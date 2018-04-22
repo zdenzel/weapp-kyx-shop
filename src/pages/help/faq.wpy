@@ -1,0 +1,92 @@
+
+<script>
+import wepy from 'wepy'
+
+import utils from '@/utils'
+import api from '@/config/api'
+
+import nulldata from '@/components/nulldata'
+import loadmore from '@/components/loadmore'
+import htmlParser from '@/components/htmlParser'
+
+export default class HelpFAQ extends wepy.page {
+    config = {
+        usingComponents: {
+            // 'wxc-cc': '/packages/@minui/wxc-cc/dist/index',
+            // 'wxc-flex': '/packages/@minui/wxc-flex/dist/index',
+            // 'wxc-avatar': '/packages/@minui/wxc-avatar/dist/index',
+            // 'wxc-elip': '/packages/@minui/wxc-elip/dist/index',
+            // 'wxc-icon': '/packages/@minui/wxc-icon/dist/index',
+            // 'wxc-label': '/packages/@minui/wxc-label/dist/index',
+            // 'wxc-loadmore': '/packages/@minui/wxc-loadmore/dist/index',
+
+            // 'wxc-abnor': '/packages/@minui/wxc-abnor/dist/index',
+            // 'wxc-countdown': '/packages/@minui/wxc-countdown/dist/index',
+            // 'wxc-counter': '/packages/@minui/wxc-counter/dist/index',
+            // 'wxc-loading': '/packages/@minui/wxc-loading/dist/index',
+            // 'wxc-mask': '/packages/@minui/wxc-mask/dist/index',
+
+            // 'wxc-dialog': '/packages/@minui/wxc-dialog/dist/index',
+            // 'wxc-popup': '/packages/@minui/wxc-popup/dist/index',
+            // 'wxc-toast': '/packages/@minui/wxc-toast/dist/index'
+        },
+        enablePullDownRefresh: true
+    }
+
+    components = {
+        nulldata,
+        loadmore,
+        htmlParser
+    }
+
+    data = {
+        proloaded: false,
+        isloading: false,
+        content: null,
+    }
+
+    async getInitialData() {
+        
+        this.isloading = true;
+
+        await utils.request(api.help.faq).then(({result}) => {
+            console.log(result)
+            this.content = result.content;
+            this.$apply();
+            //调用通知接口通知组件更新数据
+            this.$invoke('htmlParser', 'htmlParserNotice');
+        }).catch(e=>{});
+
+        this.isloading = false;
+        this.$apply();
+    }
+
+    async onLoad(option) {
+        await this.getInitialData();
+        this.proloaded = true;
+        this.$apply();
+    }
+
+    async onPullDownRefresh() {
+        //下拉刷新数据
+        console.log('下拉刷新数据');
+        await this.getInitialData();
+        wepy.stopPullDownRefresh();
+    }
+}
+
+</script>
+
+<template>
+<view class="content" wx:if="{{proloaded}}">
+    <htmlParser name="faq" :content.sync="content"></htmlParser>
+</view>
+<loadmore wx:else></loadmore>
+</template>
+
+<style lang="less">
+@import 'src/common/styles/config.less';
+.content{
+    padding: @margin;
+}
+</style>

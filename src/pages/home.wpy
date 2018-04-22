@@ -1,0 +1,254 @@
+<script>
+import _ from 'lodash'
+import wepy from 'wepy'
+import utils from '@/utils'
+import api from '@/config/api'
+
+import filter from '../wxs/filter.wxs'
+import commonMixin from '@/mixins/common'
+
+import tabbar from '@/components/tabbar'
+import loadmore from '@/components/loadmore'
+import products from '@/components/product/grid'
+
+const devWidth = 750
+const winWidth = wepy.getSystemInfoSync().windowWidth
+const winRatio = winWidth / devWidth
+
+import { getStore, connect } from 'wepy-redux'
+import { getCatalogList } from '@/store/actions'
+const store = getStore()
+
+@connect({
+    catalogList: state => state.catalog.catalogList
+})
+export default class HomePage extends wepy.page {
+    config = {
+        usingComponents: {
+            'wxc-cc': '/packages/@minui/wxc-cc/dist/index',
+            'wxc-flex': '/packages/@minui/wxc-flex/dist/index',
+            'wxc-avatar': '/packages/@minui/wxc-avatar/dist/index',
+            'wxc-elip': '/packages/@minui/wxc-elip/dist/index',
+            'wxc-icon': '/packages/@minui/wxc-icon/dist/index',
+            'wxc-label': '/packages/@minui/wxc-label/dist/index',
+            'wxc-loadmore': '/packages/@minui/wxc-loadmore/dist/index',
+
+            'wxc-abnor': '/packages/@minui/wxc-abnor/dist/index',
+            'wxc-countdown': '/packages/@minui/wxc-countdown/dist/index',
+            'wxc-counter': '/packages/@minui/wxc-counter/dist/index',
+            'wxc-loading': '/packages/@minui/wxc-loading/dist/index',
+            'wxc-mask': '/packages/@minui/wxc-mask/dist/index',
+
+            'wxc-dialog': '/packages/@minui/wxc-dialog/dist/index',
+            'wxc-popup': '/packages/@minui/wxc-popup/dist/index',
+            'wxc-toast': '/packages/@minui/wxc-toast/dist/index'
+        }
+    }
+
+    components = {
+        tabbar,
+        loadmore,
+        products
+    }
+
+    mixins = [commonMixin]
+
+    wxs = {
+        filter
+    }
+
+    data = {
+        winWidth,
+        preloaded: false,
+        isloading: false,
+        slideIndex: 0,
+        slideList: null,
+        freeQuota: 0,
+        newSaleList: null,
+        hotSaleList: null,
+        hotReviewList: null
+    }
+
+    onShareAppMessage(){
+        
+    }
+
+    computed = {
+        slideOptimize(){
+            let width = winWidth;
+            let height = 300 * winRatio;
+            return `${width}x${height}`
+        }
+    }
+
+    methods = {
+        onSlideChange(e) {
+            this.slideIndex = e.detail.current;
+        },
+        onTabChange({key}){
+            wx.navigateTo({
+                url: `/pages/product/list?id=${key}`
+            })
+        }
+    }
+
+    async getInitialData(){
+        this.isloading = true;
+        await utils.request(api.homepage).then(({ result })=>{
+            this.freeQuota = result.freeQuota;
+            this.slideList = result.slideList;
+            this.newSaleList = result.newSaleList;
+            this.hotSaleList = result.hotSaleList;
+            this.hotReviewList = result.hotReviewList;
+
+            this.$apply();
+        }).catch(e=>{});
+
+        this.isloading = false;
+    }
+
+    async onLoad() {
+        await store.dispatch(getCatalogList());
+        await this.getInitialData();
+        this.preloaded = true;
+        this.$apply();
+    }
+}
+
+</script>
+<template>
+<block wx:if="{{preloaded}}">
+    <tabbar :datalist.sync="catalogList" defaultKey="home" route="/pages/product/list" @on-change.user="onTabChange" wx:if="{{catalogList}}">
+        <view class="tabbar-button active" slot="before"><text>首页</text></view>
+        <navigator class="tabbar-button" url="/pages/topics/free" slot="after"><text>免费试喝</text></navigator>
+        <navigator class="tabbar-button" url="/pages/topics/custom" slot="after"><text>个性定制</text></navigator>
+    </tabbar>
+    <view class="swiper" wx:if="{{slideList}}">
+        <swiper class="swiper" bindchange="onSlideChange" autoplay="{{true}}" interval="{{4500}}" duration="{{500}}">
+            <repeat for="{{slideList}}">
+                <swiper-item>
+                    <navigator url="{{item.path}}">
+                        <image src="{{item.image}}" mode="scaleToFill" />
+                    </navigator>
+                </swiper-item>
+            </repeat>
+        </swiper>
+        <view class="dots">
+            <repeat for="{{slideList}}" index="index">
+                <text class="{{slideIndex==index?'active':''}}"></text>
+            </repeat>
+        </view>
+    </view>
+    <view class="lively">
+        <view class="item auto-h">
+            <navigator class="half" url="/pages/topics/free">
+                <image src="{{staticUrl}}/images/free.png" mode="scaleToFill"></image>
+                <text class="free-quota">{{freeQuota}}</text>
+            </navigator>
+        </view>
+        <view class="item auto-h">
+            <navigator class="half" url="/pages/topics/custom">
+                <image src="{{staticUrl}}/images/custom.png" mode="scaleToFill"></image>
+            </navigator>
+        </view>
+    </view>
+    <block wx:if="{{newSaleList}}">
+        <view class="title">新品上架</view>
+        <view class="lively">
+            <view class="item">
+                <navigator class="full" url="{{newSaleList[0].path}}">
+                    <image src="{{newSaleList[0].image}}" mode="scaleToFill"></image>
+                </navigator>
+            </view>
+            <view class="item">
+                <navigator class="half" url="{{newSaleList[1].path}}">
+                    <image src="{{newSaleList[1].image}}" mode="scaleToFill"></image>
+                </navigator>
+                <navigator class="half" url="{{newSaleList[2].path}}">
+                    <image src="{{newSaleList[2].image}}" mode="scaleToFill"></image>
+                </navigator>
+            </view>
+        </view>
+    </block>
+    <block wx:if="{{hotSaleList}}">
+        <view class="title">热卖商品</view>
+        <view class="lively">
+            <view class="item">
+                <navigator class="full" url="{{hotSaleList[0].path}}">
+                    <image src="{{hotSaleList[0].image}}" mode="scaleToFill"></image>
+                </navigator>
+            </view>
+            <view class="item">
+                <navigator class="full" url="{{hotSaleList[1].path}}">
+                    <image src="{{hotSaleList[1].image}}" mode="scaleToFill"></image>
+                </navigator>
+            </view>
+            <view class="item">
+                <navigator class="half" url="{{hotSaleList[2].path}}">
+                    <image src="{{hotSaleList[2].image}}" mode="scaleToFill"></image>
+                </navigator>
+                <navigator class="half" url="{{hotSaleList[3].path}}">
+                    <image src="{{hotSaleList[3].image}}" mode="scaleToFill"></image>
+                </navigator>
+            </view>
+            <view class="item">
+                <navigator class="full" url="{{hotSaleList[4].path}}">
+                    <image src="{{hotSaleList[4].image}}" mode="scaleToFill"></image>
+                </navigator>
+            </view>
+        </view>
+    </block>
+    <block wx:if="{{hotReviewList}}">
+        <view class="title">热评商品</view>
+        <products :datalist.sync="hotReviewList"></products>
+    </block>
+</block>
+<loadmore wx:else></loadmore>
+</template>
+<style lang="less">
+@import 'src/common/styles/config.less';
+.free-quota{
+    width: 75rpx;
+    height: 45rpx;
+    position: absolute;
+    left: 60rpx;
+    top: 60rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    font-size: @font-size-bigger;
+    color: @color-success;
+}
+
+.title{
+    padding: 0 @margin;
+    margin-top: @margin*1.5;
+    font-size: @font-size-large;
+}
+
+.lively{
+    image{ width: 100%; height: 100%;}
+    .full, .half{
+        width: 345rpx;
+        height: 380rpx;
+        position: relative;
+        margin-top: @margin;
+        background-color: @color-maincolor;
+        &:nth-child(1){ margin-top: 0;}
+    }
+    .half{ height: 180rpx; }
+    .item{
+        float: left;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        width: 345rpx;
+        height: 380rpx;
+        margin-top: @margin;
+        margin-left: @margin;
+    }
+    .auto-w{ width: auto; }
+    .auto-h{ height: auto; }
+}
+</style>

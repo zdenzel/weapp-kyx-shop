@@ -1,0 +1,229 @@
+<script>
+import wepy from 'wepy'
+
+const devWidth = 750
+const winWidth = wepy.getSystemInfoSync().windowWidth
+const winRatio = winWidth / devWidth
+
+export default class Tabbar extends wepy.component {
+    props = {
+        datalist: {
+            type: Array,
+            default: 0
+        },
+        defaultKey: {
+            type: String,
+            default: ''
+        },
+        defaultIndex: {
+            type: String,
+            default: ''
+        },
+        key: {
+            type: String,
+            default: 'id'
+        },
+        badge: {
+            type: String,
+            default: 'badge'
+        },
+        label: {
+            type: String,
+            default: 'name'
+        },
+        route: {
+            type: String,
+            default: ''
+        },
+        isFlex: {
+            type: String,
+            default: '',
+        },
+        justify: {
+            type: String,
+            default: 'space-around'
+        },
+        cross: {
+            type: String,
+            default: 'stretch'
+        },
+        wrap: {
+            type: String,
+            default: 'nowrap'
+        },
+        alive: {
+            type: String,
+            default: true
+        }
+    }
+
+    data = {
+        offsetLeft: 0,
+        moveOffsetLeft: 0
+    }
+
+    computed = {
+        mainStyle() {
+            let style = '';
+            if(this.isFlex){
+                style += `flex-wrap: ${this.wrap}`;
+                style += `;align-items: ${this.cross}`;
+                style += `;justify-content: ${this.justify}`;
+            }
+            return style;
+        },
+        itemStyle() {
+            return '';
+        }
+    }
+
+    methods = {
+        onClick(event){
+            const { key, index } = event.currentTarget.dataset;
+            const { offsetLeft } = event.currentTarget;
+
+            this.defaultKey = key;
+            this.defaultIndex = index;
+
+            this.calcOffsetLeft();
+
+            this.$emit('on-change', {event, key, index});
+        },
+        onScroll(e){
+            this.offsetLeft = e.detail.scrollLeft;
+            this.$apply();
+        }
+    }
+
+    calcOffsetLeft() {
+        wx.createSelectorQuery().select(`#tabbar-${this.defaultKey}`).boundingClientRect((res) =>{
+            try{
+                // let offsetLeft = res.left >= (winWidth/2-res.width/2) ? this.offsetLeft + res.left - winWidth/2 + res.width/2 : this.offsetLeft - (winWidth/2 - res.left - res.width/2);
+                let offsetLeft = this.offsetLeft + res.left - winWidth/2 + res.width/2;
+                this.offsetLeft = Math.max(offsetLeft, 0);
+                this.$apply();
+            }catch(e){ }
+        }).exec()
+    }
+
+}
+</script>
+<template>
+    <scroll-view class="tabbar" bindscroll="onScroll" scroll-left="{{offsetLeft}}" scroll-x="true" wx:if="{{datalist}}">
+        <view class="tabbar-contain {{isFlex?'is-flex':''}}" style="{{mainStyle}}">
+            <slot name="before"></slot>
+            <block wx:if="{{route}}">
+                <repeat for="{{datalist}}">
+                    <navigator class="tabbar-button {{alive!='false'&&defaultKey==(item[key])?'active':''}}" url="{{item.route || route+'?'+ key +'='+ item[key]}}" id="tabbar-{{item[key]}}" data-index="{{index}}" style="{{itemStyle}}">
+                        <text class="label">{{item[label]}}</text>
+                        <text class="badge" wx:if="{{item[badge]}}">{{item[badge]}}</text>
+                    </navigator>
+                </repeat>
+            </block>
+            <block wx:else>
+                <repeat for="{{datalist}}">
+                    <view class="tabbar-button {{alive!='false'&&defaultKey==(item[key])?'active':''}}" style="{{itemStyle}}" @tap="onClick" id="tabbar-{{item[key]}}" data-key="{{item[key]}}" data-index="{{index}}" data-index="{{index}}">
+                        <text class="label">{{item[label]}}</text>
+                        <text class="badge" wx:if="{{item[badge]}}">{{item[badge]}}</text>
+                    </view>
+                </repeat>
+            </block>
+            <slot name="content"></slot>
+            <slot name="after"></slot>
+        </view>
+    </scroll-view>
+</template>
+<style lang="less">
+@import 'src/common/styles/config.less';
+
+.tabbar{
+    width: 100%;
+    height: 100rpx;
+    white-space: nowrap;
+    position: relative;
+    left: 0;
+    top: 0;
+    z-index: 10;
+    background-image: url('@{assets-url}/images/bg.jpg');
+    background-color: @color-backcolor;
+    text-align: center;
+    &:after{
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+
+        width: 100%;
+        height: 2rpx;
+        background-color: @color-border;
+    }
+}
+.tabbar-contain{
+    display: inline-block;
+    padding: 0 @margin/2;
+    position: relative;
+    &.is-flex{
+        display: flex;
+        .tabbar-button{
+            flex: 1;
+            display: block;
+            &:after{
+                content: '';
+                height: 1em;
+                width: 3rpx;
+                margin-top: -.5em;
+                position: absolute;
+                left: 0;
+                top: 50%;
+                background-color: @color-border;
+            }
+            &:first-child:after{ display: none;}
+        }
+    }
+}
+.tabbar-button{
+    display: inline-block;
+    height: 100rpx;
+    line-height: 100rpx;
+    padding: 0 @margin/2;
+    position: relative;
+    font-size: @font-size-large;
+    text{
+        display: block;
+        overflow: hidden;
+        position: relative;
+        padding: 0 @margin/2;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        &:after{
+            display: none;
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+
+            width: 100%;
+            height: 5rpx;
+            background-color: @color-base;
+        }
+    }
+    &.active{
+        text:after{ display: inherit;}
+    }
+    .badge{
+        min-width: 20rpx;
+        line-height: 1;
+        padding: 3rpx 5rpx;
+        position: absolute;
+        right: 5rpx;
+        top: 10rpx;
+
+        text-align: center;
+
+        background-color: @color-primary;
+        font-size: @font-size-mini;
+        color: @color-invert;
+        border-radius: 20rpx;
+    }
+}
+</style>

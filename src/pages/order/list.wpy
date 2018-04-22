@@ -1,0 +1,154 @@
+<script>
+import _ from 'lodash'
+import wepy from 'wepy'
+import utils from '@/utils'
+import api from '@/config/api'
+
+import commonMixin from '@/mixins/common'
+
+import tabbar from '@/components/tabbar'
+import nulldata from '@/components/nulldata'
+import loadmore from '@/components/loadmore'
+import orderitems from '@/components/order/items'
+
+export default class OrderLists extends wepy.page {
+    config = {
+        usingComponents: {
+            'wxc-cc': '/packages/@minui/wxc-cc/dist/index',
+            'wxc-flex': '/packages/@minui/wxc-flex/dist/index',
+            'wxc-avatar': '/packages/@minui/wxc-avatar/dist/index',
+            'wxc-elip': '/packages/@minui/wxc-elip/dist/index',
+            'wxc-icon': '/packages/@minui/wxc-icon/dist/index',
+            'wxc-label': '/packages/@minui/wxc-label/dist/index',
+            'wxc-loadmore': '/packages/@minui/wxc-loadmore/dist/index',
+
+            'wxc-abnor': '/packages/@minui/wxc-abnor/dist/index',
+            'wxc-countdown': '/packages/@minui/wxc-countdown/dist/index',
+            'wxc-counter': '/packages/@minui/wxc-counter/dist/index',
+            'wxc-loading': '/packages/@minui/wxc-loading/dist/index',
+            'wxc-mask': '/packages/@minui/wxc-mask/dist/index',
+
+            'wxc-dialog': '/packages/@minui/wxc-dialog/dist/index',
+            'wxc-popup': '/packages/@minui/wxc-popup/dist/index',
+            'wxc-toast': '/packages/@minui/wxc-toast/dist/index'
+        },
+        enablePullDownRefresh: true
+    }
+
+    components = {
+        tabbar,
+        nulldata,
+        loadmore,
+        orderitems
+    }
+
+    mixins = [commonMixin]
+
+    data = {
+        preloaded: false,
+        isloading: false,
+        activeId: 0,
+        activeIndex: 0,
+        orderStatus: [
+            { id: 0, name: '全部', badge: 0, content: '全部' },
+            { id: 1, name: '待付款', badge: 0, content: '待付款' },
+            { id: 2, name: '待发货', badge: 0, content: '待发货' },
+            { id: 3, name: '待收货', badge: 0, content: '待收货' },
+            { id: 4, name: '已完成', badge: 0, content: '已完成' }
+        ],
+        orderList: null,
+        limit: 10,
+        totalPage: 1,
+        currentPage: 1
+    }
+
+    methods = {
+        onTabClick({ key }){
+            if(key != this.activeId){
+                this.activeId = key;
+                this.orderList = null;
+                this.totalPage = 1;
+                this.currentPage = 1;
+                console.log('执行数据更新');
+                this.getInitialData();
+            }
+        }
+    }
+
+    async getInitialData(isLoadmore){
+        let currentPage = this.currentPage;
+        if (isLoadmore) {
+            currentPage = this.currentPage + 1;
+        } else {
+            this.orderList = null;
+            this.totalPage = 1;
+            currentPage = 1;
+        }
+
+        let data = {
+            status: this.activeId,
+            page: this.currentPage,
+            limit: this.limit
+        }
+
+        console.log('getInitialData', data)
+
+        this.isloading = true;
+
+        await utils.request(api.order.list, { data }).then(({result}) => {
+            if(result.datalist.length){
+                if(isLoadmore){
+                    this.orderList = _.concat(this.orderList, result.datalist);
+                } else{
+                    this.orderList = _.cloneDeep(result.datalist);
+                }
+                this.totalPage = result.totalPage;
+                this.currentPage = currentPage;
+                this.$apply();
+            }
+        }).catch(e=>{});
+
+        this.isloading = false;
+        this.$apply();
+    }
+
+    async onLoad(option) {
+        this.activeId = option.id;
+        await this.getInitialData();
+        this.preloaded = true;
+        this.$apply();
+    }
+
+    onReachBottom(){
+        //上拉加载更多
+        console.log('上拉加载更多');
+        if (this.currentPage >= this.totalPage) { return; }
+        this.getInitialData('loadmore');
+    }
+
+    async onPullDownRefresh() {
+        //下拉刷新数据
+        console.log('下拉刷新数据');
+        wepy.stopPullDownRefresh();
+        await this.getInitialData();
+    }
+}
+
+</script>
+
+<template>
+<tabbar class="statusbar" :datalist.sync="orderStatus" :defaultKey.sync="activeId" @on-change.user="onTabClick"></tabbar>
+<view class="contain" wx:if="{{preloaded}}">
+    <orderitems :datalist.sync="orderList" wx:if="{{orderList}}"></orderitems>
+    <loadmore wx:if="{{isloading}}"></loadmore>
+    <nulldata wx:if="{{!orderList && !isloading}}"></nulldata>
+</view>
+<loadmore wx:else></loadmore>
+</template>
+
+<style lang="less">
+@import 'src/common/styles/config.less';
+.statusbar{
+    background: @color-maincolor;
+}
+</style>

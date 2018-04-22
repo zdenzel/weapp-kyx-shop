@@ -1,0 +1,184 @@
+
+<script>
+import wepy from 'wepy';
+import inputMixin from '@/mixins/input';
+import minuiMixin from '@/mixins/minui';
+
+import nulldata from '@/components/nulldata';
+import loadmore from '@/components/loadmore';
+import cityselect from '@/components/cityselect';
+
+import api from '@/config/api'
+import utils from '@/utils'
+
+export default class AddressDetail extends wepy.page {
+    config = {
+        usingComponents: {
+            'wxc-cc': '/packages/@minui/wxc-cc/dist/index',
+            'wxc-flex': '/packages/@minui/wxc-flex/dist/index',
+            'wxc-avatar': '/packages/@minui/wxc-avatar/dist/index',
+            'wxc-elip': '/packages/@minui/wxc-elip/dist/index',
+            'wxc-icon': '/packages/@minui/wxc-icon/dist/index',
+            'wxc-label': '/packages/@minui/wxc-label/dist/index',
+            'wxc-loadmore': '/packages/@minui/wxc-loadmore/dist/index',
+
+            'wxc-abnor': '/packages/@minui/wxc-abnor/dist/index',
+            'wxc-countdown': '/packages/@minui/wxc-countdown/dist/index',
+            'wxc-counter': '/packages/@minui/wxc-counter/dist/index',
+            'wxc-loading': '/packages/@minui/wxc-loading/dist/index',
+            'wxc-mask': '/packages/@minui/wxc-mask/dist/index',
+
+            'wxc-dialog': '/packages/@minui/wxc-dialog/dist/index',
+            'wxc-popup': '/packages/@minui/wxc-popup/dist/index',
+            'wxc-toast': '/packages/@minui/wxc-toast/dist/index'
+        }
+    }
+
+    components = {
+        cityselect,
+        nulldata,
+        loadmore,
+    }
+
+    mixins = [minuiMixin, inputMixin]
+
+    data = {
+        preloaded: false,
+        isloading: false,
+        activeId: 0,
+        from: null,
+        selectedArea: '',
+        consignee: {
+            id: 0,
+            name: '',
+            area: '',
+            tel: '',
+            address: ''
+        }
+    }
+
+    watch = {
+        selectedArea(val) {
+            this.consignee.area = val;
+        }
+    }
+
+    methods = {
+
+        showCityPicker() {
+            this.$broadcast('showCityselect');
+        },
+
+        formSubmit(e){
+            //formId
+            console.log(e.detail.formId);
+            const { name, tel, area, address } = this.consignee;
+
+            if(!name){
+                utils.showToast('请填写收货人');
+                return;
+            }
+
+            if(!tel){
+                utils.showToast('请填写联系方式');
+                return;
+            }
+
+            if(!area){
+                utils.showToast('请选择所在地区');
+                return;
+            }
+
+            if(!address){
+                utils.showToast('请填写详细地址');
+                return;
+            }
+
+            console.log('提交数据', this.consignee);
+            let data = Object.assign({}, this.consignee);
+
+            utils.request(api.consignee.info, { data, method: 'post' }).then(async (res) => {
+                utils.showToast('添加成功', 'success')
+                let result = Object.assign({}, data, res.result);
+                if(this.isOpt || result.isDefault){
+                    await wepy.setStorageSync('__SELECTED_CONSIGNEE__', result);
+                }
+                wepy.navigateBack();
+
+            }).catch(err => {
+                utils.showToast(err.message)
+            })
+
+        }
+    }
+
+    async getConsigneeInfo(){
+        if(!this.activeId) { return; }
+
+        let data = { id: this.activeId };
+
+        await utils.request(api.consignee.info, { data }).then(res => {
+            console.log('成功了', res);
+            this.consignee = Object.assign({}, this.consignee, res.result)
+            this.selectedArea = this.consignee.area;
+            this.$apply();
+        }).catch(err => {
+            utils.showToast(err.message);
+        });
+    }
+
+    async onLoad(option) {
+        this.activeId = option.id;
+        this.isOpt = option.isOpt == 'true';
+
+        await this.getConsigneeInfo();
+        this.preloaded = true;
+        this.$apply();
+    }
+}
+
+</script>
+
+<template>
+<form report-submit="true" bindsubmit="formSubmit" wx:if="{{preloaded}}">
+    <view class="consignee-detail">
+        <view class="dzui-cells">
+            <view class="dzui-cell">
+                <view class="dzui-cell-head">收货人</view>
+                <view class="dzui-cell-body"><input value="{{consignee.name}}" bindinput="input" bindblur="input" data-store="consignee.name" /></view>
+            </view>
+            <view class="dzui-cell">
+                <view class="dzui-cell-head">联系方式</view>
+                <view class="dzui-cell-body"><input value="{{consignee.tel}}" bindinput="input" bindblur="input" data-store="consignee.tel" /></view>
+            </view>
+            <view class="dzui-cell" @tap="showCityPicker">
+                <view class="dzui-cell-head">所在地区</view>
+                <view class="dzui-cell-body">{{consignee.area}}</view>
+                <view class="dzui-cell-foot"><text class="icon icon-arrow-right"></text></view>
+            </view>
+            <view class="dzui-cell">
+                <view class="dzui-cell-head">详细地址</view>
+                <view class="dzui-cell-body"><textarea value="{{consignee.address}}" auto-height  bindinput="input" bindblur="input" data-store="consignee.address" data-trim="line"></textarea></view>
+            </view>
+        </view>
+        <view class="dzui-tools">
+            <button type="base" size="large" form-type="submit">确定提交</button>
+        </view>
+    </view>
+    <cityselect :selected.sync="selectedArea"></cityselect>
+</form>
+<loadmore wx:else></loadmore>
+</template>
+
+<style lang="less">
+@import 'src/common/styles/config.less';
+.dzui-cells{
+    background-color: @color-maincolor;
+}
+.dzui-cell{
+    &:before{ border-top-style: dotted;}
+}
+.dzui-cell-head{
+    width: 140rpx;
+}
+</style>

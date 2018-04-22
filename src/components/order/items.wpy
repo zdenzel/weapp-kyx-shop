@@ -1,0 +1,301 @@
+<script>
+import _ from 'lodash'
+import wepy from 'wepy'
+
+import utils from '@/utils'
+import api from '@/config/api'
+
+import filter from '../../wxs/filter.wxs'
+
+import postcomment from '@/components/order/postcomment'
+
+const devWidth = 750
+const winWidth = wepy.getSystemInfoSync().windowWidth
+const winRatio = winWidth / devWidth
+
+export default class OrderItems extends wepy.component {
+
+    components = {
+        postcomment
+    }
+
+    props = {
+        datalist: {
+            type: Array,
+            default: null,
+            twoWay: false
+        }
+    }
+
+    wxs = {
+        filter
+    }
+
+    data = {
+        orderObj: null
+    }
+
+    computed = {
+        optimize() {
+            let width = Math.ceil(180*winRatio);
+            return width + 'x' + width;
+        }
+    }
+
+    methods = {
+        tapOrderCancel(id){
+            let data = { id }
+            wepy.showModal({
+                title: '温馨提示',
+                content: '确定要取消订单吗？'
+            }).then(async (res) => {
+                if(res.confirm){
+                    //执行删除
+                    wepy.showLoading();
+                    await utils.request(api.order.cancel, {data}).then(res=>{
+                        try{
+                            this.datalist = this.datalist.map(n => {
+                                if(n.id == id){
+                                    n.status = 5;
+                                }
+                                return n
+                            });
+                        } catch(e) {}
+                    }).catch(({ message })=>{
+                        utils.showToast(message)
+                    });
+
+                    wepy.hideLoading();
+
+                    this.$apply();
+                }
+            })
+        },
+        async tapOrderPayment(id){
+            let data = { id };
+            await utils.request(api.payment, { data }).then(({ result })=>{
+                wepy.requestPayment({
+                    timeStamp: result.timeStamp,
+                    nonceStr: result.nonceStr,
+                    package: result.package,
+                    signType: result.signType,
+                    paySign: result.paySign,
+                    complete: res => {
+                        console.log('complete', res)
+                    },
+                    success: res => {
+                        console.log('success', res)
+                    },
+                    fail: res => {
+                        console.log('fail', res)
+                    }
+                });
+            }).catch(({ message })=>{
+                utils.showToast(message)
+            });
+            
+        },
+        tapOrderConfirm(id){
+            let data = { id }
+
+            wepy.showModal({
+                title: '温馨提示',
+                content: '请确认收到货物后进行此操作'
+            }).then(async (res) => {
+                if(res.confirm){
+                    //执行删除
+                    wepy.showLoading();
+                    await utils.request(api.order.confirm, {data}).then(res=>{
+                        try{
+                            this.datalist = this.datalist.map(n => {
+                                if(n.id == id){
+                                    n.status = 4;
+                                }
+                                return n
+                            });
+                        } catch(e) {}
+                    }).catch(({ message })=>{
+                        utils.showToast(message)
+                    });
+
+                    wepy.hideLoading();
+
+                    this.$apply();
+                }
+            })
+        },
+        tapOrderComment(data){
+            this.orderObj = data;
+            this.$broadcast('showPostComment', data);
+        },
+        onSubmitComment(data){
+            this.datalist.map(item => {
+                if(item.id == data.id){
+                    item.isCommented = 1;
+                }
+                return item;
+            });
+            this.$apply();
+        }
+    }
+}
+
+</script>
+
+<template>
+    <view class="cp-order-items" wx:if="{{datalist}}">
+        <repeat for="{{datalist}}" item="order">
+            <view class="cp-oi-item is-complete">
+                <wxc-flex class="cp-oii-head" main="between">
+                    <text class="cp-oii-code">订单编号：{{order.code}}</text>
+                    <text class="cp-oii-status">{{filter.status2str(order.status,'order')}}</text>
+                </wxc-flex>
+                <navigator class="cp-oii-main" url="/pages/order/detail?id={{order.id}}">
+                    <wxc-flex class="cp-oii-product" wx:for="{{order.productList}}" wx:for-item="product" wx:key="product.id">
+                        <image class="cp-oiip-cover" src="{{filter.thumbnail(product.cover,optimize)}}" mode="scaleToFill"></image>
+                        <wxc-flex class="cp-oiip-main" dir="top" main="between">
+                            <view class="cp-oiip-info">
+                                <text class="cp-oiip-row cp-oiip-title">{{product.title}}</text>
+                                <text class="cp-oiip-row cp-oiip-text">{{product.skuAttrText}}</text>
+                            </view>
+                            <wxc-flex class="cp-oiip-count" main="between" cross="center">
+                                <text class="price">{{product.price}}</text>
+                                <text class="count">x{{product.count}}</text>
+                            </wxc-flex>
+                        </wxc-flex>
+                    </wxc-flex>
+                </navigator>
+                <view class="cp-oii-foot">
+                    <wxc-flex class="cp-oii-info" main="between" dir="right">
+                        <view wx:if="{{order.payStatus==1}}">合计（含运费）：<text class="price">{{order.actualAmount}}</text></view>
+                        <view wx:else>合计（含运费）：<text class="price">{{order.totalAmount}}</text></view>
+                    </wxc-flex>
+                    <wxc-flex class="cp-oii-tool" main="end" wrap="wrap">
+                        <block wx:if="{{order.status==1}}">
+                            <view class="btn">
+                                <button type="warn" @tap="tapOrderCancel({{order.id}})">取消订单</button>
+                            </view>
+                            <view class="btn" wx:if="{{order.payStatus==0}}">
+                                <button type="base" @tap="tapOrderPayment({{order.id}})">马上支付</button>
+                            </view>
+                        </block>
+                        <block wx:if="{{order.status==2}}">
+                            <view class="btn">
+                                <button type="warn" @tap="tapOrderCancel({{order.id}})">取消订单</button>
+                            </view>
+                        </block>
+                        <block wx:if="{{order.status==3}}">
+                            <view class="btn">
+                                <button type="base" @tap="tapOrderConfirm({{order.id}})">确认收货</button>
+                            </view>
+                        </block>
+                        <block wx:if="{{order.status==4}}">
+                            <view class="btn" wx:if="{{!order.isCommented}}">
+                                <button type="base" @tap="tapOrderComment({{order}})">发表评价</button>
+                            </view>
+                        </block>
+                    </wxc-flex>
+                </view>
+            </view>
+        </repeat>
+    </view>
+    <postcomment :order.sync="orderObj" @on-submit.user="onSubmitComment"></postcomment>
+</template>
+
+<style lang="less">
+@import 'src/common/styles/config.less';
+.cp-oii-head,
+.cp-oii-foot{
+    display: block;
+    padding: @margin;
+}
+.cp-oii-code{
+    color: @color-gray;
+}
+.cp-oii-status{
+    color: @color-gray;
+}
+.cp-oii-info{
+    margin-top: @margin;
+    .price{
+        font-size: @font-size-bigger;
+        color: @color-success;
+    }
+}
+.cp-oii-tool{
+    .btn{
+        margin-top: @margin;
+        margin-left: @margin;
+        &:first-child{
+            margin-left: 0;
+        }
+    }
+}
+
+.cp-oii-product{
+    display: block;
+    padding: @margin;
+    margin-top: @margin;
+    background-color: @color-backcolor;
+    &:first-child{
+        margin-top: 0 !important;
+    }
+
+    .cp-oiip-cover{
+        flex-grow: 0;
+        width: 180rpx;
+        height: 180rpx;
+        background-color: @color-forecolor;
+        border: 2rpx solid @color-border;
+        border-radius: @radius;
+    }
+    .cp-oiip-info{
+        overflow: hidden;
+    }
+    .cp-oiip-row{
+        display: block;
+        margin-bottom: @margin/2;
+    }
+    // .cp-oiip-title{
+    //     font-size: @font-size-large;
+    // }
+    .cp-oiip-text{
+        color: @color-gray;
+    }
+    .cp-oiip-count{
+        display: block;
+
+        .price{
+            font-size: @font-size-large;
+            color: @color-base;
+        }
+    }
+    .cp-oiip-head{
+        padding: @margin;
+    }
+    .cp-oiip-main{
+        flex: 1;
+        margin-left: @margin;
+    }
+}
+.cp-oi-item{
+    margin-top: @margin;
+    background-color: @color-maincolor;
+    
+    &.is-pending{
+        .cp-oii-status{
+            color: @color-success;
+        }
+    }
+    &.is-complete{
+        .cp-oii-status{
+            color: @color-primary;
+        }
+    }
+    &.is-invailed{
+        .cp-oii-status{
+            color: @color-gray;
+        }
+    }
+}
+</style>

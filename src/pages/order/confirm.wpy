@@ -1,0 +1,381 @@
+
+<script>
+
+import wepy from 'wepy'
+
+import utils from '@/utils'
+import api from '@/config/api'
+
+import inputMixin from '@/mixins/input'
+import products from '@/components/order/products'
+
+import { getStore, connect } from 'wepy-redux'
+import { getShopBuyList, removeShopBuyList } from '@/store/actions'
+const store = getStore()
+
+@connect({
+    shopBuyList: state => state.shopcart.shopBuyList,
+    shopBuyType: state => state.shopcart.shopBuyType,
+    totalAmount: state => state.shopcart.totalAmount
+})
+
+export default class OrderDetail extends wepy.page {
+    config = {
+        usingComponents: {
+            'wxc-cc': '/packages/@minui/wxc-cc/dist/index',
+            'wxc-flex': '/packages/@minui/wxc-flex/dist/index',
+            'wxc-avatar': '/packages/@minui/wxc-avatar/dist/index',
+            'wxc-elip': '/packages/@minui/wxc-elip/dist/index',
+            'wxc-icon': '/packages/@minui/wxc-icon/dist/index',
+            'wxc-label': '/packages/@minui/wxc-label/dist/index',
+            'wxc-loadmore': '/packages/@minui/wxc-loadmore/dist/index',
+
+            'wxc-abnor': '/packages/@minui/wxc-abnor/dist/index',
+            'wxc-countdown': '/packages/@minui/wxc-countdown/dist/index',
+            'wxc-counter': '/packages/@minui/wxc-counter/dist/index',
+            'wxc-loading': '/packages/@minui/wxc-loading/dist/index',
+            'wxc-mask': '/packages/@minui/wxc-mask/dist/index',
+
+            'wxc-dialog': '/packages/@minui/wxc-dialog/dist/index',
+            'wxc-popup': '/packages/@minui/wxc-popup/dist/index',
+            'wxc-toast': '/packages/@minui/wxc-toast/dist/index'
+        }
+    }
+
+    components = {
+        products
+    }
+
+    mixins = [inputMixin]
+
+    data = {
+        message: '',
+        consignee: null,
+        freightAmount: '0.00',
+        freightTemplate: null,
+    }
+
+    methods = {
+        tapConsignee(){
+            if(this.consignee){
+                wx.navigateTo({
+                    url: `/pages/consignee/list?sid=${this.consignee.id}&isOpt=true`
+                })
+            } else{
+                wx.navigateTo({
+                    url: `/pages/consignee/edit?isOpt=true`
+                })
+            }
+        },
+
+        async formSubmit(e){
+            console.log(e.detail.formId);
+            console.log('提交订单');
+
+            if(!this.consignee){
+                utils.showToast('请填写收货地址');
+                return;
+            }
+
+            let data = {
+                formId: e.detail.formId,
+                otype: this.shopBuyType,
+                products: null,
+                frees: null,
+                consignee: this.consignee,
+                freight: this.freightAmount,
+                message: this.message
+            };
+
+            if(this.shopBuyType == 1){
+                data.products = this.shopBuyList.map(n => {
+                    return { id: n.id, sid: n.sid, type: n.type, count: n.count, custom: n.custom || null }
+                })
+            }
+            if(this.shopBuyType == 2){
+                data.frees = this.shopBuyList.map(n=> {
+                    return {id: n.id}
+                });
+            }
+
+            await utils.request(api.order.create, { data, method: 'POST' }).then( async ({result})=>{
+
+                this.delStorageConsignee();
+                await store.dispatch(removeShopBuyList());
+                
+                wepy.redirectTo({
+                    url: `/pages/order/detail?id=${result}`
+                });
+            }).catch(e=>{
+                wepy.showModal({
+                    title: '提交失败',
+                    content: e.message
+                });
+            });
+        }
+    }
+
+    computed = {
+        actualAmount() {
+            let freightAmount = Number(this.freightAmount) != NaN ? Number(this.freightAmount) : 0
+            let totalAmount = Number(this.totalAmount) != NaN ? Number(this.totalAmount) : 0
+            return (totalAmount + freightAmount).toFixed(2)
+        }
+    }
+
+    //获取收货人缓存数据
+    async getConsigneeDefault(){
+        let consigneeDefault = wepy.getStorageSync('__SELECTED_CONSIGNEE__') || null;
+        await utils.request(api.consignee.default).then(({result})=>{
+            if(!consigneeDefault){
+                consigneeDefault = result;
+                wepy.setStorageSync('__SELECTED_CONSIGNEE__', consigneeDefault);
+            }
+        }).catch(e=>{});
+        this.consignee = consigneeDefault;
+        this.$apply();
+    }
+    //删除收货人缓存数据
+    delStorageConsignee(){
+        wepy.removeStorageSync('__SELECTED_CONSIGNEE__');
+    }
+
+    //运费模板
+    async getFreightTemplate(){
+        let freightTemplate = null;
+        await utils.request(api.freightTemplate.default).then(({result})=>{
+            freightTemplate = result;
+        }).catch(e=>{});
+        this.freightTemplate = freightTemplate;
+        this.$apply();
+    }
+
+    clacFreightAmount(){
+        let { price, plusPrice, expressStart, expressPlus, expressArea, exemption} = this.freightTemplate;
+        let isFreeShipping = exemption.status && this.actualAmount >= exemption.limit;
+
+        if(isFreeShipping){
+            return;
+        }
+
+        let nowCount = 0, freightAmount = 0, areaFreight = null;
+
+        this.shopBuyList.forEach(n => {
+            nowCount = nowCount + n.count;
+        });
+
+        try{
+            let province = this.consignee.area.split(' ')[0];
+            let city = this.consignee.area.split(' ')[1];
+            let exist = false;
+            expressArea.forEach(area=>{
+                area.area.forEach(b=>{
+                    if(b.province == province || b.province == province + '市'){
+                        if(b.city.some(c => c == city)){
+                            areaFreight = area;
+                        }
+                    }
+                })
+            })
+            if(areaFreight){
+                freightAmount = Math.ceil( ( nowCount - areaFreight.expressStart ) / areaFreight.expressPlus ) * areaFreight.plusPrice + parseInt(areaFreight.price);
+            } else{
+                freightAmount = Math.ceil( ( nowCount - expressStart ) / expressPlus ) * plusPrice + parseInt(price);
+            }
+        } catch(e){}
+
+        this.freightAmount = freightAmount.toFixed(2);
+
+        this.$apply();
+    }
+
+    onLoad(res) {
+        store.dispatch(getShopBuyList());
+    }
+
+    onUnload() {
+        //删除收货人缓存数据
+        this.delStorageConsignee();
+    }
+
+    async onShow(res) {
+        //获取商品数据
+        await store.dispatch(getShopBuyList());
+        //获取默认收货人
+        await this.getConsigneeDefault();
+        await this.getFreightTemplate();
+        await this.clacFreightAmount();
+    }
+}
+
+</script>
+
+<template>
+<form report-submit="true" bindsubmit="formSubmit">
+    <view class="order-confirm">
+        <view class="order-confirm-consignee" @tap="tapConsignee()">
+            <view class="order-consignee-side">
+                <text class="icon icon-address"></text>
+            </view>
+            <view class="order-consignee-main" wx:if="{{consignee}}">
+                <view class="order-consignee-title">
+                    <text class="order-consignee-name">{{consignee.name}}</text>
+                    <text class="order-consignee-tel">{{consignee.tel}}</text>
+                </view>
+                <view class="order-consignee-address">
+                    <text>收货地址：</text>{{consignee.area +' '+ consignee.address}}
+                </view>
+            </view>
+            <view class="order-consignee-main" wx:else>
+                <view class="order-consignee-title">您还没有收货地址</view>
+                <view class="order-consignee-address">请先添加收货地址</view>
+            </view>
+            <view class="order-consignee-side">
+                <text class="icon icon-arrow-right"></text>
+            </view>
+        </view>
+        <view class="order-confirm-contain">
+            <products :datalist.sync="shopBuyList"></products>
+        </view>
+        <view class="order-confirm-footer">
+            <view class="order-confirm-message">
+                <textarea bindinput="input" bindblur="input" bindconfirm="input" value="{{message}}" data-store="message" cursor-spacing="20" maxlength="50" placeholder="选填：买家留言（50字以内）"></textarea>
+            </view>
+            <view class="order-confirm-amount">
+                <wxc-flex class="amount" main="between" cross="center">
+                    <text>商品总价</text>
+                    <text class="price">{{totalAmount}}</text>
+                </wxc-flex>
+                <wxc-flex class="freight" main="between" cross="center">
+                    <view>
+                        <text>运费</text>
+                        <text wx:if="{{freightTemplate.exemption.status}}">（满{{freightTemplate.exemption.limit}}包邮）</text>
+                    </view>
+                    <text class="price">{{freightAmount}}</text>
+                </wxc-flex>
+            </view>
+        </view>
+    </view>
+    <wxc-flex class="order-confirm-toolbar">
+        <wxc-flex class="count" cross="center" main="end">
+            <text>实付款：</text>
+            <text class="price">{{actualAmount}}</text>
+        </wxc-flex>
+        <button class="submit" type="base" size="bigger" form-type="submit">提交订单</button>
+    </wxc-flex>
+</form>
+</template>
+
+<style lang="less">
+@import 'src/common/styles/config.less';
+.order-confirm-amount,
+.order-confirm-property,
+.order-confirm-toolbar,
+.order-confirm-consignee,
+.order-confirm-contain,
+.order-confirm-message{
+    padding: @margin;
+    margin-top: @margin;
+    position: relative;
+    background-color: @color-maincolor;
+}
+.order-confirm-consignee{
+    margin-top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.order-consignee-side{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    .icon{
+        font-size: 40rpx;
+    }
+    .icon-address{
+        color: @color-primary;
+    }
+    .icon-arrow-right{
+        font-size: 60rpx;
+    }
+}
+.order-consignee-main{
+    flex-grow: 1;
+    margin-left: @margin;
+}
+.order-consignee-name{
+    margin-right: @margin;
+}
+.order-consignee-title{
+    font-weight: 700;
+    font-size: @font-size-large;
+}
+.order-consignee-address{
+    margin-top: @margin/2;
+}
+.order-confirm-amount{
+    padding-bottom: 140rpx;
+    .freight{
+        display: block;
+        margin-top: @margin/2;
+    }
+    .price{
+        font-size: @font-size-large;
+        color: @color-success;
+    }
+}
+.order-confirm-property{
+    margin-top: 2rpx;
+    line-height: 1.8;
+}
+.order-confirm-contain{
+    flex-grow: 1;
+    padding: 0;
+    background-color: transparent;
+}
+.order-confirm-message{
+    height: 5.5em;
+    line-height: 1.5em;
+    padding: @margin/2 @margin;
+}
+.order-confirm-footer{
+}
+.order-confirm-toolbar{
+    display: block;
+    width: 100%;
+    height: 120rpx;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    margin: 0;
+    padding: 0;
+    border-top: 2rpx solid @color-border;
+    box-sizing: border-box;
+    z-index: 100;
+    .price{
+        font-size: @font-size-bigger;
+        color: @color-success;
+    }
+    .count{
+        flex-grow: 1;
+        padding: @margin;
+        text-align: right;
+    }
+    .submit{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        border-radius: 0;
+        &:after, &:before{
+            border-radius: 0;
+        }
+    }
+}
+.order-confirm{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    min-height: 100vh;
+}
+</style>

@@ -1,0 +1,43 @@
+
+    
+    <form class="searchbar {{$searchbar$keyword ? 'inputing':''}} {{$searchbar$skin}}" style="{{$searchbar$style}}" report-submit="{{$searchbar$true}}" bindsubmit="$searchbar$formSubmit" bindreset="$searchbar$formReset">
+        <view class="wrapper">
+            <input type="text" value="{{$searchbar$keyword}}" confirm-type="search" bindinput="$searchbar$inputTyping" bindconfirm="$searchbar$formSubmit" placeholder="搜索产品名"/>
+            <button class="submit" form-type="submit"><text class="icon icon-search"/></button>
+            <button class="cancel" form-type="reset">取消</button>
+        </view>
+    </form>
+
+    <view class="catalog">
+        <scroll-view class="catalog-nav" scroll-y="true">
+            <button type="normal" class="nav-item active">茶分类</button>
+            <navigator type="normal" class="nav-item" url="/pages/topics/free">免费试喝</navigator>
+            <navigator type="normal" class="nav-item" url="/pages/topics/custom">个性定制</navigator>
+        </scroll-view>
+        <scroll-view class="catalog-body" scroll-y="true">
+            <block  wx:if="catalogList">
+                <wxs src="../wxs/filter.wxs" module="filter"/>
+
+    <view class="cp-catalog-list {{$catalog$skin}}" style="width:{{$catalog$width}}rpx;padding:{{$catalog$margin}}rpx;{{$catalog$style}}">
+        <block wx:for="{{$catalog$datalist}}" wx:for-index="$catalog$index" wx:for-item="$catalog$item" wx:key="$catalog$key">
+            <navigator class="normal cp-catalog-item" url="/pages/product/list?id={{$catalog$item.id}}" rediect="{{$catalog$rediect}}" hover-class="{{$catalog$hoverClass}}" style="width:{{$catalog$itemWidth}}rpx;padding:{{$catalog$padding}}rpx;margin-top:{{$catalog$index>=$catalog$column?$catalog$margin:0}}rpx">
+                <view class="cp-catalog-image" style="width:{{$catalog$imageWidth}}rpx;height:{{$catalog$imageHeight}}rpx;">
+                    <image src="{{$catalog$item.image}}" mode="scaleToFill"/>
+                </view>
+                <text class="cp-catalog-name">{{$catalog$item.name}}</text>
+                
+            </navigator>
+        </block>
+    </view>
+
+            </block>
+            
+    <view class="cp-loadmore" wx:else>
+        <view class="cp-loadmore-main" style="padding:{{$loadmore$padding}} 0;">
+            <view class="cp-loadmore-icon" style="border-color:{{$loadmore$iconColor}}"  wx:if="{{$loadmore$icon}}"><view style="background-color: {{$loadmore$iconColor}}"/></view>
+            <view class="cp-loadmore-text" style="color:{{$loadmore$textColor}}">{{$loadmore$text}}</view>
+        </view>
+    </view>
+
+        </scroll-view>
+    </view>

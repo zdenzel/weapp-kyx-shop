@@ -1,0 +1,18 @@
+{
+    "pid": 1,
+    "page": 1,
+    "limit": 10,
+}
+
+{
+    "status": 1,
+    "message": "提示信息",
+    "result": {
+        "totalPage": 1,
+        "totalScore": 4.5,
+        "totalCount": 100,
+        "datalist": [
+            {"id": 1, "avatarUrl": "https://t1.picb.cc/uploads/2018/02/22/KGQhG.png", "nickName": "denzel", "score": 4, "content": "真好喝", "date": "2018.01.28"}
+        ]
+    }
+}

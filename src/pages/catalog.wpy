@@ -1,0 +1,130 @@
+<script>
+import wepy from 'wepy'
+import loadmore from '@/components/loadmore'
+import searchbar from '@/components/searchbar'
+import catalog from '@/components/product/catalog'
+
+import { getStore, connect } from 'wepy-redux'
+import { getCatalogList } from '@/store/actions'
+const store = getStore()
+
+@connect({
+    catalogList: state => state.catalog.catalogList
+})
+
+export default class Catalog extends wepy.page {
+    config = {
+        usingComponents: {
+            'wxc-cc': '/packages/@minui/wxc-cc/dist/index',
+            'wxc-flex': '/packages/@minui/wxc-flex/dist/index',
+            'wxc-avatar': '/packages/@minui/wxc-avatar/dist/index',
+            'wxc-elip': '/packages/@minui/wxc-elip/dist/index',
+            'wxc-icon': '/packages/@minui/wxc-icon/dist/index',
+            'wxc-label': '/packages/@minui/wxc-label/dist/index',
+            'wxc-loadmore': '/packages/@minui/wxc-loadmore/dist/index',
+
+            'wxc-abnor': '/packages/@minui/wxc-abnor/dist/index',
+            'wxc-countdown': '/packages/@minui/wxc-countdown/dist/index',
+            'wxc-counter': '/packages/@minui/wxc-counter/dist/index',
+            'wxc-loading': '/packages/@minui/wxc-loading/dist/index',
+            'wxc-mask': '/packages/@minui/wxc-mask/dist/index',
+
+            'wxc-dialog': '/packages/@minui/wxc-dialog/dist/index',
+            'wxc-popup': '/packages/@minui/wxc-popup/dist/index',
+            'wxc-toast': '/packages/@minui/wxc-toast/dist/index'
+        }
+    }
+
+    components = {
+        catalog,
+        loadmore,
+        searchbar,
+    }
+
+    methods = {
+        onSearch(keyword){
+            wx.navigateTo({
+                url: `/pages/search?keyword=${keyword}`
+            });
+        }
+    }
+
+}
+
+</script>
+
+<template>
+    <searchbar @on-search.user="onSearch"></searchbar>
+    <view class="catalog">
+        <scroll-view class="catalog-nav" scroll-y="true">
+            <button type="normal" class="nav-item active">茶分类</button>
+            <navigator type="normal" class="nav-item" url="/pages/topics/free">免费试喝</navigator>
+            <navigator type="normal" class="nav-item" url="/pages/topics/custom">个性定制</navigator>
+        </scroll-view>
+        <scroll-view class="catalog-body" scroll-y="true">
+            <block wx:if="catalogList">
+                <catalog :datalist.sync="catalogList" width="550"></catalog>
+            </block>
+            <loadmore wx:else></loadmore>
+        </scroll-view>
+    </view>
+</template>
+
+<style lang="less">
+@import 'src/common/styles/config.less';
+.catalog{
+    flex: 1;
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    background-color: @color-backcolor;
+}
+.catalog-nav {
+    width: 200rpx;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    top: 0;
+    background-image: url('@{assets-url}/images/bg.jpg');
+    .nav-item{
+        height: 100rpx;
+        line-height: 100rpx;
+        overflow: hidden;
+        padding: 0 @margin/2;
+
+        display: -webkit-box;
+        word-break: break-all;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+
+        border-top: 2rpx solid @color-border;
+        text-align: center;
+
+        font-size: @font-size-large;
+
+        &:first-child{
+            border-top: none;
+        }
+
+        &.navigator-hover{
+            background-color: transparent;
+        }
+
+        &.active{
+            background-color: @color-backcolor !important;
+        }
+
+        &.navigator-hover, &.button-hover{
+            background-color: @color-maincolor;
+        }
+    }
+}
+.catalog-body{
+    height: 100%;
+    overflow: auto;
+    position: absolute;
+    bottom: 0;
+    left: 200rpx;
+    top: 0;
+}
+</style>

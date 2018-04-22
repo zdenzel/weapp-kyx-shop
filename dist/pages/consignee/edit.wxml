@@ -1,0 +1,55 @@
+
+<form report-submit="true" bindsubmit="formSubmit"  wx:if="{{preloaded}}">
+    <view class="consignee-detail">
+        <view class="dzui-cells">
+            <view class="dzui-cell">
+                <view class="dzui-cell-head">收货人</view>
+                <view class="dzui-cell-body"><input value="{{consignee.name}}" bindinput="input" bindblur="input" data-store="consignee.name"/></view>
+            </view>
+            <view class="dzui-cell">
+                <view class="dzui-cell-head">联系方式</view>
+                <view class="dzui-cell-body"><input value="{{consignee.tel}}" bindinput="input" bindblur="input" data-store="consignee.tel"/></view>
+            </view>
+            <view class="dzui-cell" bindtap="showCityPicker">
+                <view class="dzui-cell-head">所在地区</view>
+                <view class="dzui-cell-body">{{consignee.area}}</view>
+                <view class="dzui-cell-foot"><text class="icon icon-arrow-right"/></view>
+            </view>
+            <view class="dzui-cell">
+                <view class="dzui-cell-head">详细地址</view>
+                <view class="dzui-cell-body"><textarea value="{{consignee.address}}" auto-height bindinput="input" bindblur="input" data-store="consignee.address" data-trim="line"/></view>
+            </view>
+        </view>
+        <view class="dzui-tools">
+            <button type="base" size="large" form-type="submit">确定提交</button>
+        </view>
+    </view>
+    
+    <wxc-popup class="J_Cityselect" locked="false" animation-mode="bottom" align="bottom">
+        <view class="cp-cityselect" catchtap="$cityselect$tap">
+            <view class="cp-cityselect-tool">
+                <button class="cp-cityselect-cancel" catchtap="$cityselect$onCancel">取消</button>
+                <button class="cp-cityselect-confirm" catchtap="$cityselect$onConfirm">确定</button>
+            </view>
+            <picker-view class="cp-cityselect-view" indicator-style="height: 4em;" value="{{$cityselect$value}}" bindchange="$cityselect$onChange"  wx:if="{{$cityselect$isReady}}">
+                <picker-view-column class="cp-cityselect-view-column">
+                    <view class="cp-cityselect-text" wx:for="{{$cityselect$provinces}}" wx:key="item">{{item}}</view>
+                </picker-view-column>
+                <picker-view-column class="cp-cityselect-view-column">
+                    <view class="cp-cityselect-text" wx:for="{{$cityselect$citys}}" wx:key="item">{{item}}</view>
+                </picker-view-column>
+                <picker-view-column class="cp-cityselect-view-column">
+                    <view class="cp-cityselect-text" wx:for="{{$cityselect$countys}}" wx:key="item">{{item}}</view>
+                </picker-view-column>
+            </picker-view>
+        </view>
+    </wxc-popup>
+
+</form>
+
+    <view class="cp-loadmore" wx:else>
+        <view class="cp-loadmore-main" style="padding:{{$loadmore$padding}} 0;">
+            <view class="cp-loadmore-icon" style="border-color:{{$loadmore$iconColor}}"  wx:if="{{$loadmore$icon}}"><view style="background-color: {{$loadmore$iconColor}}"/></view>
+            <view class="cp-loadmore-text" style="color:{{$loadmore$textColor}}">{{$loadmore$text}}</view>
+        </view>
+    </view>

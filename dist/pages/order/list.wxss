@@ -1,0 +1,5 @@
+@import "./../../components/order/items.wxss";
+@import "./../../components/loadmore.wxss";
+@import "./../../components/nulldata.wxss";
+@import "./../../components/tabbar.wxss";
+.statusbar{background:#e9e0cc}

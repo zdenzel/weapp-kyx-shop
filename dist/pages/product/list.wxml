@@ -1,0 +1,201 @@
+
+    <view class="products"  wx:if="{{preloaded}}">
+        
+    <scroll-view class="tabbar catalog" bindscroll="$tabbar$onScroll" scroll-left="{{$tabbar$offsetLeft}}" scroll-x="true"  wx:if="{{preloaded}}">
+        <view class="tabbar-contain {{$tabbar$isFlex?'is-flex':''}}" style="{{$tabbar$mainStyle}}">
+            <navigator class="tabbar-button" url="/pages/home" open-type="switchTab"><text>首页</text></navigator>
+            <block wx:if="{{$tabbar$route}}">
+                <block wx:for="{{$tabbar$datalist}}" wx:for-index="$tabbar$index" wx:for-item="$tabbar$item" wx:key="$tabbar$key">
+                    <navigator class="tabbar-button {{$tabbar$alive!='false'&&$tabbar$defaultKey==($tabbar$item[$tabbar$key])?'active':''}}" url="{{$tabbar$item.route || $tabbar$route+'?'+ $tabbar$key +'='+ $tabbar$item[$tabbar$key]}}" id="tabbar-{{$tabbar$item[$tabbar$key]}}" data-index="{{$tabbar$index}}" style="{{$tabbar$itemStyle}}">
+                        <text class="label">{{$tabbar$item[$tabbar$label]}}</text>
+                        <text class="badge" wx:if="{{$tabbar$item[$tabbar$badge]}}">{{$tabbar$item[$tabbar$badge]}}</text>
+                    </navigator>
+                </block>
+            </block>
+            <block wx:else>
+                <block wx:for="{{$tabbar$datalist}}" wx:for-index="$tabbar$index" wx:for-item="$tabbar$item" wx:key="$tabbar$key">
+                    <view class="tabbar-button {{$tabbar$alive!='false'&&$tabbar$defaultKey==($tabbar$item[$tabbar$key])?'active':''}}" style="{{$tabbar$itemStyle}}" bindtap="$tabbar$onClick" id="tabbar-{{$tabbar$item[$tabbar$key]}}" data-key="{{$tabbar$item[$tabbar$key]}}" data-index="{{$tabbar$index}}">
+                        <text class="label">{{$tabbar$item[$tabbar$label]}}</text>
+                        <text class="badge" wx:if="{{$tabbar$item[$tabbar$badge]}}">{{$tabbar$item[$tabbar$badge]}}</text>
+                    </view>
+                </block>
+            </block>
+            
+            <navigator class="tabbar-button" url="/pages/topics/free"><text>免费试喝</text></navigator><navigator class="tabbar-button" url="/pages/topics/custom"><text>个性定制</text></navigator>
+        </view>
+    </scroll-view>
+
+        <view class="product">
+            <wxc-flex class="product-tool" main="between" cross="center">
+                <wxc-flex>
+                    <view class="btn {{sortValue == 'isPopular' ? 'active' : ''}}" bindtap="tapSort" data-wpytapsort-a="popular">
+                        <text>人气</text>
+                    </view>
+                    <view class="btn {{(sortValue == 'isPriceDown' || sortValue == 'isPriceUp') ? 'active' : ''}}" bindtap="tapSort" data-wpytapsort-a="price">
+                        <text>价格</text>
+                        <text class="icon icon-sort-{{sortValue == 'isPriceDown' ? 'down' : 'up'}}" wx:if="{{(sortValue == 'isPriceDown' || sortValue == 'isPriceUp')}}"/>
+                    </view>
+                </wxc-flex>
+                <wxc-flex>
+                    <!-- <view class="btn" bindtap="tapGridList()">
+                        <text class="icon icon-{{isGridList ? 'grid' : 'list'}}"></text>
+                    </view> -->
+                    <view class="btn {{filterValue ? 'active' : ''}}" bindtap="showFilter" data-wpyshowfilter-a="">
+                        <text>筛选</text>
+                        <text class="icon icon-filter"/>
+                    </view>
+                </wxc-flex>
+            </wxc-flex>
+            
+    <wxc-popup class="J_Filter" locked="false" animation-mode="right" align="right">
+        <view class="cp-filter" catchtap="$filter$tap">
+            <scroll-view class="cp-filter-scroll" scroll-y>
+                <view class="cp-filter-main">
+                    <block wx:for="{{$filter$datalist}}" wx:for-index="$filter$index" wx:for-item="$filter$item" wx:key="$filter$key">
+                        <radio-group class="cp-filter-group" bindchange="$filter$onRadioChange" data-key="{{$filter$item.key}}">
+                            <view class="cp-filter-title">{{$filter$item.name}}</view>
+                            <view class="cp-filter-value">
+                                <block wx:for="{{$filter$item.child}}" wx:for-index="$filter$index" wx:for-item="$filter$child" wx:key="$filter$key">
+                                    <label class="{{$filter$child.checked ? 'is-checked': ''}}">
+                                        <radio value="{{$filter$child.key}}" checked="{{$filter$child.checked}}"/>
+                                        {{$filter$child.name}}
+                                    </label>
+                                </block>
+                            </view>
+                        </radio-group>
+                        <!-- <checkbox-group class="cp-filter-group" bindchange="onCheckboxChange" data-key="{{item.key}}">
+                            <view class="cp-filter-title">{{item.name}}</view>
+                            <view class="cp-filter-value">
+                                <repeat for="{{item.child}}" item="child">
+                                    <label class="{{child.checked ? 'is-checked': ''}}">
+                                        <checkbox value="{{child.key}}" checked="{{child.checked}}"></checkbox>
+                                        {{child.name}}
+                                    </label>
+                                </repeat>
+                            </view>
+                        </checkbox-group> -->
+                    </block>
+                </view>
+            </scroll-view>
+            <view class="cp-filter-tool">
+                <button type="warn" size="large" catchtap="$filter$onReset">重置</button>
+                <button type="base" size="large" catchtap="$filter$onSubmit">完成</button>
+            </view>
+        </view>
+    </wxc-popup>
+
+            <block wx:if="{{productList}}">
+                <view class="product-list">
+                    <wxs src="../../wxs/filter.wxs" module="filter"/>
+
+    <view style="padding:{{$grids$margin}}rpx" wx:if="{{isGridList}}">
+        <view class="cp-grid-product">
+            <block wx:for="{{$grids$datalist}}" wx:for-index="$grids$index" wx:for-item="$grids$product" wx:key="$grids$id">
+                <navigator class="cp-product-item" url="/pages/product/detail?id={{$grids$product.id}}" style="width:{{$grids$itemWidth}}rpx;padding:{{$grids$padding}}rpx;margin-top:{{$grids$index>=$grids$column?$grids$margin:0}}rpx;{{$grids$boxBackColor}}">
+                    <view class="cp-product-cover" style="width:{{$grids$imageWidth}}rpx;height:{{$grids$imageHeight}}rpx;{{$grids$imgBackColor}}">
+                        <image src="{{filter.thumbnail($grids$product.cover,$grids$imageOptimize)}}" mode="scaleToFill"/>
+                    </view>
+                    <view class="cp-product-context" style="margin-top: {{$grids$margin}}rpx;">
+                        <wxc-elip class="cp-product-row cp-product-title">{{$grids$product.title}}</wxc-elip>
+                        <wxc-elip class="cp-product-row cp-product-price"><view class="price">{{$grids$product.price}}</view></wxc-elip>
+                        <wxc-flex class="cp-product-row cp-product-score" main="start">
+                            <view class="score">
+                                
+    <view class="cp-score" style="{{$grids$score$color}}">
+        <text class="cp-score-bar">
+            <text class="icon icon-star-fill"/>
+            <text class="icon icon-star-fill"/>
+            <text class="icon icon-star-fill"/>
+            <text class="icon icon-star-fill"/>
+            <text class="icon icon-star-fill"/>
+        </text>
+        <text class="cp-score-bar active" style="{{$grids$score$activeColor}}width:{{$grids$product.score/$grids$score$total*100}}%;">
+            <text class="icon icon-star-fill"/>
+            <text class="icon icon-star-fill"/>
+            <text class="icon icon-star-fill"/>
+            <text class="icon icon-star-fill"/>
+            <text class="icon icon-star-fill"/>
+        </text>
+    </view>
+
+                            </view>
+                            <view class="comment">
+                                <text>({{$grids$product.comment}}人评价)</text>
+                            </view>
+                        </wxc-flex>
+                    </view>
+                </navigator>
+            </block>
+        </view>
+    </view>
+
+                    <wxs src="../../wxs/filter.wxs" module="filter"/>
+
+    <view style="padding:{{$items$margin}}rpx 0;" wx:else>
+        <view class="cp-item-product">
+            <block wx:for="{{$items$datalist}}" wx:for-index="$items$index" wx:for-item="$items$product" wx:key="$items$id">
+                <navigator class="cp-product-item" url="/pages/product/detail?id={{$items$product.id}}" style="padding:{{$items$padding}}rpx;margin-top:{{$items$index>0?$items$margin:0}}rpx;{{$items$boxBackColor}}">
+                    <view class="cp-product-cover" style="width:{{$items$imageWidth}}rpx;height:{{$items$imageHeight}}rpx;{{$items$imgBackColor}}">
+                        <image src="{{filter.thumbnail($items$product.cover,$items$imageOptimize)}}" mode="scaleToFill"/>
+                    </view>
+                    <view class="cp-product-context" style="margin-left:{{$items$padding}}rpx;">
+                        <wxc-elip class="cp-product-row cp-product-title">{{$items$product.title}}</wxc-elip>
+                        <wxc-elip class="cp-product-row cp-product-price"><text class="price">{{$items$product.price}}</text></wxc-elip>
+                        <wxc-flex class="cp-product-row cp-product-score" main="between">
+                            <view class="score">
+                                
+    <view class="cp-score" style="{{$items$score$color}}">
+        <text class="cp-score-bar">
+            <text class="icon icon-star-fill"/>
+            <text class="icon icon-star-fill"/>
+            <text class="icon icon-star-fill"/>
+            <text class="icon icon-star-fill"/>
+            <text class="icon icon-star-fill"/>
+        </text>
+        <text class="cp-score-bar active" style="{{$items$score$activeColor}}width:{{$items$product.score/$items$score$total*100}}%;">
+            <text class="icon icon-star-fill"/>
+            <text class="icon icon-star-fill"/>
+            <text class="icon icon-star-fill"/>
+            <text class="icon icon-star-fill"/>
+            <text class="icon icon-star-fill"/>
+        </text>
+    </view>
+
+                            </view>
+                            <view class="comment">
+                                <text>({{$items$product.comment}}人评价)</text>
+                            </view>
+                        </wxc-flex>
+                    </view>
+                </navigator>
+            </block>
+        </view>
+    </view>
+
+                </view>
+            </block>
+            
+    <view class="cp-loadmore" wx:if="{{isloading}}">
+        <view class="cp-loadmore-main" style="padding:{{$loadmore$padding}} 0;">
+            <view class="cp-loadmore-icon" style="border-color:{{$loadmore$iconColor}}"  wx:if="{{$loadmore$icon}}"><view style="background-color: {{$loadmore$iconColor}}"/></view>
+            <view class="cp-loadmore-text" style="color:{{$loadmore$textColor}}">{{$loadmore$text}}</view>
+        </view>
+    </view>
+
+            
+    <view class="cp-nulldata" wx:if="{{!productList && !isloading}}">
+        <view class="cp-nulldata-main" style="padding:{{$nulldata$padding}} 0;">
+            <view class="cp-nulldata-icon icon icon-nulldata" style="color:{{$nulldata$iconColor}}"/>
+            <view class="cp-nulldata-text" style="color:{{$nulldata$textColor}}">{{$nulldata$text}}</view>
+        </view>
+    </view>
+
+        </view>
+    </view>
+    
+    <view class="cp-loadmore" wx:else>
+        <view class="cp-loadmore-main" style="padding:{{$loadmore$padding}} 0;">
+            <view class="cp-loadmore-icon" style="border-color:{{$loadmore$iconColor}}"  wx:if="{{$loadmore$icon}}"><view style="background-color: {{$loadmore$iconColor}}"/></view>
+            <view class="cp-loadmore-text" style="color:{{$loadmore$textColor}}">{{$loadmore$text}}</view>
+        </view>
+    </view>

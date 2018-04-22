@@ -1,0 +1,43 @@
+{
+    "id": 1
+}
+
+
+{
+    "status": 1,
+    "message": "提示信息",
+    "result": {
+        "id": 2,
+        "code": "E20180102112201",
+        "status": 1,
+        "payStatus": 1,
+        "freightAmount": "10.00",
+        "actualAmount": "200.00",
+        "isCommented": false,
+        "message": "帮我包装得好看点",
+        "createTime": "2015-11-16 12:45:00",
+        "logistics": {
+            "id": 1,
+            "name": "顺丰快递",
+            "code": "SF20180901020001",
+            "time": "2015-11-16 12:45:00",
+        },
+        "consignee": {
+            "id": 1,
+            "name": "张生",
+            "tel": "15817489898",
+            "area": "广东 广州市  天河区",
+            "address": "金穗路1号3401(广东星外星唱片)",
+        },
+        "productList": [
+            {
+                "id": 1,
+                "cover": "https://t1.picb.cc/uploads/2018/02/22/KGQhG.png",
+                "title": "云之七味",
+                "type": "熟茶",
+                "price": "100.00",
+                "count": 1
+            }
+        ]
+    }
+}

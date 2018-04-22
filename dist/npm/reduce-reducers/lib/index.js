@@ -1,0 +1,1 @@
+"use strict";function reduceReducers(){for(var e=arguments.length,r=Array(e),u=0;u<e;u++)r[u]=arguments[u];return function(e,u){return r.reduce(function(e,r){return r(e,u)},e)}}exports.__esModule=!0,exports.default=reduceReducers,module.exports=exports.default;

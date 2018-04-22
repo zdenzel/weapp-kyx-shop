@@ -1,0 +1,303 @@
+<script>
+import _ from 'lodash'
+import wepy from 'wepy'
+import filter from '../../wxs/filter.wxs'
+import previewImage from '@/mixins/previewImage'
+
+const devWidth = 750
+const winWidth = wepy.getSystemInfoSync().windowWidth
+const winRatio = winWidth / devWidth
+
+export default class ProductFilter extends wepy.component {
+    props = {
+        datalist: {
+            type: Array,
+            default: [],
+            twoWay: false
+        },
+        checked: {
+            type: Object,
+            default: {},
+            twoWay: true
+        },
+        column: {
+            type: String,
+            default: 3
+        },
+        imgRatio: {
+            type: Array,
+            default: [1,1]
+        },
+        margin: {
+            type: String,
+            default: 20
+        },
+        height: {
+            type: String,
+            default: 320
+        }
+    }
+
+    data = {
+        isloaded: false,
+        selected: null,
+        offsetLeft: 0,
+        activeId: null,
+        activeIndex: 0,
+        activeColumn: 1,
+    }
+
+    mixins = [previewImage]
+
+    wxs = {
+        filter
+    }
+
+    computed = {
+        imageRatio() {
+            let imgRatio = 1
+            try{
+                imgRatio = this.imgRatio[1] / this.imgRatio[0]
+                if(isNaN(imgRatio)){
+                    imgRatio = 1
+                }
+            }catch(e){}
+
+            return imgRatio
+        },
+        imageWidth() {
+            return Math.ceil((devWidth - this.margin * (this.column + 1)) / this.column)
+        },
+        imageHeight() {
+            return this.imageWidth * this.imageRatio
+        },
+        imageOptimize() {
+            return Math.ceil(this.imageWidth) + 'x' + Math.ceil(this.imageHeight);
+        }
+    }
+
+    events = {
+        showCustomSelector() {
+            let popup = this.$wxpage.selectComponent('.J_Custom_Selector');
+            popup && popup.show();
+            this.onReinit();
+        },
+        hideCustomSelector() {
+            this.isloaded = false;
+            this.activeId = null;
+            this.activeIndex = 0;
+            this.activeColumn = 1;
+            let popup = this.$wxpage.selectComponent('.J_Custom_Selector');
+            popup && popup.hide();
+        }
+    }
+
+    methods = {
+        tap(e) { },
+        onSelect(item){
+            let { id } = item;
+            let selected = _.cloneDeep(this.selected) || {};
+            let datalist = _.cloneDeep(this.datalist) || [];
+
+            //在列表中设置选中项
+            this.datalist = datalist.map((n, i) => {
+                n.checked = !!(n.id == id);
+                return n;
+            });
+
+            //保存选中项
+            this.selected = _.cloneDeep(this.datalist.find(n => n.id == id));
+
+            let activeIndex = Math.max(this.datalist.findIndex(n => n.id == id), 0);
+            this.activeIndex = activeIndex > this.activeIndex ? Math.min(activeIndex, this.datalist.length - this.column) : Math.max(activeIndex - 1, 0);
+
+            this.activeId = id;
+
+        },
+        onCancel() {
+            this.$emit('on-cancel');
+            this.$emit('hideCustomSelector');
+        },
+        onSubmit() {
+            this.$emit('hideCustomSelector');
+            if(_.isEqual(this.selected, this.checked)){ return; }
+            this.checked = _.cloneDeep(this.selected);
+            console.log(this.checked)
+            this.$emit('on-submit', this.checked);
+        },
+        onReset(e) {
+            this.selected = null;
+            this.datalist = this.datalist.map(n => {
+                n.checked = false;
+                return n;
+            });
+            this.$emit('on-reset');
+        }
+    }
+
+    onReinit() {
+        setTimeout(()=>{
+            this.selected = _.cloneDeep(this.checked) || {};
+            this.datalist = this.datalist.map((n, i) => {
+                n.checked = !!(n.id == this.selected.id);
+                return n;
+            });
+
+            this.activeColumn = this.datalist.length >= this.column ? this.column : 1;
+            let activeIndex = Math.max(this.datalist.findIndex(n => n.id == this.selected.id), 0);
+            this.activeIndex = activeIndex > this.activeIndex ? Math.min(activeIndex, this.datalist.length - this.column) : Math.max(activeIndex - 1, 0);
+            this.activeId = this.selected.id;
+            this.isloaded = true;
+            this.$apply();
+        }, 1)
+    }
+
+}
+
+</script>
+<template>
+    <wxc-popup class="J_Custom_Selector" locked="false" animation-mode="bottom" align="bottom">
+        <view class="cp-custom-selector" @tap.stop="tap">
+            <view class="cp-custom-selector-tool">
+                <button class="cp-custom-selector-cancel" @tap.stop="onCancel">取消</button>
+                <button class="cp-custom-selector-confirm" @tap.stop="onSubmit">确定</button>
+            </view>
+            <view class="cp-custom-selector-main" style="padding:{{margin}}rpx {{margin/2}}rpx;">
+                <swiper class="swiper cp-custom-selector-swiper" current="{{activeIndex}}" display-multiple-items="{{activeColumn}}" indicator-dots="true" style="height:{{height}}rpx;" wx:if="{{isloaded}}">
+                    <repeat for="{{datalist}}">
+                        <swiper-item @tap="onSelect({{item}})">
+                            <view class="cp-custom-product" id="J_Custom_Product_{{index}}" style="margin:0 {{margin/2}}rpx;">
+                                <text class="checkbox icon icon-checkbox{{ item.checked ? '-cur': '' }}"></text>
+                                <!-- <view class="image" @tap.stop="previewImage({{item.image}},{{[item.image]}})" style="width:{{imageWidth}}rpx;height:{{imageHeight}}rpx;margin-bottom:{{margin}}rpx;"> -->
+                                <view class="cover" style="width:{{imageWidth}}rpx;height:{{imageHeight}}rpx;margin-bottom:{{margin}}rpx;" wx:if="{{item.cover}}">
+                                    <image src="{{filter.thumbnail(item.cover,imageOptimize)}}" mode="scaleToFill"></image>
+                                </view>
+                                <wxc-elip class="title">{{item.title}}</wxc-elip>
+                            </view>
+                        </swiper-item>
+                    </repeat>
+                </swiper>
+            </view>
+        </view>
+    </wxc-popup>
+</template>
+<style lang="less">
+@import 'src/common/styles/config.less';
+.cp-custom-list {
+    display: inline-block;
+    &:after {
+        visibility: hidden;
+        display: block;
+        font-size: 0;
+        content: " ";
+        clear: both;
+        height: 0;
+    }
+}
+
+.cp-custom-product {
+
+    display: inline-block;
+    // float: left;
+    // width: (750rpx - @margin*3) / 2;
+    // margin-top: @margin;
+    margin-right: @margin;
+    position: relative;
+    text-align: center;
+    radio,
+    checkbox {
+        display: none;
+    }
+    &:last-child{
+        margin-right: 0 !important;
+    }
+    // &:nth-child(1),
+    // &:nth-child(2) {
+    //     margin-top: 0;
+    // }
+    // &:nth-child(2n) {
+    //     margin-right: 0;
+    // }
+    .checkbox {
+        width: 42rpx;
+        height: 42rpx;
+        line-height: 42rpx;
+
+        display: flex;
+        justify-content: center;
+        text-align: center;
+        
+        position: absolute;
+        left: 5rpx;
+        top: 5rpx;
+
+        border-radius: @radius;
+        background-color: rgba(255,255,255,.8);
+        font-size: 42rpx;
+    }
+
+    .cover {
+        width: (750rpx - @margin*3) / 2;
+        height: (750rpx - @margin*3) / 2;
+        margin-bottom: @margin;
+        background-color: @color-maincolor;
+    }
+
+    .tips {
+        color: @color-primary;
+    }
+}
+
+.cp-custom-selector {
+    display: flex;
+    flex-direction: column;
+
+    width: 100%;
+    // height: 540rpx;
+    background-color: @color-maincolor;
+}
+
+.cp-custom-selector-swiper{
+    height: 300rpx;
+    background-color: transparent;
+}
+
+.cp-custom-selector-main {
+    padding: @margin;
+    display: inline-block;
+    background-color: @color-white;
+    // padding: 0 @margin/2;
+    // position: relative;
+}
+
+.cp-custom-selector-cancel,
+.cp-custom-selector-confirm{
+    display: block;
+    border: none;
+    outline: none;
+    margin: 0;
+    padding: 1em 1.5em;
+    height: auto;
+    line-height: inherit;
+    border-radius: 0;
+    background-color: transparent;
+    color: @color-gray;
+
+    font-size: @font-size-large;
+    &:after { display: none;}
+    &.button-hover{
+        background-color: @color-forecolor;
+    }
+}
+.cp-custom-selector-confirm{
+    color: @color-primary;
+}
+
+.cp-custom-selector-tool{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    background-color: @color-maincolor;
+}
+</style>

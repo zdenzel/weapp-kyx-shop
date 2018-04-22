@@ -1,0 +1,72 @@
+<script>
+import wepy from 'wepy'
+
+const devWidth = 750
+const winRatio = wepy.getSystemInfoSync().windowWidth / devWidth
+
+export default class NullData extends wepy.component {
+    props = {
+        text: {
+            type: String,
+            default: '暂时还没有数据'
+        },
+        textColor: {
+            type: String,
+            default: '#8c8174'
+        },
+        iconColor: {
+            type: String,
+            default: '#8c8174'
+        },
+        padding: {
+            type: String,
+            default: '40rpx'
+        }
+    }
+
+    onLoad () {
+    }
+}
+
+</script>
+
+<template>
+    <view class="cp-nulldata">
+        <view class="cp-nulldata-main" style="padding:{{padding}} 0;">
+            <view class="cp-nulldata-icon icon icon-nulldata" style="color:{{iconColor}}"></view>
+            <view class="cp-nulldata-text" style="color:{{textColor}}">{{text}}</view>
+        </view>
+    </view>
+</template>
+
+<style lang="less">
+@import 'src/common/styles/config.less';
+.cp-nulldata{
+    display: block;
+}
+.cp-nulldata-main{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 20rpx 0;
+}
+.cp-nulldata-icon{
+
+    margin-right: 20rpx;
+    color: @color-gray;
+
+    overflow: hidden;
+    position: relative;
+    
+    box-sizing: border-box;
+
+    line-height: 1em;
+    font-size: 48rpx;
+
+}
+.cp-nulldata-text{
+    display: inline-block;
+    vertical-align: middle;
+}
+</style>

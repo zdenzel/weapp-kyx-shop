@@ -1,0 +1,99 @@
+<script>
+import _ from 'lodash'
+import wepy from 'wepy'
+import filter from '../../wxs/filter.wxs'
+
+const devWidth = 750
+const winRatio = wepy.getSystemInfoSync().windowWidth / devWidth
+
+export default class OrderProducts extends wepy.component {
+
+    props = {
+        datalist: {
+            type: Array,
+            default: null
+        }
+    }
+
+    wxs = {
+        filter
+    }
+
+    computed = {
+        optimize() {
+            let width = Math.ceil(180*winRatio);
+            return width + 'x' + width;
+        }
+    }
+}
+
+</script>
+
+<template>
+    <view class="cp-order-products">
+        <repeat for="{{datalist}}" item="product" key="product.id">
+            <wxc-flex class="cp-op-product">
+                <image class="cp-op-cover" src="{{filter.thumbnail(product.cover,optimize)}}" mode="scaleToFill"></image>
+                <wxc-flex class="cp-op-main" dir="top" main="between">
+                    <view class="cp-op-info">
+                        <text class="cp-op-row cp-op-title">{{product.title}}</text>
+                        <text class="cp-op-row cp-op-text">{{product.skuAttrText}}</text>
+                    </view>
+                    <wxc-flex class="cp-op-count" main="between" cross="center">
+                        <text class="price">{{product.price}}</text>
+                        <text class="count">x{{product.count}}</text>
+                    </wxc-flex>
+                </wxc-flex>
+            </wxc-flex>
+        </repeat>
+    </view>
+</template>
+
+<style lang="less">
+@import 'src/common/styles/config.less';
+
+.cp-op-cover{
+    width: 180rpx;
+    height: 180rpx;
+    background-color: @color-forecolor;
+    border: 2rpx solid @color-border;
+    border-radius: @radius;
+}
+.cp-op-info{
+    overflow: hidden;
+}
+.cp-op-row{
+    display: block;
+    margin-bottom: @margin/2;
+}
+// .cp-op-title{
+//     font-size: @font-size-large;
+// }
+.cp-op-text{
+    color: @color-gray;
+}
+.cp-op-count{
+    display: block;
+
+    .price{
+        font-size: @font-size-large;
+        color: @color-base;
+    }
+}
+.cp-op-head{
+    padding: @margin;
+}
+.cp-op-main{
+    flex: 1;
+    margin-left: @margin;
+}
+.cp-op-product{
+    display: block;
+    padding: @margin;
+    margin-top: 2rpx;
+    background-color: @color-maincolor;
+    &:first-child{
+        margin-top: 0 !important;
+    }
+}
+</style>

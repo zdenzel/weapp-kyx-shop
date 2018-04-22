@@ -1,0 +1,66 @@
+
+    <view class="consignee-toolbar"  wx:if="{{preloaded}}">
+        <navigator class="button base large" url="/pages/consignee/edit">添加地址</navigator>
+    </view>
+    <view class="consignee-list"  wx:if="{{preloaded}}">
+        <block wx:if="{{consigneeList}}">
+            <block wx:for="{{consigneeList}}" wx:for-index="index" wx:for-item="consignee" wx:key="consignee.id">
+                <view class="item-consignee {{consignee.id == selectId ? 'selected' : ''}}" bindtap="tapSelect" data-wpytapselect-a="{{consignee}}">
+                    <view class="item-consignee-contain">
+                        <view class="item-consignee-side" wx:if="{{isOpt}}">
+                            <text class="icon icon-address"/>
+                        </view>
+                        <view class="item-consignee-main">
+                            <view class="item-consignee-title">
+                                <text class="item-consignee-name">{{consignee.name}}</text>
+                                <text class="item-consignee-tel">{{consignee.tel}}</text>
+                            </view>
+                            <view class="item-consignee-address">
+                                {{consignee.area +' '+ consignee.address}}
+                            </view>
+                        </view>
+                        <view class="item-consignee-close" wx:if="{{!isOpt}}">
+                            <text class="icon icon-close" catchtap="tapDelete" data-wpytapdelete-a="{{consignee.id}}"/>
+                        </view>
+                    </view>
+                    <view class="item-consignee-toolbar" wx:if="{{!isOpt}}">
+                        <view>
+                            <label catchtap="tapDefault" data-wpytapdefault-a="{{consignee.id}}">
+                                <text class="icon icon-radio{{consignee.isDefault ? '-cur': ''}}"/>
+                                <text>设为默认地址</text>
+                            </label>
+                        </view>
+                        <view>
+                            <label catchtap="tapEdit" data-wpytapedit-a="{{consignee.id}}">
+                                <text class="icon icon-edit"/>
+                                <text>编辑</text>
+                            </label>
+                        </view>
+                    </view>
+                </view>
+            </block>
+        </block>
+        
+    <view class="cp-loadmore" wx:if="{{isloading}}">
+        <view class="cp-loadmore-main" style="padding:{{$loadmore$padding}} 0;">
+            <view class="cp-loadmore-icon" style="border-color:{{$loadmore$iconColor}}"  wx:if="{{$loadmore$icon}}"><view style="background-color: {{$loadmore$iconColor}}"/></view>
+            <view class="cp-loadmore-text" style="color:{{$loadmore$textColor}}">{{$loadmore$text}}</view>
+        </view>
+    </view>
+
+        
+    <view class="cp-nulldata" wx:if="{{!consigneeList && !isloading}}">
+        <view class="cp-nulldata-main" style="padding:{{$nulldata$padding}} 0;">
+            <view class="cp-nulldata-icon icon icon-nulldata" style="color:{{$nulldata$iconColor}}"/>
+            <view class="cp-nulldata-text" style="color:{{$nulldata$textColor}}">{{$nulldata$text}}</view>
+        </view>
+    </view>
+
+    </view>
+    
+    <view class="cp-loadmore" wx:else>
+        <view class="cp-loadmore-main" style="padding:{{$loadmore$padding}} 0;">
+            <view class="cp-loadmore-icon" style="border-color:{{$loadmore$iconColor}}"  wx:if="{{$loadmore$icon}}"><view style="background-color: {{$loadmore$iconColor}}"/></view>
+            <view class="cp-loadmore-text" style="color:{{$loadmore$textColor}}">{{$loadmore$text}}</view>
+        </view>
+    </view>

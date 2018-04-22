@@ -1,0 +1,35 @@
+{
+    "id": 1,
+    "page": 1,
+    "limit": 10,
+}
+
+
+{
+    "status": 1,
+    "message": "提示信息",
+    "result": {
+        "totalPage": 1,
+        "datalist": [
+            {
+                "id": 1,
+                "code": "E20180102112200",
+                "status": 1,
+                "payStatus": 1,
+                "freightAmount": "0.00",
+                "actualAmount": "200.00",
+                "isCommented": false,
+                "productList": [
+                    {
+                        "id": 2,
+                        "cover": "https://t1.picb.cc/uploads/2018/02/22/KGQhG.png",
+                        "title": "云之七味",
+                        "type": "熟茶",
+                        "price": "100.00",
+                        "count": 1
+                    }
+                ]
+            }
+        ]
+    }
+}

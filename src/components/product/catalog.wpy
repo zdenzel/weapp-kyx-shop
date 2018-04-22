@@ -1,0 +1,151 @@
+
+<script>
+import wepy from 'wepy'
+import filter from '../../wxs/filter.wxs'
+
+const devWidth = 750
+const winWidth = wepy.getSystemInfoSync().windowWidth
+const winRatio = winWidth / devWidth
+
+export default class ProductCatalog extends wepy.component {
+    props = {
+        datalist: {
+            type: Array,
+            default: null
+        },
+        image: {
+            type: String,
+            default: ''
+        },
+        name: {
+            type: String,
+            default: ''
+        },
+        skin: {
+            type: String,
+            default: ''
+        },
+        style: {
+            type: String,
+            default: ''
+        },
+        route: {
+            type: String,
+            default: ''
+        },
+        rediect: {
+            type: Boolean,
+            default: false
+        },
+        hoverClass: {
+            type: String,
+            default: ''
+        },
+        lazyLoad: {
+            type: Boolean,
+            default: false
+        },
+        width: {
+            type: [String, Number],
+            default: 750
+        },
+        //列数
+        column: {
+            type: [String, Number],
+            default: 3
+        },
+        //外补白
+        margin: {
+            type: [String, Number],
+            default: 15
+        },
+        //内补白
+        padding: {
+            type: [String, Number],
+            default: 10
+        },
+        //图片比例
+        ratio: {
+            type: Array,
+            default: [1,1]
+        }
+    }
+
+    wxs = {
+        filter
+    }
+
+    computed = {
+        imageRatio(){
+            let imageRatio = 1
+            try{
+                imageRatio = this.ratio[1] / this.ratio[0]
+                if(isNaN(imageRatio)){
+                    imageRatio = 1
+                }
+            }catch(e){}
+
+            return imageRatio
+        },
+        itemWidth(){
+            return ((this.width - this.column * this.margin) / this.column) - this.padding*2
+        },
+        imageWidth(){
+            return this.itemWidth
+        },
+        imageHeight(){
+            return this.itemWidth * this.imageRatio
+        },
+        imageOptimize(){
+            return Math.ceil(this.imageWidth) + 'x' + Math.ceil(this.imageHeight)
+        }
+
+    }
+}
+
+</script>
+
+<template>
+    <view class="cp-catalog-list {{skin}}" style="width:{{width}}rpx;padding:{{margin}}rpx;{{style}}">
+        <repeat for="{{datalist}}" index="index" item="item">
+            <navigator class="normal cp-catalog-item" url="/pages/product/list?id={{item.id}}" rediect="{{rediect}}" hover-class="{{hoverClass}}" style="width:{{itemWidth}}rpx;padding:{{padding}}rpx;margin-top:{{index>=column?margin:0}}rpx">
+                <view class="cp-catalog-image" style="width:{{imageWidth}}rpx;height:{{imageHeight}}rpx;">
+                    <image src="{{item.image}}" mode="scaleToFill"></image>
+                </view>
+                <text class="cp-catalog-name">{{item.name}}</text>
+                <slot></slot>
+            </navigator>
+        </repeat>
+    </view>
+</template>
+
+<style lang="less">
+@import 'src/common/styles/config.less';
+
+.cp-catalog-item{
+    width: 33.333%;
+}
+.cp-catalog-image{
+    // padding: 10rpx;
+    box-sizing: border-box;
+    // background-color: @color-forecolor;
+}
+.cp-catalog-image image{
+    width: 100%;
+    height: 100%;
+}
+.cp-catalog-name{
+    margin-top: @margin/2;
+    display: -webkit-box;
+    word-break: break-all;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    text-align: center;
+}
+.cp-catalog-list{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    box-sizing: border-box;
+}
+</style>

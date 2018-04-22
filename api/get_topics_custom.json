@@ -1,0 +1,68 @@
+{
+    "materialId": 1,
+    "shapeId": 1,
+    "packageId": 1,
+    "capacityId": 1,
+    "specId": 1,
+    "nefiId": 1,
+    "nefiText": "xxx",
+    "coverId": 1,
+    "coverText": "xxxx",
+    "count": 1
+}
+
+
+{
+    "status": 1,
+    "message": "提示信息",
+    "result": {
+        "materialList": [
+            {
+                "id": 1,
+                "cover": "https://t1.picb.cc/uploads/2018/02/22/KGQhG.png",
+                "title": "糥伍古树圆茶",
+                "price": "99.00"
+            }
+        ],
+        "shapeList": [
+            {
+                "id": 1,
+                "image": "https://t1.picb.cc/uploads/2018/02/22/KGQhG.png",
+                "name": "月饼型压制",
+            }
+        ],
+        "packageList": [
+            {
+                "id": 1,
+                "image": "https://t1.picb.cc/uploads/2018/02/22/KGQhG.png",
+                "name": "牛皮纸礼盒",
+            }
+        ],
+        "capacityList": [
+            {
+                "id": 1,
+                "name": "200克",
+            }
+        ],
+        "specList": [
+            {
+                "id": 1,
+                "name": "1饼",
+            }
+        ],
+        "nefiList": [
+            {
+                "id": 1,
+                "image": "https://t1.picb.cc/uploads/2018/02/22/KGQhG.png",
+                "name": "NF1",
+            }
+        ],
+        "coverList": [
+            {
+                "id": 1,
+                "image": "https://t1.picb.cc/uploads/2018/02/22/KGQhG.png",
+                "name": "FM1",
+            }
+        ]
+    }
+}

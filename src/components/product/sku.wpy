@@ -1,0 +1,385 @@
+
+<script>
+import _ from 'lodash'
+import wepy from 'wepy'
+
+import utils from '@/utils'
+import api from '@/config/api'
+
+import filter from '../../wxs/filter.wxs'
+
+const devWidth = 750
+const winWidth = wepy.getSystemInfoSync().windowWidth
+const winRatio = winWidth / devWidth
+
+import { getStore, connect } from 'wepy-redux'
+import { addShopCart, setShopBuyList } from '@/store/actions'
+const store = getStore()
+
+export default class ProductFilter extends wepy.component {
+
+    wxs = {
+        filter
+    }
+    
+    props = {
+        skudata: {
+            type: Object,
+            default: {},
+            twoWay: true
+        }
+    }
+
+    data = {
+        preloaded: false,
+        type: null,
+        pid: null,
+        sid: null,
+        datalist: [],
+        selected: [],
+        skustock: 0,
+        skuimage: null,
+        skuprice: '0.00',
+        skucount: 0,
+        skuAttrText: '请选择',
+    }
+
+    computed = {
+        optimize() {
+            let width = Math.ceil(180*winRatio);
+            return width + 'x' + width;
+        }
+    }
+
+    events = {
+        showSkuPopup(type) {
+            console.log(type)
+            let popup = this.$wxpage.selectComponent('.J_SKU');
+            popup && popup.show();
+            this.type = type || null;
+            this.$apply();
+            this.onReinit();
+        },
+        hideSkuPopup(type) {
+            let popup = this.$wxpage.selectComponent('.J_SKU');
+            popup && popup.hide();
+        }
+    }
+
+    methods = {
+        tap(e) { },
+        onRadioChange(e){
+            let val = e.detail.value;
+            let key = e.currentTarget.dataset.key;
+            let datalist = _.cloneDeep(this.datalist) || [];
+
+            //在列表中设置选中项
+            this.datalist = datalist.map(n => {
+                if(n.id == key){
+                    n.attributes.map(k => {
+                        k.checked = !!(k.id == val);
+                        return k;
+                    })
+                }
+                return n;
+            });
+
+            let selected = [];
+            datalist.forEach(n=>{
+                n.attributes.forEach(k=>{
+                    if(k.checked){
+                        selected.push({key: n.id, val: k.id, txt: k.attributeName});
+                    }
+                })
+            })
+
+            this.selected = selected;
+
+            this.$apply();
+
+            this.skufetch();
+
+        },
+        onChangeCounter(e){
+            this.skucount = e.detail.number || 1;
+            this.$apply();
+            this.skufetch();
+        },
+        onCancel() {
+            this.$emit('on-cancel');
+            this.$emit('hideSkuPopup');
+        },
+        onSubmit() {
+            const data = {
+                id: this.skudata.pid,
+                sid: this.skudata.sid,
+                uid: wepy.$instance.globalData.uid,
+                type: 1,
+                cover: this.skudata.skuimage,
+                title: this.skudata.skutitle,
+                price: this.skudata.skuprice,
+                count: this.skudata.skucount,
+                stock: this.skudata.skustock,
+                skuAttrText: this.skudata.skuAttrText,
+            }
+            if(this.type){
+                if(!data.sid){
+                    utils.showToast('请选择属性');
+                    return;
+                }
+                if(this.type == 'addcart'){
+                    store.dispatch(addShopCart(data)).then(res => {
+                        wx.navigateTo({
+                            url: '/pages/product/shopcart'
+                        });
+                    });
+                }
+                if(this.type == 'buynow'){
+                    store.dispatch(setShopBuyList(data)).then(res => {
+                        wx.navigateTo({
+                            url: '/pages/order/confirm'
+                        });
+                    });
+                }
+            }
+            this.$emit('on-submit', data);
+            this.$emit('hideSkuPopup');
+        },
+        onReset(e) {
+            this.skudata = _.assign({}, this.skudata, {
+                datalist: this.skudata.defaults.datalist,
+                selected: this.skudata.defaults.selected,
+                skustock: this.skudata.defaults.skustock,
+                skuimage: this.skudata.defaults.skuimage,
+                skuprice: this.skudata.defaults.skuprice,
+                skucount: this.skudata.defaults.skucount,
+                skuAttrText: this.skudata.defaults.skuAttrText,
+            });
+
+            this.$apply();
+            this.$emit('on-reset');
+        }
+    }
+
+    async skufetch(){
+        let skuObj = {};
+        this.selected.forEach((n,i) => {
+            skuObj[`cid${i+1}`] = n.key;
+            skuObj[`aid${i+1}`] = n.val;
+        });
+        let data = Object.assign({ id: this.pid }, skuObj);
+        console.log(data)
+        await utils.request(api.product.sku, { data }).then(({result}) => {
+            this.sid = result.id;
+            this.pid = result.productId;
+            this.skustock = result.count;
+            this.skucount = result.count ? this.skucount ? this.skucount : 1 : 0;
+            this.skuprice = result.price;
+            this.$apply();
+        }).catch(e=>{
+            this.sid = null;
+            this.skustock = 0;
+            this.skucount = 0;
+            this.$apply();
+        });
+
+        this.sku2data();
+    }
+
+    sku2data(){
+        try{
+            let skuAttrText = [];
+            this.selected.forEach(n => {
+                skuAttrText.push(n.txt);
+            })
+            this.skuAttrText = skuAttrText.join('，');
+        }catch(e){
+            this.skuAttrText = '请选择';
+        }
+        this.skudata = _.assign({}, this.skudata, {
+            pid: this.pid,
+            sid: this.sid,
+            datalist: this.datalist,
+            selected: this.selected,
+            skustock: this.skustock,
+            skuimage: this.skuimage,
+            skuprice: this.skuprice,
+            skucount: this.skucount,
+            skuAttrText: this.skuAttrText,
+        });
+        this.$apply();
+    }
+
+    onReinit() {
+        setTimeout(()=>{
+            try{
+                let checked = [];
+                let selected = _.cloneDeep(this.skudata.selected);
+                let datalist = _.cloneDeep(this.skudata.datalist);
+
+                if(selected){
+                    selected.forEach(n=>{
+                        checked = checked.concat(n.val);
+                    });
+                }
+                this.datalist = datalist.map(n => {
+                    n.attributes = n.attributes.map(m => {
+                        m.checked = !!checked.some(k => k == m.id);
+                        return m;
+                    });
+                    return n;
+                });
+
+                this.pid = this.skudata.pid;
+                this.sid = this.skudata.sid;
+                this.skuimage = this.skudata.skuimage;
+                this.skuprice = this.skudata.skuprice;
+                this.skustock = this.skudata.skustock;
+                this.skucount = this.skudata.skucount;
+                this.skuAttrText = this.skudata.skuAttrText;
+
+            }catch(e){}
+
+            this.preloaded = true;
+
+            this.$apply();
+        }, 1)
+    }
+
+    onLoad () {
+        this.onReinit();
+    }
+}
+
+</script>
+
+<template>
+    <wxc-popup class="J_SKU" locked="false" animation-mode="bottom" align="bottom">
+        <view class="cp-sku" @tap.stop="tap" wx:if="{{preloaded}}">
+            <view class="cp-sku-product">
+                <view class="cp-sku-product-cover" wx:if="{{skuimage}}"><image src="{{filter.thumbnail(skuimage, optimize)}}" mode="scaleToFill"></image></view>
+                <view class="cp-sku-product-price" wx:if="{{skuprice}}"><text class="price">{{skuprice}}</text></view>
+                <view class="cp-sku-product-stock" wx:if="{{skustock}}">库存：{{skustock}}</view>
+            </view>
+            <scroll-view class="cp-sku-scroll" scroll-y>
+                <view class="cp-sku-main">
+                    <repeat for="{{datalist}}" item="item">
+                        <radio-group class="cp-sku-group" bindchange="onRadioChange" data-key="{{item.id}}">
+                            <view class="cp-sku-label">{{item.className}}</view>
+                            <view class="cp-sku-value">
+                                <repeat for="{{item.attributes}}" item="child">
+                                    <label class="{{child.checked ? 'is-checked': ''}}">
+                                        <radio value="{{child.id}}" checked="{{child.checked}}"></radio>
+                                        {{child.attributeName}}
+                                    </label>
+                                </repeat>
+                            </view>
+                        </radio-group>
+                    </repeat>
+                    <view class="cp-sku-count">
+                        <label class="cp-sku-label">数量</label>
+                        <wxc-counter class="counter" number="{{skucount}}" max="{{skustock}}" min="1" bind:changenumber="onChangeCounter"></wxc-counter>
+                    </view>
+                </view>
+            </scroll-view>
+            <view class="cp-sku-tool">
+                <!-- <button type="warn" size="large" @tap.stop="onReset">重置</button> -->
+                <button type="base" size="large" @tap.stop="onSubmit">确定</button>
+            </view>
+        </view>
+    </wxc-popup>
+</template>
+
+<style lang="less">
+@import 'src/common/styles/config.less';
+
+.cp-sku{
+    display: flex;
+    flex-direction: column;
+
+    width: 100%;
+    height: auto;
+    // height: 100%;
+    background-color: @color-maincolor;
+}
+.cp-sku-scroll{
+    flex: 1;
+    width: 100%;
+    max-height: 600rpx;
+}
+.cp-sku-main{
+    display: block;
+    padding: @margin;
+}
+.cp-sku-product{
+    margin: 0 30rpx;
+    padding-top: 50rpx;
+    padding-left: 230rpx;
+    padding-bottom: 30rpx;
+    position: relative;
+    border-bottom: 1px dashed @color-border;
+}
+.cp-sku-product-price{
+    font-size: @font-size-bigger;
+}
+.cp-sku-product-stock{
+    color: @color-gray;
+}
+.cp-sku-product-cover{
+    width: 200rpx;
+    height: 200rpx;
+    position: absolute;
+    bottom: 30rpx;
+    left: 0;
+
+    border-radius: @radius;
+    border: 2rpx solid @color-border;
+    background-color: #fff;
+}
+.cp-sku-label{
+    color: @color-gray;
+}
+.cp-sku-group{
+    padding: @margin/2 @margin/2;
+    radio, checkbox{ display: none;}
+    label{
+        display: inline-block;
+        padding: @margin/2 @margin;
+
+        background-color: @color-forecolor;
+        border-radius: @radius;
+        margin-right: @margin/2;
+        margin-top: @margin/2;
+        &:last-child{ margin-right: 0;}
+    }
+    .is-checked{
+        background-color: @color-primary;
+        color: #fff;
+    }
+}
+.cp-sku-count{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: @margin/2;
+}
+.cp-sku-tool{
+    height: 100rpx;
+    display: flex;
+    background-color: @color-border;
+    button{
+        height: 100rpx;
+        line-height: 100rpx;
+        display: block;
+        flex-flow: 1;
+        width: 100%;
+        border-radius: 0;
+        margin-left: 1rpx;
+        &:first-child{
+            margin-left: 0;
+            margin-right: 1rpx;
+        }
+    }
+}
+</style>

@@ -1,0 +1,30 @@
+{
+    "id": 1
+}
+
+{
+    "status": 1,
+    "message": "提示信息",
+    "result": {
+        "id": 1,
+        "title": "茶叶标题茶叶标题",
+        "price": "100.00",
+        "catalog": {
+            "id": 1,
+            "name": "ssss分类"
+        },
+        "attribute": {
+            "year": "2012年",
+            "type": "普洱生茶",
+            "weight": "375g",
+            "area": "易武茶区",
+            "spec": "375g*28饼/件",
+        },
+        "previewList": [
+            "https://t1.picb.cc/uploads/2018/03/27/2ZLQjL.jpg",
+            "https://t1.picb.cc/uploads/2018/03/26/2ZuFXu.jpg",
+            "https://t1.picb.cc/uploads/2018/03/25/2tXJy7.jpg"
+        ],
+        "details": ""
+    }
+}

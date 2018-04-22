@@ -1,0 +1,314 @@
+
+<script>
+
+import wepy from 'wepy'
+
+import utils from '@/utils'
+import api from '@/config/api'
+
+import filter from '../../wxs/filter.wxs'
+
+import products from '@/components/order/products'
+import postcomment from '@/components/order/postcomment'
+
+export default class OrderDetail extends wepy.page {
+    config = {
+        usingComponents: {
+            'wxc-cc': '/packages/@minui/wxc-cc/dist/index',
+            'wxc-flex': '/packages/@minui/wxc-flex/dist/index',
+            'wxc-avatar': '/packages/@minui/wxc-avatar/dist/index',
+            'wxc-elip': '/packages/@minui/wxc-elip/dist/index',
+            'wxc-icon': '/packages/@minui/wxc-icon/dist/index',
+            'wxc-label': '/packages/@minui/wxc-label/dist/index',
+            'wxc-loadmore': '/packages/@minui/wxc-loadmore/dist/index',
+
+            'wxc-abnor': '/packages/@minui/wxc-abnor/dist/index',
+            'wxc-countdown': '/packages/@minui/wxc-countdown/dist/index',
+            'wxc-counter': '/packages/@minui/wxc-counter/dist/index',
+            'wxc-loading': '/packages/@minui/wxc-loading/dist/index',
+            'wxc-mask': '/packages/@minui/wxc-mask/dist/index',
+
+            'wxc-dialog': '/packages/@minui/wxc-dialog/dist/index',
+            'wxc-popup': '/packages/@minui/wxc-popup/dist/index',
+            'wxc-toast': '/packages/@minui/wxc-toast/dist/index'
+        }
+    }
+
+    components = {
+        products,
+        postcomment
+    }
+
+    mixins = []
+
+    wxs = {
+        filter
+    }
+
+    data = {
+        preloaded: false,
+        isloading: false,
+        id: null,
+        order: null,
+        productList: null
+    }
+
+    methods = {
+        tapOrderCancel(){
+            let data = {
+                id: this.activeId,
+            }
+
+            wepy.showModal({
+                title: '温馨提示',
+                content: '确定要取消订单吗？'
+            }).then(async (res) => {
+                if(res.confirm){
+                    //执行删除
+                    wepy.showLoading();
+                    await utils.request(api.order.cancel, {data}).then(res=>{
+                        this.order.status = 5;
+                        this.$apply();
+                        utils.showToast('取消成功');
+                    }).catch(({ message })=>{
+                        utils.showToast(message)
+                    });
+
+                    wepy.hideLoading();
+
+                    this.$apply();
+                }
+            })
+        },
+        async tapOrderPayment(){
+            let { id } = this.order;
+            let data = { id };
+            await utils.request(api.payment, { data }).then(({ result })=>{
+                wepy.requestPayment({
+                    timeStamp: result.timeStamp,
+                    nonceStr: result.nonceStr,
+                    package: result.package,
+                    signType: result.signType,
+                    paySign: result.paySign,
+                    complete: res => {
+                        console.log('complete', res)
+                    },
+                    success: res => {
+                        console.log('success', res)
+                    },
+                    fail: res => {
+                        console.log('fail', res)
+                    }
+                });
+            }).catch(({ message })=>{
+                utils.showToast(message)
+            });
+            
+        },
+        tapOrderConfirm(){
+            let data = {
+                id: this.activeId,
+            }
+
+            wepy.showModal({
+                title: '温馨提示',
+                content: '请确认收到货物后进行此操作'
+            }).then(async (res) => {
+                if(res.confirm){
+                    //执行删除
+                    wepy.showLoading();
+                    await utils.request(api.order.confirm, {data}).then(res=>{
+                        this.order.status = 4;
+                        this.$apply();
+                    }).catch(({ message })=>{
+                        utils.showToast(message)
+                    });
+
+                    wepy.hideLoading();
+
+                    this.$apply();
+                }
+            })
+        },
+        tapOrderComment(data){
+            this.$broadcast('showPostComment');
+        },
+        onSubmitComment(data){
+            this.order.isCommented = 1;
+            this.$apply();
+        }
+    }
+
+    async getInitialData(){
+        let data = {
+            id: this.activeId,
+        }
+
+        this.isloading = true;
+
+        await utils.request(api.order.info, { data }).then(({result}) => {
+            this.order = result;
+            this.productList = result.productList;
+            this.$apply();
+        }).catch(e=>{});
+
+        this.isloading = false;
+        this.$apply();
+    }
+
+    async onLoad(option) {
+        this.activeId = option.id;
+        await this.getInitialData();
+        this.preloaded = true;
+        this.$apply();
+    }
+}
+
+</script>
+
+<template>
+    <view class="order-detail" wx:if="{{preloaded}}">
+        <wxc-flex class="order-detail-consignee" wx:if="{{order.consignee}}">
+            <wxc-cc class="order-consignee-side">
+                <text class="icon icon-address"></text>
+            </wxc-cc>
+            <view class="order-consignee-main">
+                <view class="order-consignee-title">
+                    <text class="order-consignee-name">{{order.consignee.name}}</text>
+                    <text class="order-consignee-tel">{{order.consignee.tel}}</text>
+                </view>
+                <view class="order-consignee-address">
+                    <text>收货地址：</text>{{order.consignee.area +' '+ order.consignee.address}}
+                </view>
+            </view>
+        </wxc-flex>
+        <view class="order-detail-products">
+            <products :datalist.sync="productList"></products>
+        </view>
+        <view class="order-detail-amount">
+            <wxc-flex class="freight" main="between" cross="center">
+                <text>运费</text>
+                <text class="price">{{order.freightAmount}}</text>
+            </wxc-flex>
+            <wxc-flex class="amount" main="between" cross="center" wx:if="{{order.payStatus==1}}">
+                <text>实付款（含运费）</text>
+                <text class="price">{{order.actualAmount}}</text>
+            </wxc-flex>
+            <wxc-flex class="amount" main="between" cross="center" wx:else>
+                <text>应付款（含运费）</text>
+                <text class="price">{{order.totalAmount}}</text>
+            </wxc-flex>
+        </view>
+        <view class="order-detail-property">
+            <view wx:if="{{order.status==4}}"><text>订单状态：</text>{{filter.status2str(order.status,'order')}}（{{order.isCommented?'已评价':'未评价'}}）</view>
+            <view wx:else><text>订单状态：</text>{{filter.status2str(order.status,'order')}}</view>
+            <view><text>订单编号：</text>{{order.code}}</view>
+            <view><text>成交时间：</text>{{order.createTime}}</view>
+            <view wx:if="{{order.logistics.name}}"><text>快递公司：</text>{{order.logistics.name}}</view>
+            <view wx:if="{{order.logistics.code}}"><text>快递编号：</text>{{order.logistics.code}}</view>
+            <view wx:if="{{order.logistics.time}}"><text>发货时间：</text>{{order.logistics.time}}</view>
+            <view wx:if="{{order.message}}"><text>留　　言：</text>{{order.message}}</view>
+        </view>
+        <view class="order-detail-toolbar">
+            <block wx:if="{{order.status==1}}">
+                <view class="btn">
+                    <button type="warn" @tap="tapOrderCancel()">取消订单</button>
+                </view>
+                <view class="btn" wx:if="{{order.payStatus==0}}">
+                    <button type="base" @tap="tapOrderPayment()">马上支付</button>
+                </view>
+            </block>
+            <block wx:if="{{order.status==2}}">
+                <view class="btn">
+                    <button type="warn" @tap="tapOrderCancel()">取消订单</button>
+                </view>
+            </block>
+            <block wx:if="{{order.status==3}}">
+                <view class="btn">
+                    <button type="base" @tap="tapOrderConfirm()">确认收货</button>
+                </view>
+            </block>
+            <block wx:if="{{order.status==4}}">
+                <view class="btn" wx:if="{{!order.isCommented}}">
+                    <button type="base" @tap="tapOrderComment()">发表评价</button>
+                </view>
+            </block>
+        </view>
+        <postcomment :order.sync="order" @on-submit.user="onSubmitComment"></postcomment>
+    </view>
+    <loadmore wx:else></loadmore>
+</template>
+
+<style lang="less">
+@import 'src/common/styles/config.less';
+.order-detail-amount,
+.order-detail-property,
+.order-detail-toolbar,
+.order-detail-consignee{
+    padding: @margin;
+    margin-top: @margin;
+    background-color: @color-maincolor;
+}
+.order-detail-consignee{
+    display: block;
+    margin-top: 0;
+    margin-bottom: @margin;
+}
+.order-consignee-side{
+    display: block;
+    .icon{
+        font-size: 40rpx;
+    }
+    .icon-address{
+        color: @color-primary;
+    }
+    .icon-arrow-right{
+        font-size: 60rpx;
+    }
+}
+.order-consignee-main{
+    margin-left: @margin;
+}
+.order-consignee-name{
+    margin-right: @margin;
+}
+.order-consignee-title{
+    font-weight: 700;
+    font-size: @font-size-large;
+}
+.order-consignee-address{
+    margin-top: @margin/2;
+}
+.order-detail-products{
+    padding: 0;
+    background-color: transparent;
+}
+.order-detail-amount{
+    .freight{
+        display: block;
+        margin-bottom: @margin/2;
+    }
+    .price{
+        font-size: @font-size-bigger;
+        color: @color-success;
+    }
+}
+.order-detail-property{
+    margin-top: 2rpx;
+    line-height: 1.8;
+}
+.order-detail-toolbar{
+    display: flex;
+    flex-wrap: wrap;
+    text-align: center;
+    justify-content: center;
+    margin-top: 0;
+    padding-bottom: @margin*2;
+    background-color: transparent;
+    .btn{
+        margin-top: @margin;
+        margin-left: @margin;
+        &:first-child{ margin-left: 0;}
+    }
+}
+</style>

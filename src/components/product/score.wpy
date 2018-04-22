@@ -1,0 +1,88 @@
+
+<script>
+import wepy from 'wepy'
+
+const devWidth = 750
+const winRatio = wepy.getSystemInfoSync().windowWidth / devWidth
+
+export default class ProductScore extends wepy.component {
+    props = {
+        score: {
+            type: [String, Number],
+            default: 0
+        },
+        total: {
+            type: [String, Number],
+            default: 5
+        },
+        color: {
+            type: String,
+            default: '',
+            coerce (val) {
+                return val ? 'color:' + val : ''
+            }
+        },
+        active: {
+            type: String,
+            default: '',
+            coerce (val) {
+                return val ? 'color:' + val : ''
+            }
+        }
+    }
+
+    onLoad () {
+    }
+}
+
+</script>
+
+<template>
+    <view class="cp-score" style="{{color}}">
+        <text class="cp-score-bar">
+            <text class="icon icon-star-fill"></text>
+            <text class="icon icon-star-fill"></text>
+            <text class="icon icon-star-fill"></text>
+            <text class="icon icon-star-fill"></text>
+            <text class="icon icon-star-fill"></text>
+        </text>
+        <text class="cp-score-bar active" style="{{activeColor}}width:{{score/total*100}}%;">
+            <text class="icon icon-star-fill"></text>
+            <text class="icon icon-star-fill"></text>
+            <text class="icon icon-star-fill"></text>
+            <text class="icon icon-star-fill"></text>
+            <text class="icon icon-star-fill"></text>
+        </text>
+    </view>
+</template>
+
+<style lang="less">
+@import 'src/common/styles/config.less';
+.cp-score{
+    display: inline-block;
+    vertical-align: middle;
+    width: 5em;
+    height: 1.1em;
+    line-height: inherit;
+    position: relative;
+    line-height: inherit;
+    font-size: 110%;
+    .icon{ font-size: inherit; width: 1em; height: 1em; text-align: center; }
+    .cp-score-bar{
+        width: 100%;
+        height: 100%;
+        line-height: 1em;
+        white-space: nowrap;
+        overflow: hidden;
+        position: absolute;
+        left: 0;
+        top: 0;
+        &.active{
+            position: absolute;
+            left: 0;
+            top: 0;
+            color: @color-success;
+        }
+    }
+}
+</style>

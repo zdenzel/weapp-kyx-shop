@@ -1,0 +1,369 @@
+
+<script>
+import wepy from 'wepy'
+import Promise from 'promise-polyfill'
+import 'wepy-async-function'
+
+import utils from '@/utils'
+import api from '@/config/api'
+
+import { setStore } from 'wepy-redux'
+import configStore from '@/store'
+import { getShopCart } from '@/store/actions'
+const store = configStore()
+setStore(store)
+
+const device = wx.getSystemInfoSync()
+const deviceRadio = device.windowWidth / 750
+
+export default class extends wepy.app {
+    config = {
+        pages: [
+
+            'pages/home',
+
+            'pages/catalog',
+            'pages/product/list',
+            'pages/product/detail',
+            'pages/product/comments',
+            'pages/product/shopcart',
+
+            'pages/shopcart',
+            'pages/mycenter',
+
+            'pages/order/list',
+            'pages/order/detail',
+            'pages/order/confirm',
+            'pages/order/information',
+
+            'pages/consignee/list',
+            'pages/consignee/edit',
+
+            'pages/help/faq',
+
+            'pages/search',
+            
+            'pages/topics/free',
+            'pages/topics/custom',
+
+            'pages/webview',
+        ],
+        tabBar: {
+            color: '#452713',
+            selectedColor: '#a91e11',
+            backgroundColor: '#e9e0cc',
+            list: [{
+                pagePath: 'pages/home',
+                iconPath: 'images/homepage.png',
+                selectedIconPath: 'images/homepage-cur.png',
+                text: '首页'
+            }, {
+                pagePath: 'pages/catalog',
+                iconPath: 'images/catalog.png',
+                selectedIconPath: 'images/catalog-cur.png',
+                text: '商品分类'
+            }, {
+                pagePath: 'pages/shopcart',
+                iconPath: 'images/shopcart.png',
+                selectedIconPath: 'images/shopcart-cur.png',
+                text: '购物车'
+            }, {
+                pagePath: 'pages/mycenter',
+                iconPath: 'images/mycenter.png',
+                selectedIconPath: 'images/mycenter-cur.png',
+                text: '个人中心'
+            }]
+        },
+        window: {
+            backgroundColor: '#e9e0cc',
+            backgroundTextStyle: 'light',
+            navigationBarBackgroundColor: '#452713',
+            navigationBarTitleText: '可以兴商城',
+            navigationBarTextStyle: '#d6c5ac'
+        }
+    }
+
+    globalData = {
+        deviceRadio: deviceRadio,
+        userInfo: null,
+        token: null
+    }
+
+    constructor() {
+        super();
+        this.use('promisify');
+        this.use('requestfix');
+        //拦截request请求
+        this.intercept('request', {
+            // 发出请求时的回调函数
+            config (p) {
+                // 对所有request请求中的OBJECT参数对象统一附加时间戳属性
+                p.timestamp = +new Date();
+                console.log('config request: ', p);
+                // 必须返回OBJECT参数对象，否则无法发送请求到服务端
+                return p;
+            },
+
+            // 请求成功后的回调函数
+            success (res) {
+                let data = { status: 1, result: null, message: null, errCode: null }
+                if(res.statusCode === 200){
+                    data = Object.assign({}, data, res.data)
+                } else{
+                    data = Object.assign({}, data, {status: 0, message: `接口异常:${res.statusCode}`, errCode: res.statusCode})
+                }
+                // 可以在这里对收到的响应数据对象进行加工处理
+                console.log('request success: ', data);
+                // 必须返回响应数据对象，否则后续无法对响应数据进行处理
+                return data;
+            },
+
+            //请求失败后的回调函数
+            fail (res) {
+                let data = { status: 0, result: null, message: res.errMsg || `接口异常:${res.statusCode}`, errCode: res.statusCode }
+                // 可以在这里对收到的响应数据对象进行加工处理
+                console.log('request fail: ', data);
+                // 必须返回响应数据对象，否则后续无法对响应数据进行处理
+                return data;
+            },
+
+            // 请求完成时的回调函数(请求成功或失败都会被执行)
+            complete (p) {
+                // console.log('request complete: ', p);
+            }
+        });
+    }
+
+    async onLaunch() {
+        console.log(wepy)
+        await utils.login()
+        let params = { uid: this.globalData.uid };
+        store.dispatch(getShopCart(params));
+    }
+
+}
+
+</script>
+
+<style lang="less">
+
+@import 'src/common/styles/config.less';
+@import 'src/common/styles/icon.less';
+@import 'src/common/styles/dzui.less';
+
+page{
+    background-image: url('@{assets-url}/images/bg.jpg');
+    background-color: @color-backcolor;
+
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    // align-items: center;
+    // justify-content: space-between;
+    // box-sizing: border-box;
+
+    line-height: 1.5em;
+    // font-family: Helvetica Neue,Helvetica,sans-serif;
+    font-family: -apple-system-font, "Helvetica Neue",Helvetica,sans-serif;
+    font-size: @font-size-base;
+    color: @color-base;
+}
+image{
+    max-width: 100%;
+    max-height: 100%;
+}
+// view, input, button{
+//     font-size: inherit;
+//     font-family: inherit;
+// }
+text{
+    display: inline-block;
+    vertical-align: middle;
+    font-size: inherit;
+}
+textarea{
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    line-height: inherit;
+    &[auto-height]{
+        line-height: 1;
+    }
+}
+button{
+    // display: inline-block;
+    border-radius: @radius;
+    // line-height: 2.5;
+    padding: 0 1.4em;
+    font-size: @font-size-base;
+    &:before, &:after{
+        border-radius: @radius;
+    }
+    &[type="primary"], &[type="primary"].button-hover{
+        background-color: @color-primary;
+        color: @color-invert;
+    }
+    &[type="success"], &[type="success"].button-hover{
+        background-color: @color-success;
+        color: @color-invert;
+    }
+    &[type="warn"], &[type="warn"].button-hover{
+        background-color: @color-warn;
+        color: @color-invert;
+    }
+    &[type="base"], &[type="base"].button-hover{
+        background-color: @color-base;
+        color: @color-invert;
+    }
+    &[type="gray"], &[type="gray"].button-hover{
+        background-color: @color-gray;
+        color: @color-invert;
+    }
+    &[type].button-hover{
+        opacity: 0.8;
+    }
+    &[size=mini] {
+        font-size: @font-size-small;
+        padding: 0 1.2em;
+    }
+    &[size=base] {
+        font-size: @font-size-base;
+    }
+    &[size=large] {
+        font-size: @font-size-large;
+    }
+    &[size=bigger] {
+        font-size: @font-size-bigger;
+    }
+    &[size=biggest] {
+        font-size: @font-size-biggest;
+    }
+
+}
+
+.icon-radio, .icon-radio-cur{
+    margin-right: .2em;
+}
+
+.price{
+    // padding-left: 1em;
+    position: relative;
+    color: @color-success;
+    &:before{
+        content: '￥';
+        font-size: 85%;
+    }
+}
+
+.button{
+    // display: inline-block;
+    border-radius: @radius;
+    line-height: 2.5;
+    padding: 0 1.4em;
+    text-align: center;
+    font-size: @font-size-base;
+    &:before, &:after{
+        border-radius: @radius;
+    }
+    &.primary, &.primary.button-hover, &.primary.navigator-hover{
+        background-color: @color-primary;
+        color: @color-white;
+    }
+    &.warn, &.warn.button-hover, &.warn.navigator-hover{
+        background-color: @color-warn;
+        color: @color-white;
+    }
+    &.base, &.base.button-hover, &.base.navigator-hover{
+        background-color: @color-base;
+        color: @color-white;
+    }
+    &.gray, &.gray.button-hover, &.gray.navigator-hover{
+        background-color: @color-gray;
+        color: @color-white;
+    }
+    &.button-hover, &.navigator-hover{
+        opacity: 0.8;
+    }
+    &.mini {
+        font-size: @font-size-small;
+        padding: 0 1.2em;
+    }
+    &.base {
+        font-size: @font-size-base;
+    }
+    &.large {
+        font-size: @font-size-large;
+    }
+    &.bigger {
+        font-size: @font-size-bigger;
+    }
+    &.biggest {
+        font-size: @font-size-biggest;
+    }
+
+}
+scroll-view:-webkit-scrollbar{
+    position: absolute;
+    z-index: 1000;
+}
+button[type="normal"], navigator.normal{
+    border: 0;
+    margin: 0;
+    padding: @margin;
+    position: static;
+    overflow: visible;
+    line-height: normal;
+    background-color: transparent;
+    border-radius: 0;
+    text-align: center;
+    color: inherit;
+    &:after {
+        display: none;
+    }
+    &.button-hover, &.navigator-hover{
+        color: @color-primary;
+    }
+}
+
+.c-gray{ color: @color-gray;}
+.c-base{ color: @color-base;}
+.c-warn{ color: @color-warn;}
+.c-invert{ color: @color-invert;}
+.c-primary{ color: @color-primary;}
+.c-success{ color: @color-success;}
+
+.clearfix:after{content:"";display:table}
+.clearfix:after{clear:both}
+
+.swiper {
+    height: 300rpx;
+    position: relative;
+    background-color: @color-maincolor;
+    swiper, swiper-item, navigator, image {
+        width: 100%;
+        height: 100%;
+    }
+    .dots{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        bottom: @margin;
+        right: 0;
+        left: 0;
+        text{
+            width: 70rpx;
+            height: 8rpx;
+            margin: 0 5rpx;
+            overflow: hidden;
+            background-color: rgba(255,255,255,.65);
+        }
+        .active{
+            background-color: @color-success;
+        }
+    }
+    .wx-swiper-dots{
+        bottom: -@margin;
+    }
+}
+</style>

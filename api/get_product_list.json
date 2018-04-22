@@ -1,0 +1,29 @@
+{
+    "cid": 1,
+    "sort": "isPopular | isPriceDown | isPriceUp",
+    "filter": [
+        {"gid": "1", "cid": ["11","12"]},
+        {"gid": "2", "cid": ["21","22"]}
+    ],
+    "page": 1,
+    "limit": 10
+}
+
+
+{
+    "status": 1,
+    "message": "提示信息",
+    "result": {
+        "totalPage": 1,
+        "datalist": [
+            {
+                "id": 2,
+                "cover": "https://t1.picb.cc/uploads/2018/02/22/KGQhG.png",
+                "title": "糥伍古树圆茶",
+                "price": "99.00",
+                "score": 6,
+                "comment": 101
+            }
+        ]
+    }
+}

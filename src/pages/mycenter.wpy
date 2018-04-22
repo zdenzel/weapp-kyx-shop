@@ -1,0 +1,137 @@
+
+<script>
+import wepy from 'wepy'
+import utils from '@/utils'
+import api from '@/config/api'
+import tabbar from '@/components/tabbar'
+
+export default class MyCenter extends wepy.page {
+    config = {
+        usingComponents: {
+            'wxc-cc': '/packages/@minui/wxc-cc/dist/index',
+            'wxc-flex': '/packages/@minui/wxc-flex/dist/index',
+            'wxc-avatar': '/packages/@minui/wxc-avatar/dist/index',
+            'wxc-elip': '/packages/@minui/wxc-elip/dist/index',
+            'wxc-icon': '/packages/@minui/wxc-icon/dist/index',
+            'wxc-label': '/packages/@minui/wxc-label/dist/index',
+            'wxc-loadmore': '/packages/@minui/wxc-loadmore/dist/index',
+
+            'wxc-abnor': '/packages/@minui/wxc-abnor/dist/index',
+            'wxc-countdown': '/packages/@minui/wxc-countdown/dist/index',
+            'wxc-counter': '/packages/@minui/wxc-counter/dist/index',
+            'wxc-loading': '/packages/@minui/wxc-loading/dist/index',
+            'wxc-mask': '/packages/@minui/wxc-mask/dist/index',
+
+            'wxc-dialog': '/packages/@minui/wxc-dialog/dist/index',
+            'wxc-popup': '/packages/@minui/wxc-popup/dist/index',
+            'wxc-toast': '/packages/@minui/wxc-toast/dist/index'
+        }
+    }
+
+    components = {
+        tabbar
+    }
+
+    mixins = []
+
+    data = {
+        userInfo: {},
+        orderStatus: [
+            { id: 0, name: '全部', badge: 0 },
+            { id: 1, name: '待付款', badge: 0 },
+            { id: 2, name: '待发货', badge: 0 },
+            { id: 3, name: '待收货', badge: 0 },
+            { id: 4, name: '已完成', badge: 0 }
+        ],
+        activeKey: 0
+    }
+
+    methods = {
+    }
+
+    events = {
+
+    }
+
+    async onLoad() {
+        let { userInfo } = await utils.getUserInfo()
+        this.userInfo = userInfo
+        this.$apply()
+    }
+}
+
+</script>
+
+<template>
+    <view class="mycenter">
+        <view class="header">
+            <wxc-cc>
+                <view class="user-info">
+                    <view class="user-avatar">
+                        <wxc-avatar src="{{userInfo.avatarUrl}}"></wxc-avatar>
+                    </view>
+                    <view class="user-name">
+                        <text>{{userInfo.nickName}}</text>
+                    </view>
+                </view>
+            </wxc-cc>
+        </view>
+        <tabbar class="tabbar" :datalist.sync="orderStatus" alive="false" isFlex route="/pages/order/list"></tabbar>
+        <wxc-flex class="menu" main="around">
+            <navigator class="normal" url="/pages/shopcart" open-type="switchTab">
+                <text class="icon icon-shopcart"></text>
+                <text class="text">购物车</text>
+            </navigator>
+            <navigator class="normal" url="/pages/consignee/list">
+                <text class="icon icon-location"></text>
+                <text class="text">收货地址</text>
+            </navigator>
+            <navigator class="normal" url="/pages/help/faq">
+                <text class="icon icon-question"></text>
+                <text class="text">常见问题</text>
+            </navigator>
+        </wxc-flex>
+    </view>
+</template>
+
+<style lang="less">
+@import 'src/common/styles/config.less';
+.header{
+    padding: 60rpx;
+    text-align: center;
+    background-color: @color-base;
+    .user-avatar{
+        width: 170rpx;
+        height: 170rpx;
+        overflow: hidden;
+        background-color: @color-white;
+        border: 5rpx solid @color-white;
+        border-radius: 50%;
+    }
+    .user-name{
+        margin-top: @margin;
+        font-size: @font-size-bigger;
+        color: @color-invert;
+    }
+}
+.tabbar{
+    background: @color-maincolor;
+}
+.menu{
+    display: block;
+    padding: 60rpx;
+    margin-top: @margin;
+    background-color: @color-maincolor;
+    .menu-button{
+        padding: @margin;
+    }
+    .icon, .text{
+        display: block;
+        text-align: center;
+    }
+    .icon{
+        font-size: 64rpx;
+        margin-bottom: @margin;
+    }
+}
+</style>

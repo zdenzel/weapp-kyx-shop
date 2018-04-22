@@ -1,0 +1,37 @@
+<script>
+import wepy from 'wepy'
+
+export default class WebView extends wepy.page {
+
+    data = {
+        url: ''
+    }
+
+    onLoad(res) {
+        let nt = new Date().getTime()
+        let url = res.url || ''
+        if(url){
+            if(url.indexOf("?") < 0){
+                url = `${url}?webviewTime=${nt}`
+            } else{
+                url = `${url}&webviewTime=${nt}`
+            }
+            this.url = url
+        }
+
+    }
+
+    onUnload(){
+        this.url = ''
+    }
+
+}
+
+</script>
+<template>
+    <web-view src="{{url}}" wx:if="{{url}}"></web-view>
+    <view class="dzui-nodata" wx:else>请求链接地址不存在</view>
+</template>
+<style lang="less">
+@import 'src/common/styles/config.less';
+</style>

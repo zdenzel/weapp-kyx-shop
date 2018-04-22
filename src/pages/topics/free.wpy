@@ -1,0 +1,349 @@
+
+<script>
+import _ from 'lodash'
+import wepy from 'wepy'
+import utils from '@/utils'
+import api from '@/config/api'
+import loadmore from '@/components/loadmore'
+import filter from '../../wxs/filter.wxs'
+import commonMixin from '@/mixins/common'
+import minuiMixin from '@/mixins/minui';
+import { getStore, connect } from 'wepy-redux'
+import { setShopBuyList } from '@/store/actions'
+const store = getStore()
+
+const devWidth = 750
+const winWidth = wepy.getSystemInfoSync().windowWidth
+const winRatio = winWidth / devWidth
+
+export default class FreeTopics extends wepy.page {
+    config = {
+        usingComponents: {
+            'wxc-cc': '/packages/@minui/wxc-cc/dist/index',
+            'wxc-flex': '/packages/@minui/wxc-flex/dist/index',
+            'wxc-avatar': '/packages/@minui/wxc-avatar/dist/index',
+            'wxc-elip': '/packages/@minui/wxc-elip/dist/index',
+            'wxc-icon': '/packages/@minui/wxc-icon/dist/index',
+            'wxc-label': '/packages/@minui/wxc-label/dist/index',
+            'wxc-loadmore': '/packages/@minui/wxc-loadmore/dist/index',
+
+            'wxc-abnor': '/packages/@minui/wxc-abnor/dist/index',
+            'wxc-countdown': '/packages/@minui/wxc-countdown/dist/index',
+            'wxc-counter': '/packages/@minui/wxc-counter/dist/index',
+            'wxc-loading': '/packages/@minui/wxc-loading/dist/index',
+            'wxc-mask': '/packages/@minui/wxc-mask/dist/index',
+
+            'wxc-dialog': '/packages/@minui/wxc-dialog/dist/index',
+            'wxc-popup': '/packages/@minui/wxc-popup/dist/index',
+            'wxc-toast': '/packages/@minui/wxc-toast/dist/index'
+        },
+        enablePullDownRefresh: true
+    }
+
+    components = {
+        loadmore
+    }
+
+    mixins = [commonMixin, minuiMixin]
+
+    wxs = {
+        filter
+    }
+
+    data = {
+        preloaded: false,
+        isloading: false,
+        limit: 10,
+        totalPage: 1,
+        currentPage: 1,
+        amount: 0,
+        productList: null,
+        selected: [],
+        selectedLimit: 3
+    }
+
+    computed = {
+        optimize() {
+            let width = Math.ceil(((devWidth - 20*3) / 2) * winRatio);
+            return width + 'x' + width;
+        }
+    }
+
+    methods = {
+        onSelect(id){
+            let selected = _.cloneDeep(this.selected) || [];
+            let productList = _.cloneDeep(this.productList) || [];
+
+            if(selected.length >= this.selectedLimit && !selected.find(n => n == id)){
+                utils.showToast(`只能选择${this.selectedLimit}个`);
+                return;
+            }
+
+            let index = selected.findIndex(n => n == id);
+
+            if(index > -1){
+                selected.splice(index, 1);
+            } else{
+                selected.push(id);
+            }
+
+            //在列表中设置选中项
+            this.productList = productList.map(n => {
+                n.isSelected = !!selected.some(k => k == n.id);
+                return n;
+            });
+
+            this.selected = _.cloneDeep(selected);
+
+            console.log('now', this.selected.length)
+
+        },
+        onSubmit(){
+            if(!this.selected || !this.selected.length){
+                utils.showToast('请选择商品');
+                return;
+            }
+
+            let products = [];
+
+            this.productList.forEach(item => {
+                if(this.selected.some(k => k == item.id)){
+                    let p = _.assign({}, item, {
+                        sid: 0,
+                        uid: wepy.$instance.globalData.uid,
+                        type: 3,
+                        count: 1,
+                        stock: 1,
+                        price: '0.00',
+                        skuAttrText: '免费试喝',
+                    });
+                    products.push(p);
+                }
+            });
+
+            store.dispatch(setShopBuyList(products)).then(res => {
+                wx.navigateTo({
+                    url: '/pages/order/confirm'
+                });
+            });
+        }
+    }
+
+    events = {
+    }
+
+    getTopicsFree(option, isLoadmore){
+        this.isloading = true;
+        //请求免费试喝
+        let data = Object.assign({page: 1, limit: 10}, option);
+        //接口访问
+        return new Promise(async (resolve, reject) => {
+
+            utils.request(api.topics.free, { data }).then(({ result }) => {
+                console.log('成功了', result);
+                if(isLoadmore){
+                    this.productList = _.concat(this.productList, result.datalist);
+                } else{
+                    this.productList = _.cloneDeep(result.datalist);
+                }
+                this.amount = result.amount;
+                this.totalPage = result.totalPage;
+                this.isloading = false;
+                this.$apply();
+                resolve()
+            }).catch(err => {
+                this.isloading = false;
+                console.log('失败了', err);
+            });
+
+        });
+    }
+
+    getInitialData(isLoadmore){
+        if(isLoadmore){
+            this.currentPage = this.currentPage + 1;
+        } else{
+            this.totalPage = 1;
+            this.currentPage = 1;
+        }
+
+        let data = {
+            page: this.currentPage,
+            limit: this.limit
+        }
+
+        console.log('getInitialData', data)
+
+        return this.getTopicsFree(data, isLoadmore);
+    }
+
+    onLoad(res) {
+        console.log(res);
+        this.getInitialData().then(() => {
+            this.preloaded = true;
+            this.$apply();
+        });
+    }
+
+    onReachBottom(){
+        //上拉加载更多
+        console.log('上拉加载更多');
+        if (this.currentPage >= this.totalPage) { return; }
+        this.getInitialData('loadmore');
+    }
+    
+    onPullDownRefresh() {
+        //下拉刷新数据
+        console.log('下拉刷新数据');
+        this.getInitialData().then(res => {
+            wepy.stopPullDownRefresh()
+        }).catch(err => {
+            wepy.stopPullDownRefresh()
+        })
+    }
+}
+
+</script>
+
+<template>
+    <view class="free-page" wx:if="{{preloaded}}">
+        <view class="free-contain">
+            <view class="free-head">
+                <view class="free-title"><text>今天还剩</text><text class="number">{{amount}}</text><text>个名额可以免费试喝</text></view>
+                <view class="free-text">
+                    <view>温馨提示：</view>
+                    <view>每天有100个名额可以免费试喝可以兴普洱散茶！</view>
+                    <view>只需支付10块钱邮费，先到先得，派完即止！</view>
+                </view>
+            </view>
+            <view class="free-tips"><text>来自各普洱茶区的上好茶叶毛料（一次最多选三种）</text></view>
+            <view class="free-list">
+                <repeat for="{{productList}}" item="item">
+                    <view class="free-product" @tap.stop="onSelect({{item.id}})">
+                        <text class="checkbox icon icon-checkbox{{ item.isSelected ? '-cur': '' }}"></text>
+                        <view class="free-product-cover">
+                            <image src="{{filter.thumbnail(item.cover,optimize)}}" mode="scaleToFill"></image>
+                        </view>
+                        <wxc-elip class="free-product-title">{{item.title}}</wxc-elip>
+                        <wxc-elip class="free-product-price">市场价：{{item.price}}元/斤</wxc-elip>
+                        <view class="free-product-tips">免费试喝</view>
+                    </view>
+                </repeat>
+            </view>
+        </view>
+        <loadmore wx:if="{{isloading}}"></loadmore>
+        <view class="free-toolbar" wx:if="{{preloaded}}">
+            <view class="action">
+                <view class="text">可选：{{selected.length}}/{{selectedLimit}}</view>
+            </view> 
+            <button class="button" type="base" size="bigger" @tap="onSubmit()">提交订单</button>
+        </view>
+    </view>
+    <loadmore wx:else></loadmore>
+</template>
+
+<style lang="less">
+@import 'src/common/styles/config.less';
+.free-page{
+    padding-bottom: 50px;
+}
+.free-head{
+    padding-bottom: @margin;
+}
+.free-title{
+    font-weight: 700;
+    font-size: @font-size-large;
+    margin-bottom: @margin/2;
+    .number{
+        margin: 0 @margin/2;
+        font-size: 60rpx;
+        color: @color-success;
+    }
+}
+.free-tips{
+    padding: @margin 0;
+    font-size: @font-size-small;
+    border-top: 2rpx dashed @color-border;
+}
+.free-contain{
+    padding: @margin;
+    background-color: @color-maincolor;
+}
+.free-toolbar{
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 50px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    margin: 0;
+    padding: 0;
+    z-index: 100;
+
+    background-color: @color-maincolor;
+    border-top: 2rpx solid @color-border;
+    box-sizing: border-box;
+    
+    .button{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0;
+        height: 100%;
+        width: 240rpx;
+        padding: 0;
+    }
+    .action{
+        flex: 1;
+        align-self: center;
+        padding: @margin;
+        line-height: 1.2;
+        border-left: 2rpx solid @color-border;
+        &:first-child{ border-left: 0;}
+        .icon{ font-size: 46rpx; }
+    }
+}
+.free-list{
+    overflow: hidden;
+}
+.free-more{
+    padding: @margin;
+    text-align: center;
+}
+.free-product{
+    float: left;
+    width: (750rpx - @margin*3) / 2;
+    margin-top: @margin;
+    margin-right: @margin;
+    position: relative;
+    &:nth-child(1), &:nth-child(2){ margin-top: 0; }
+    &:nth-child(2n){ margin-right: 0; }
+    .checkbox{
+        width: 50rpx;
+        height: 50rpx;
+        line-height: 50rpx;
+
+        display: flex;
+        justify-content: center;
+        text-align: center;
+        
+        position: absolute;
+        left: 5rpx;
+        top: 5rpx;
+
+        border-radius: @radius;
+        background-color: rgba(255,255,255,.8);
+        font-size: 48rpx;
+    }
+}
+.free-product-cover{
+    width: (750rpx - @margin*3) / 2;
+    height: (750rpx - @margin*3) / 2;
+    margin-bottom: @margin;
+    background-color: @color-forecolor;
+}
+.free-product-tips{
+    color: @color-primary;
+}
+</style>

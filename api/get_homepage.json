@@ -1,0 +1,36 @@
+{
+    "status": 1,
+    "message": "提示信息",
+    "result":
+    {
+        "freeQuota": 100,
+        "slideList": [
+        {
+            "id": 1,
+            "path": "/pages/product/detail?id=1",
+            "image": "http://www.aa.com/asdf.jpg"
+        }, ],
+        "newSaleList": [
+        {
+            "id": 1,
+            "path": "/pages/product/detail?id=1",
+            "image": "http://www.aa.com/asdf.jpg"
+        }],
+        "hotSaleList": [
+        {
+            "id": 1,
+            "path": "/pages/product/detail?id=1",
+            "image": "http://www.aa.com/asdf.jpg"
+        }],
+        "hotReviewList": [
+            {
+                "id": 1,
+                "cover": "https://t1.picb.cc/uploads/2018/02/22/KGQhG.png",
+                "title": "糥伍古树圆茶",
+                "price": "99.00",
+                "score": 3.5,
+                "comment": 801
+            }
+        ]
+    }
+}

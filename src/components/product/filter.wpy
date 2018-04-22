@@ -1,0 +1,270 @@
+
+<script>
+import _ from 'lodash'
+import wepy from 'wepy'
+
+const devWidth = 750
+const winRatio = wepy.getSystemInfoSync().windowWidth / devWidth
+
+export default class ProductFilter extends wepy.component {
+    props = {
+        datalist: {
+            type: Array,
+            default: [],
+            coerce(val) {
+                return val.map(n => {
+                    n.child = n.child.map(k => {
+                        k.checked = false;
+                        return k;
+                    });
+                    return n;
+                });
+            }
+        },
+        checked: {
+            type: Array,
+            default: [],
+            twoWay: true
+        }
+    }
+
+    data = {
+        selected: null
+    }
+
+    events = {
+        showFilter() {
+            let popup = this.$wxpage.selectComponent('.J_Filter');
+            popup && popup.show();
+            this.onReinit();
+        },
+        hideFilter() {
+            let popup = this.$wxpage.selectComponent('.J_Filter');
+            popup && popup.hide();
+        }
+    }
+
+    methods = {
+        tap(e) { },
+        onRadioChange(e){
+            let val = e.detail.value;
+            let key = e.currentTarget.dataset.key;
+            let selected = _.cloneDeep(this.selected) || [];
+            let datalist = _.cloneDeep(this.datalist) || [];
+
+            //在列表中设置选中项
+            this.datalist = datalist.map(n => {
+                if(n.key == key){
+                    n.child.map(k => {
+                        k.checked = !!(k.key == val);
+                        return k;
+                    })
+                }
+                // if(n.id == gid){
+                //     n.child = n.child.map(k => {
+                //         k.checked = false;
+                //         if(k.id == cid){
+                //             k.checked = true;
+                //         }
+                //         return k;
+                //     });
+                // }
+                return n;
+            });
+
+            //保存选中项
+            if(selected.some(n => n.key == key)){
+                selected = selected.map(n => {
+                    if(n.key == key){
+                        n.val = [val];
+                    }
+                    return n;
+                });
+            } else{
+                selected.push({key, val:[val]});
+            }
+
+            this.selected = selected;
+
+        },
+        onCheckboxChange(e){
+            let val = e.detail.value;
+            let key = e.currentTarget.dataset.key;
+            let selected = _.cloneDeep(this.selected) || [];
+            let datalist = _.cloneDeep(this.datalist) || [];
+
+            //在列表中设置选中项
+            this.datalist = datalist.map(n => {
+                if(n.key == key){
+                    n.child = n.child.map(k => {
+                        k.checked = !!val.some(n=> n == k.key);
+                        // k.checked = false;
+                        // if(cid.some(n=> n == k.id)){
+                        //     k.checked = true;
+                        // }
+                        return k;
+                    });
+                }
+                return n;
+            });
+
+            //保存选中项
+            if(selected.some(n => n.key == key)){
+                selected = selected.map(n => {
+                    if(n.key == key){
+                        n.val = val;
+                    }
+                    return n;
+                });
+            } else{
+                selected.push({key, val});
+            }
+
+            this.selected = selected;
+
+        },
+        onCancel() {
+            this.$emit('on-cancel');
+            this.$emit('hideFilter');
+        },
+        onSubmit() {
+            this.$emit('hideFilter');
+            if(_.isEqual(this.selected, this.checked)){ return; }
+            this.checked = _.cloneDeep(this.selected);
+            this.$emit('on-submit', this.checked);
+        },
+        onReset(e) {
+            this.selected = null;
+            this.datalist = this.datalist.map(n => {
+                n.child = n.child.map(k => {
+                    k.checked = false;
+                    return k;
+                });
+                return n;
+            });
+            this.$emit('on-reset');
+        }
+    }
+
+    onReinit() {
+        setTimeout(()=>{
+            let checked = [];
+            this.selected = _.cloneDeep(this.checked)
+            if(this.checked){
+                this.checked.forEach(n=>{
+                    checked = checked.concat(n.val);
+                });
+            }
+            this.datalist = this.datalist.map(n => {
+                n.child = n.child.map(m => {
+                    m.checked = !!checked.some(k => k == m.key);
+                    return m;
+                });
+                return n;
+            });
+            this.$apply();
+        }, 1)
+    }
+
+    onLoad () {
+        this.onReinit();
+    }
+}
+
+</script>
+
+<template>
+    <wxc-popup class="J_Filter" locked="false" animation-mode="right" align="right">
+        <view class="cp-filter" @tap.stop="tap">
+            <scroll-view class="cp-filter-scroll" scroll-y>
+                <view class="cp-filter-main">
+                    <repeat for="{{datalist}}" item="item">
+                        <radio-group class="cp-filter-group" bindchange="onRadioChange" data-key="{{item.key}}">
+                            <view class="cp-filter-title">{{item.name}}</view>
+                            <view class="cp-filter-value">
+                                <repeat for="{{item.child}}" item="child">
+                                    <label class="{{child.checked ? 'is-checked': ''}}">
+                                        <radio value="{{child.key}}" checked="{{child.checked}}"></radio>
+                                        {{child.name}}
+                                    </label>
+                                </repeat>
+                            </view>
+                        </radio-group>
+                        <!-- <checkbox-group class="cp-filter-group" bindchange="onCheckboxChange" data-key="{{item.key}}">
+                            <view class="cp-filter-title">{{item.name}}</view>
+                            <view class="cp-filter-value">
+                                <repeat for="{{item.child}}" item="child">
+                                    <label class="{{child.checked ? 'is-checked': ''}}">
+                                        <checkbox value="{{child.key}}" checked="{{child.checked}}"></checkbox>
+                                        {{child.name}}
+                                    </label>
+                                </repeat>
+                            </view>
+                        </checkbox-group> -->
+                    </repeat>
+                </view>
+            </scroll-view>
+            <view class="cp-filter-tool">
+                <button type="warn" size="large" @tap.stop="onReset">重置</button>
+                <button type="base" size="large" @tap.stop="onSubmit">完成</button>
+            </view>
+        </view>
+    </wxc-popup>
+</template>
+
+<style lang="less">
+@import 'src/common/styles/config.less';
+
+.cp-filter{
+    display: flex;
+    flex-direction: column;
+
+    width: 75%;
+    height: 100%;
+    background-color: @color-maincolor;
+}
+.cp-filter-scroll{
+    flex: 1;
+    display: flex;
+    height: 100%;
+}
+.cp-filter-main{
+    padding: @margin;
+}
+.cp-filter-group{
+    padding: @margin;
+    radio, checkbox{ display: none;}
+    label{
+        display: inline-block;
+        padding: @margin/2 @margin;
+
+        background-color: @color-forecolor;
+        border-radius: @radius;
+        margin-right: @margin;
+        margin-top: @margin;
+        &:last-child{ margin-right: 0;}
+    }
+    .is-checked{
+        background-color: @color-primary;
+        color: #fff;
+    }
+}
+.cp-filter-tool{
+    height: 100rpx;
+    display: flex;
+    background-color: @color-border;
+    button{
+        height: 100rpx;
+        line-height: 100rpx;
+        display: block;
+        flex-flow: 1;
+        width: 100%;
+        border-radius: 0;
+        margin-left: 1rpx;
+        &:first-child{
+            margin-left: 0;
+            margin-right: 1rpx;
+        }
+    }
+}
+</style>

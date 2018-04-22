@@ -1,0 +1,4 @@
+@import "./../../components/htmlParser.wxss";
+@import "./../../components/loadmore.wxss";
+@import "./../../components/nulldata.wxss";
+.content{padding:20rpx}

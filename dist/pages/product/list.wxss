@@ -1,0 +1,7 @@
+@import "./../../components/product/filter.wxss";
+@import "./../../components/product/grid.wxss";
+@import "./../../components/product/item.wxss";
+@import "./../../components/loadmore.wxss";
+@import "./../../components/nulldata.wxss";
+@import "./../../components/tabbar.wxss";
+.products{padding-top:100rpx;position:relative}.catalog{position:fixed;z-index:10}.product{padding-top:100rpx}.product-tool{display:block;height:60rpx;padding:20rpx;position:fixed;right:0;left:0;top:100rpx;z-index:2;background-color:#e9e0cc}.product-tool .btn{display:flex;align-items:center;justify-content:center;height:60rpx;padding:0 20rpx;margin-left:20rpx;background-color:transparent;border-radius:6rpx}.product-tool .btn:first-child{margin-left:0}.product-tool .btn.active{background-color:#452713;color:#e9e0cc}.product-tool .btn .icon{margin-left:5rpx}.product-tool .btn text{display:inline-block;vertical-align:middle}

@@ -1,0 +1,86 @@
+
+<script>
+import wepy from 'wepy'
+import { thumbnail } from '@/utils'
+import score from '@/components/product/score'
+
+const devWidth = 750
+const winRatio = wepy.getSystemInfoSync().windowWidth / devWidth
+
+export default class ProductComment extends wepy.component {
+
+    components = {
+        score
+    }
+
+    props = {
+        datalist: {
+            type: Array,
+            default: []
+        }
+    }
+
+    data =  {
+    }
+
+    onLoad() {
+    }
+}
+</script>
+
+<template>
+    <repeat for="{{datalist}}" item="comment">
+        <view class="cp-comment-item">
+            <view class="cp-comment-header">
+                <view class="cp-comment-user" cross="center">
+                    <image class="avatar" src="{{comment.avatarUrl}}" mode="scaleToFill"></image>
+                    <text class="name">{{comment.nickName}}</text>
+                    <score class="score" :score="comment.score"></score>
+                </view>
+                <text class="cp-comment-time">{{comment.date}}</text>
+            </view>
+            <view class="cp-comment-content">{{comment.content}}</view>
+        </view>
+    </repeat>
+</template>
+
+<style lang="less">
+@import 'src/common/styles/config.less';
+.cp-comment-item{
+    padding: @margin*1.5 0;
+    border-top: 2rpx dashed @color-border;
+    &:first-child{ border-top: 0;}
+}
+.cp-comment-header{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.cp-comment-user{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    .avatar{
+        width: 60rpx;
+        height: 60rpx;
+        overflow: hidden;
+        background-color: @color-white;
+        border: 5rpx solid @color-white;
+        border-radius: 50%;
+    }
+    .name{
+        margin-left: @margin;
+        font-size: @font-size-large;
+    }
+    .score{
+        margin-left: @margin;
+    }
+}
+.cp-comment-time{
+    font-size: @font-size-small;
+    color: @color-gray;
+}
+.cp-comment-content{
+    padding-top: @margin*1.5;
+}
+</style>

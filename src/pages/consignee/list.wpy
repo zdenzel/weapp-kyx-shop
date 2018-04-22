@@ -1,0 +1,291 @@
+
+<script>
+import _ from 'lodash'
+import wepy from 'wepy'
+import utils from '@/utils'
+import api from '@/config/api'
+
+import nulldata from '@/components/nulldata'
+import loadmore from '@/components/loadmore'
+
+export default class AddressList extends wepy.page {
+    config = {
+        usingComponents: {
+            'wxc-cc': '/packages/@minui/wxc-cc/dist/index',
+            'wxc-flex': '/packages/@minui/wxc-flex/dist/index',
+            'wxc-avatar': '/packages/@minui/wxc-avatar/dist/index',
+            'wxc-elip': '/packages/@minui/wxc-elip/dist/index',
+            'wxc-icon': '/packages/@minui/wxc-icon/dist/index',
+            'wxc-label': '/packages/@minui/wxc-label/dist/index',
+            'wxc-loadmore': '/packages/@minui/wxc-loadmore/dist/index',
+
+            'wxc-abnor': '/packages/@minui/wxc-abnor/dist/index',
+            'wxc-countdown': '/packages/@minui/wxc-countdown/dist/index',
+            'wxc-counter': '/packages/@minui/wxc-counter/dist/index',
+            'wxc-loading': '/packages/@minui/wxc-loading/dist/index',
+            'wxc-mask': '/packages/@minui/wxc-mask/dist/index',
+
+            'wxc-dialog': '/packages/@minui/wxc-dialog/dist/index',
+            'wxc-popup': '/packages/@minui/wxc-popup/dist/index',
+            'wxc-toast': '/packages/@minui/wxc-toast/dist/index'
+        },
+        enablePullDownRefresh: true
+    }
+
+    components = {
+        nulldata,
+        loadmore
+    }
+
+    data = {
+        preloaded: false,
+        isloading: false,
+        isOpt: null,
+        selectId: 0,
+        defaultId: 0,
+        limit: 10,
+        totalPage: 1,
+        currentPage: 1,
+        consigneeList: null
+    }
+
+    methods = {
+        async tapDefault(id){
+            console.log('tapDefault');
+            if(!id){ return }
+            //防止重复设定
+            if(this.defaultId == id){ return; }
+            let data = { id };
+            wepy.showLoading();
+            await utils.request(api.consignee.default, { data, method: 'post' }).then(({result}) => {
+                wepy.hideLoading();
+                try{
+                    this.consigneeList.map(item => {
+                        item.isDefault = false;
+                        if(item.id == id){
+                            item.isDefault = true;
+                            this.defaultId = item.id;
+                        }
+                        return item;
+                    })
+                } catch(e) {}
+            }).catch(e=>{
+                wepy.hideLoading();
+                utils.showToast(e.message)
+            });
+            this.$apply();
+        },
+        tapDelete(id){
+            console.log('tapDelete');
+            let data = { id };
+            wepy.showModal({
+                // title: '温馨提示',
+                content: '确定要删除吗？'
+            }).then(async (res) => {
+                if(res.confirm){
+                    //执行删除
+                    wepy.showLoading();
+                    await utils.request(api.consignee.delete, { data }).then(({result}) => {
+                        wepy.hideLoading();
+                        try{
+                            let index = this.consigneeList.findIndex(n => n.id == id);
+                            this.consigneeList.splice(index, 1);
+                        } catch(e) {}
+                    }).catch(e=>{
+                        wepy.hideLoading();
+                        utils.showToast(e.message)
+                    });
+
+                    this.$apply();
+                }
+            })
+        },
+        tapSelect(consignee){
+            console.log('tapSelect');
+            if(!this.isOpt){ return; }
+            wepy.setStorageSync('__SELECTED_CONSIGNEE__', consignee);
+            wepy.navigateBack();
+        },
+        tapEdit(id){
+            console.log('tapEdit');
+            wepy.navigateTo({
+                url: `/pages/consignee/edit?id=${id}`
+            });
+        }
+    }
+
+    async getInitialData(isLoadmore){
+        let currentPage = this.currentPage;
+        if(isLoadmore){
+            currentPage = this.currentPage + 1;
+        } else{
+            this.consigneeList = null;
+            this.totalPage = 1;
+            currentPage = 1;
+        }
+
+        let data = {
+            page: currentPage,
+            limit: this.limit
+        }
+
+        console.log('getInitialData', data);
+
+        this.isloading = true;
+        await utils.request(api.consignee.list, { data }).then(({result}) => {
+            console.log('成功了', result);
+            if(isLoadmore){
+                this.consigneeList = _.concat(this.consigneeList, result.datalist);
+            } else{
+                this.consigneeList = _.cloneDeep(result.datalist);
+            }
+            this.totalPage = result.totalPage;
+            this.currentPage = currentPage;
+        }).catch(e=>{})
+
+        this.isloading = false;
+        this.$apply();
+    }
+
+    async onLoad(option) {
+        this.isOpt = option.isOpt;
+        this.selectId = option.sid;
+    }
+
+    async onShow(){
+        await this.getInitialData();
+        this.preloaded = true;
+        this.$apply();
+    }
+
+    async onReachBottom(){
+        //上拉加载更多
+        console.log('上拉加载更多');
+        if (this.currentPage >= this.totalPage) { return; }
+        await this.getInitialData('loadmore');
+    }
+
+    async onPullDownRefresh() {
+        //下拉刷新数据
+        console.log('下拉刷新数据');
+        wepy.stopPullDownRefresh();
+        await this.getInitialData();
+    }
+}
+
+</script>
+
+<template>
+    <view class="consignee-toolbar" wx:if="{{preloaded}}">
+        <navigator class="button base large" url="/pages/consignee/edit">添加地址</navigator>
+    </view>
+    <view class="consignee-list" wx:if="{{preloaded}}">
+        <block wx:if="{{consigneeList}}">
+            <repeat for="{{consigneeList}}" item="consignee" key="consignee.id">
+                <view class="item-consignee {{consignee.id == selectId ? 'selected' : ''}}" @tap="tapSelect({{consignee}})">
+                    <view class="item-consignee-contain">
+                        <view class="item-consignee-side" wx:if="{{isOpt}}">
+                            <text class="icon icon-address"></text>
+                        </view>
+                        <view class="item-consignee-main">
+                            <view class="item-consignee-title">
+                                <text class="item-consignee-name">{{consignee.name}}</text>
+                                <text class="item-consignee-tel">{{consignee.tel}}</text>
+                            </view>
+                            <view class="item-consignee-address">
+                                {{consignee.area +' '+ consignee.address}}
+                            </view>
+                        </view>
+                        <view class="item-consignee-close" wx:if="{{!isOpt}}">
+                            <text class="icon icon-close" @tap.stop="tapDelete({{consignee.id}})"></text>
+                        </view>
+                    </view>
+                    <view class="item-consignee-toolbar" wx:if="{{!isOpt}}">
+                        <view>
+                            <label @tap.stop="tapDefault({{consignee.id}})">
+                                <text class="icon icon-radio{{consignee.isDefault ? '-cur': ''}}"></text>
+                                <text>设为默认地址</text>
+                            </label>
+                        </view>
+                        <view>
+                            <label @tap.stop="tapEdit({{consignee.id}})">
+                                <text class="icon icon-edit"></text>
+                                <text>编辑</text>
+                            </label>
+                        </view>
+                    </view>
+                </view>
+            </repeat>
+        </block>
+        <loadmore wx:if="{{isloading}}"></loadmore>
+        <nulldata wx:if="{{!consigneeList && !isloading}}"></nulldata>
+    </view>
+    <loadmore wx:else></loadmore>
+</template>
+
+<style lang="less">
+@import 'src/common/styles/config.less';
+.item-consignee-name{
+    margin-right: @margin;
+}
+.item-consignee-title{
+    font-weight: 700;
+    font-size: @font-size-large;
+}
+.item-consignee-address{
+    margin-top: @margin/2;
+}
+.item-consignee-side{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    &:last-child{ padding-left: @margin;}
+    &:first-child{ padding-right: @margin;}
+    .icon{
+        font-size: 40rpx;
+    }
+    .icon-address{
+        color: @color-primary;
+    }
+    .icon-arrow-right{
+        font-size: 60rpx;
+    }
+}
+.item-consignee-main{
+    flex: 1;
+}
+.item-consignee-close{
+}
+.item-consignee-contain,
+.item-consignee-toolbar{
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+}
+.item-consignee-toolbar{
+    margin-top: @margin;
+    padding-top: @margin;
+    border-top: 2rpx dashed @color-border;
+    .icon{
+        margin-right: @margin/2;
+        font-size: @font-size-bigger;
+    }
+}
+.item-consignee{
+    padding: @margin;
+
+    margin-top: @margin;
+    background-color: @color-maincolor;
+    &:first-child{ margin-top: 0;}
+    .icon-close{
+        font-size: @font-size-biggest;
+        color: @color-gray;
+    }
+    &.selected{
+        background-color: @color-forecolor;
+    }
+}
+.consignee-toolbar{
+    padding: @margin;
+}
+</style>

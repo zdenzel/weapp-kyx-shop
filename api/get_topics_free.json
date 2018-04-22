@@ -1,0 +1,19 @@
+{
+    "materialId": [1,2,3]
+}
+
+{
+    "status": 1,
+    "message": "提示信息",
+    "result": {
+        "amount": 20,
+        "materialList": [
+            {
+                "id": 1,
+                "cover": "https://t1.picb.cc/uploads/2018/02/22/KGQhG.png",
+                "title": "糥伍古树圆茶",
+                "price": "99.00"
+            }
+        ]
+    }
+}

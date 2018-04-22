@@ -1,0 +1,15 @@
+{
+}
+
+
+{
+    "status": 1,
+    "message": "提示信息",
+    "result": [
+        {
+            "id": 1,
+            "name": "饼茶",
+            "image": "https://t1.picb.cc/uploads/2018/01/31/UpnXX.png"
+        }
+    ]
+}

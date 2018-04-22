@@ -1,0 +1,278 @@
+
+<script>
+import _ from 'lodash'
+import wepy from 'wepy'
+import utils from '@/utils'
+import api from '@/config/api'
+
+import commonMixin from '@/mixins/common'
+
+import nulldata from '@/components/nulldata'
+import loadmore from '@/components/loadmore'
+import searchbar from '@/components/searchbar'
+import items from '@/components/product/item'
+import grids from '@/components/product/grid'
+import filter from '@/components/product/filter'
+
+export default class ProductList extends wepy.page {
+    config = {
+        usingComponents: {
+            'wxc-cc': '/packages/@minui/wxc-cc/dist/index',
+            'wxc-flex': '/packages/@minui/wxc-flex/dist/index',
+            'wxc-avatar': '/packages/@minui/wxc-avatar/dist/index',
+            'wxc-elip': '/packages/@minui/wxc-elip/dist/index',
+            'wxc-icon': '/packages/@minui/wxc-icon/dist/index',
+            'wxc-label': '/packages/@minui/wxc-label/dist/index',
+            'wxc-loadmore': '/packages/@minui/wxc-loadmore/dist/index',
+
+            'wxc-abnor': '/packages/@minui/wxc-abnor/dist/index',
+            'wxc-countdown': '/packages/@minui/wxc-countdown/dist/index',
+            'wxc-counter': '/packages/@minui/wxc-counter/dist/index',
+            'wxc-loading': '/packages/@minui/wxc-loading/dist/index',
+            'wxc-mask': '/packages/@minui/wxc-mask/dist/index',
+
+            'wxc-dialog': '/packages/@minui/wxc-dialog/dist/index',
+            'wxc-popup': '/packages/@minui/wxc-popup/dist/index',
+            'wxc-toast': '/packages/@minui/wxc-toast/dist/index'
+        }
+    }
+
+    components = {
+        nulldata,
+        loadmore,
+        searchbar,
+        items,
+        grids,
+        filter
+    }
+
+    mixins = [commonMixin]
+
+    data = {
+        preloaded: false,
+        isloading: false,
+        isGridList: true,
+        productList: null,
+        filterList: null,
+        filterValue: null,
+        keyword: '',
+        sortValue: '',
+        yearValue: '',
+        typeValue: '',
+        limit: 10,
+        totalPage: 1,
+        currentPage: 1
+    }
+
+    methods = {
+        tapGridList(e){
+            //切换列表方式
+            this.isGridList = !this.isGridList;
+        },
+        showFilter(e){
+            this.$broadcast('showFilter');
+        },
+        tapSort(type){
+            //切换排序方式
+            switch(type){
+                case 'price' : this.sortValue = this.sortValue == 'isPriceUp' ? 'isPriceDown' : 'isPriceUp'; break;
+                case 'popular' : this.sortValue = 'isPopular'; break;
+                default: this.sortValue = null;
+            }
+            this.getInitialData();
+
+        },
+        submitFilter(result) {
+            this.filterValue = _.cloneDeep(result);
+            try{
+                this.yearValue = result.find(k => k.key == 'year').val[0];
+            }catch(e){
+                this.yearValue = null
+            }
+            try{
+                this.typeValue = result.find(n => n.key == 'type').val[0];
+            }catch(e){
+                this.typeValue = null
+            }
+            this.getInitialData();
+        },
+
+        onSearch(keyword){
+            this.keyword = keyword;
+            this.sortValue = null;
+            this.filterValue = null;
+            this.yearValue = null;
+            this.typeValue = null;
+            this.productList = null;
+            this.totalPage = 1;
+            this.currentPage = 1;
+            this.getInitialData();
+        }
+    }
+
+    async getInitialData(isLoadmore) {
+        if (isLoadmore) {
+            this.currentPage = this.currentPage + 1;
+        } else {
+            this.productList = null;
+            this.totalPage = 1;
+            this.currentPage = 1;
+        }
+
+        let data = {
+            keyword: this.keyword || '',
+            sort: this.sortValue || '',
+            year: this.yearValue || '',
+            type: this.typeValue || '',
+            page: this.currentPage,
+            limit: this.limit
+        }
+
+        console.log('getInitialData', data)
+
+        this.isloading = true;
+        if(!isLoadmore){
+            await this.getProductFilter();
+        }
+        
+        await utils.request(api.product.search, { data }).then(({result}) => {
+            if(result.datalist.length){
+                if (isLoadmore) {
+                    this.productList = _.concat(this.productList, result.datalist);
+                } else {
+                    this.productList = _.cloneDeep(result.datalist);
+                }
+            }
+            this.totalPage = result.totalPage;
+        }).catch(e=>{});
+
+        this.isloading = false;
+        this.$apply();
+    }
+
+    async getProductFilter() {
+
+        this.filterList = [{ key: 'type', name: '生熟', child: [{ key: 1, name: '生茶' }, { key: 2, name: '熟茶' }] }];
+
+        await utils.request(api.product.year).then(({result}) => {
+            let years = [];
+            years = result.map((n,i) => {
+                n.key = n.year;
+                n.name = n.year;
+                return n;
+            });
+            if(years.length){
+                this.yearList = years;
+                this.filterList.push({ key: 'year', name: '年分', child: years });
+            }
+        });
+
+        this.$apply();
+    }
+
+    async onLoad(option) {
+        this.keyword = option.keyword;
+
+        await this.getInitialData();
+
+        this.preloaded = true;
+
+        this.$apply();
+    }
+
+    async onReachBottom() {
+        //上拉加载更多
+        console.log('上拉加载更多');
+        if (this.currentPage >= this.totalPage) { return; }
+        await this.getInitialData('loadmore');
+    }
+    
+    async onPullDownRefresh() {
+        //下拉刷新数据
+        console.log('下拉刷新数据');
+        await this.getInitialData();
+        wepy.stopPullDownRefresh();
+    }
+}
+
+</script>
+
+<template>
+    <block wx:if="{{preloaded}}">
+        <searchbar :keyword.sync="keyword" @on-search.user="onSearch"></searchbar>
+        <view class="search">
+            <wxc-flex class="search-tool" main="between" cross="center">
+                <wxc-flex>
+                    <view class="btn {{sortValue == 'isPopular' ? 'active' : ''}}" @tap="tapSort('popular')">
+                        <text>人气</text>
+                    </view>
+                    <view class="btn {{(sortValue == 'isPriceDown' || sortValue == 'isPriceUp') ? 'active' : ''}}" @tap="tapSort('price')">
+                        <text>价格</text>
+                        <text class="icon icon-sort-{{sortValue == 'isPriceDown' ? 'down' : 'up'}}" wx:if="{{(sortValue == 'isPriceDown' || sortValue == 'isPriceUp')}}"></text>
+                    </view>
+                </wxc-flex>
+                <wxc-flex>
+                    <!-- <view class="btn" @tap="tapGridList()">
+                        <text class="icon icon-{{isGridList ? 'grid' : 'list'}}"></text>
+                    </view> -->
+                    <view class="btn {{filterValue ? 'active' : ''}}" @tap="showFilter()">
+                        <text>筛选</text>
+                        <text class="icon icon-filter"></text>
+                    </view>
+                </wxc-flex>
+            </wxc-flex>
+            <filter :datalist.sync="filterList" :checked="filterValue" @on-submit.user="submitFilter"></filter>
+            <block wx:if="{{productList}}">
+                <view class="search-list">
+                    <grids :datalist.sync="productList" wx:if="{{isGridList}}"></grids>
+                    <items :datalist.sync="productList" wx:else></items>
+                </view>
+            </block>
+            <loadmore wx:if="{{isloading}}"></loadmore>
+            <nulldata wx:if="{{!productList && !isloading}}"></nulldata>
+        </view>
+    </block>
+    <loadmore wx:else></loadmore>
+</template>
+
+<style lang="less">
+@import 'src/common/styles/config.less';
+.search{
+    padding-top: 100rpx;
+    position: relative;
+}
+.search-tool{
+    display: block;
+    height: 60rpx;
+    padding: @margin;
+    position: fixed;
+    right: 0;
+    left: 0;
+    top: 110rpx;
+    z-index: 2;
+    background-color: @color-maincolor;
+    .btn{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 60rpx;
+        padding: 0 @margin;
+        margin-left: @margin;
+        background-color: transparent;
+        border-radius: @radius;
+        &:first-child{ margin-left: 0;}
+        &.active{
+            background-color: @color-base;
+            color: @color-invert;
+        }
+        .icon{
+            margin-left: 5rpx;
+        }
+        text{
+            display: inline-block;
+            vertical-align: middle;
+        }
+        // font-size: @font-size-large;
+    }
+}
+</style>

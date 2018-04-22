@@ -1,0 +1,174 @@
+
+<script>
+import wepy from 'wepy'
+
+import utils from '@/utils'
+import api from '@/config/api'
+
+import previewImage from '@/mixins/previewImage'
+
+import nulldata from '@/components/nulldata'
+import loadmore from '@/components/loadmore'
+import score from '@/components/product/score'
+import comments from '@/components/product/comments'
+
+export default class ProductDetail extends wepy.page {
+    config = {
+        usingComponents: {
+            'wxc-cc': '/packages/@minui/wxc-cc/dist/index',
+            'wxc-flex': '/packages/@minui/wxc-flex/dist/index',
+            'wxc-avatar': '/packages/@minui/wxc-avatar/dist/index',
+            'wxc-elip': '/packages/@minui/wxc-elip/dist/index',
+            'wxc-icon': '/packages/@minui/wxc-icon/dist/index',
+            'wxc-label': '/packages/@minui/wxc-label/dist/index',
+            'wxc-loadmore': '/packages/@minui/wxc-loadmore/dist/index',
+
+            'wxc-abnor': '/packages/@minui/wxc-abnor/dist/index',
+            'wxc-countdown': '/packages/@minui/wxc-countdown/dist/index',
+            'wxc-counter': '/packages/@minui/wxc-counter/dist/index',
+            'wxc-loading': '/packages/@minui/wxc-loading/dist/index',
+            'wxc-mask': '/packages/@minui/wxc-mask/dist/index',
+
+            'wxc-dialog': '/packages/@minui/wxc-dialog/dist/index',
+            'wxc-popup': '/packages/@minui/wxc-popup/dist/index',
+            'wxc-toast': '/packages/@minui/wxc-toast/dist/index'
+        },
+        enablePullDownRefresh: true
+    }
+
+    components = {
+        nulldata,
+        loadmore,
+        score,
+        comments,
+    }
+
+    mixins = [previewImage]
+
+    data = {
+        proloaded: false,
+        isloading: false,
+        limit: 10,
+        totalPage: 1,
+        currentPage: 1,
+        comments: null
+    }
+
+    async getInitialData(isLoadmore) {
+        let currentPage = this.currentPage;
+        if (isLoadmore) {
+            currentPage = this.currentPage + 1;
+        } else {
+            this.orderList = null;
+            this.totalPage = 1;
+            currentPage = 1;
+        }
+
+        let data = {
+            id: this.activeId,
+            page: this.currentPage,
+            limit: this.limit
+        }
+        
+        this.isloading = true;
+
+        await utils.request(api.product.comments, { data }).then(({result}) => {
+            this.comments = result;
+            this.totalPage = result.totalPage;
+            this.currentPage = currentPage;
+            this.$apply();
+        }).catch(e=>{ });
+
+        this.isloading = false;
+        this.$apply();
+    }
+
+    async onLoad(option) {
+        this.activeId = option.id;
+        await this.getInitialData();
+        this.proloaded = true;
+        this.$apply();
+    }
+
+    onReachBottom(){
+        //上拉加载更多
+        console.log('上拉加载更多');
+        if (this.currentPage >= this.totalPage) { return; }
+        this.getInitialData('loadmore');
+    }
+
+    async onPullDownRefresh() {
+        //下拉刷新数据
+        console.log('下拉刷新数据');
+        wepy.stopPullDownRefresh();
+        await this.getInitialData();
+    }
+}
+
+</script>
+
+<template>
+    <view class="box comments" wx:if="{{proloaded}}">
+        <view class="head">商品评价({{comments.totalCount}})</view>
+        <view class="lead">
+            <text class="score-text">好评度：{{comments.totalScore/5*100}}%</text>
+            <repeat>
+                <score class="score-chart" :score="comments.totalScore"></score>
+            </repeat>
+        </view>
+        <view class="body" wx:if="{{comments && comments.totalCount}}">
+            <repeat>
+                <comments :datalist="comments.datalist"></comments>
+            </repeat>
+            <loadmore wx:if="{{isloading}}"></loadmore>
+        </view>
+        <nulldata text="还没有评价" wx:else></nulldata>
+    </view>
+    <loadmore wx:else></loadmore>
+</template>
+
+<style lang="less">
+@import 'src/common/styles/config.less';
+.box{
+    margin-top: @margin;
+    background-color: @color-maincolor;
+    &:first-child{ margin-top: 0;}
+    .head{
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: @margin @margin*1.5 @margin @margin*2.5;
+        position: relative;
+        border-bottom: 3rpx solid @color-border;
+        font-size: @font-size-large;
+        &:before{
+            content: '';
+            width: 6rpx;
+            height: 1em;
+            margin-top: -.5em;
+            position: absolute;
+            left: @margin*1.5;
+            top: 50%;
+            background-color: @color-base;
+        }
+    }
+    .lead{
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: @margin @margin*1.5;
+        background-color: @color-backcolor;
+    }
+}
+.infos{
+    margin-top: 4rpx;
+    padding: @margin @margin*1.5;
+    .title{ font-size: @font-size-large; }
+    .price{ font-size: @font-size-bigger; }
+}
+.comments{
+    .body{
+        padding: 0 @margin*1.5;
+    }
+}
+</style>

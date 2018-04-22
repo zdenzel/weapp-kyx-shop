@@ -1,0 +1,200 @@
+<wxs src="../../wxs/filter.wxs" module="filter"/>
+
+    <scroll-view class="details" scroll-y  wx:if="{{preloaded}}">
+        <block wx:if="{{product}}">
+            <view class="swiper">
+                <swiper class="swiper" bindchange="onSwiperChange" autoplay="{{true}}" interval="{{4500}}" duration="{{500}}">
+                    <block wx:for="{{product.previewList}}" wx:for-index="index" wx:for-item="item" wx:key="key">
+                        <swiper-item bindtap="previewImage" data-wpypreviewimage-a="{{item}}" data-wpypreviewimage-b="{{product.previewList}}">
+                            <image src="{{filter.thumbnail(item,winWidth+'x'+winWidth)}}" mode="scaleToFill"/>
+                        </swiper-item>
+                    </block>
+                </swiper>
+                <view class="dots">
+                    <block wx:for="{{product.previewList}}" wx:for-index="index" wx:for-item="item" wx:key="key">
+                        <text class="{{previewIndex==index?'active':''}}"/>
+                    </block>
+                </view>
+            </view>
+            <view class="box infos">
+                <view class="title">{{product.title}}</view>
+                <view class="price">{{skudata.skuprice || product.price}}</view>
+            </view>
+            <view class="box stock" bindtap="showPorductSku" data-wpyshowporductsku-a="">
+                <text class="label">已选</text>
+                <text class="text">{{skudata.sid ? skudata.skuAttrText +'，'+ skudata.skucount +'件' : skudata.skuAttrText}}</text>
+            </view>
+            <view class="box attrs">
+                <view class="item" wx:if="{{product.attribute.year}}">
+                    <text class="label">年份</text>
+                    <text class="text">{{product.attribute.year}}年</text>
+                </view>
+                <view class="item" wx:if="{{product.attribute.year}}">
+                    <text class="label">类型</text>
+                    <text class="text">{{product.attribute.type}}</text>
+                </view>
+                <view class="item" wx:if="{{product.attribute.weight}}">
+                    <text class="label">净重</text>
+                    <text class="text">{{product.attribute.weight}}kg</text>
+                </view>
+                <view class="item" wx:if="{{product.attribute.area}}">
+                    <text class="label">茶区</text>
+                    <text class="text">{{product.attribute.area}}</text>
+                </view>
+                <view class="item" wx:if="{{product.attribute.spec}}">
+                    <text class="label">规格</text>
+                    <text class="text">{{product.attribute.spec}}</text>
+                </view>
+            </view>
+            <view class="box comments" wx:if="{{comments}}">
+                <view class="head">商品评价({{comments.totalCount}})</view>
+                <view class="lead">
+                    <view>
+                        <text class="score-text">好评度：{{comments.totalScore/5*100}}%</text>
+                        <block>
+                            
+    <view class="cp-score score-chart" style="{{$score$color}}">
+        <text class="cp-score-bar">
+            <text class="icon icon-star-fill"/>
+            <text class="icon icon-star-fill"/>
+            <text class="icon icon-star-fill"/>
+            <text class="icon icon-star-fill"/>
+            <text class="icon icon-star-fill"/>
+        </text>
+        <text class="cp-score-bar active" style="{{$score$activeColor}}width:{{comments.totalScore/$score$total*100}}%;">
+            <text class="icon icon-star-fill"/>
+            <text class="icon icon-star-fill"/>
+            <text class="icon icon-star-fill"/>
+            <text class="icon icon-star-fill"/>
+            <text class="icon icon-star-fill"/>
+        </text>
+    </view>
+
+                        </block>
+                    </view>
+                    <view class="links">
+                        <navigator url="/pages/product/comments?id={{activeId}}">查看全部</navigator>
+                    </view>
+                </view>
+                <view class="body" wx:if="{{comments && comments.totalCount}}">
+                    <block>
+                        
+    <block wx:for="{{comments.datalist}}" wx:for-index="$comments$index" wx:for-item="$comments$comment" wx:key="$comments$key">
+        <view class="cp-comment-item">
+            <view class="cp-comment-header">
+                <view class="cp-comment-user" cross="center">
+                    <image class="avatar" src="{{$comments$comment.avatarUrl}}" mode="scaleToFill"/>
+                    <text class="name">{{$comments$comment.nickName}}</text>
+                    
+    <view class="cp-score score" style="{{$comments$score$color}}">
+        <text class="cp-score-bar">
+            <text class="icon icon-star-fill"/>
+            <text class="icon icon-star-fill"/>
+            <text class="icon icon-star-fill"/>
+            <text class="icon icon-star-fill"/>
+            <text class="icon icon-star-fill"/>
+        </text>
+        <text class="cp-score-bar active" style="{{$comments$score$activeColor}}width:{{$comments$comment.score/$comments$score$total*100}}%;">
+            <text class="icon icon-star-fill"/>
+            <text class="icon icon-star-fill"/>
+            <text class="icon icon-star-fill"/>
+            <text class="icon icon-star-fill"/>
+            <text class="icon icon-star-fill"/>
+        </text>
+    </view>
+
+                </view>
+                <text class="cp-comment-time">{{$comments$comment.date}}</text>
+            </view>
+            <view class="cp-comment-content">{{$comments$comment.content}}</view>
+        </view>
+    </block>
+
+                    </block>
+                </view>
+                
+    <view class="cp-nulldata" wx:else>
+        <view class="cp-nulldata-main" style="padding:{{$nocomments$padding}} 0;">
+            <view class="cp-nulldata-icon icon icon-nulldata" style="color:{{$nocomments$iconColor}}"/>
+            <view class="cp-nulldata-text" style="color:{{$nocomments$textColor}}">{{$nocomments$text}}</view>
+        </view>
+    </view>
+
+            </view>
+            <view class="box contents">
+                <view class="head">商品详情</view>
+                <view class="body">
+                    
+    <import src="/plugins/wxParse/wxParse.wxml"/>
+    <block  wx:for="{{$htmlParser$htmlParserTpl.nodes}}" wx:key="{{index}}">
+        <template is="wxParse0" data="{{item}}"/>
+    </block>
+
+                </view>
+            </view>
+        </block>
+        
+    <view class="cp-nulldata" wx:else>
+        <view class="cp-nulldata-main" style="padding:{{$nulldata$padding}} 0;">
+            <view class="cp-nulldata-icon icon icon-nulldata" style="color:{{$nulldata$iconColor}}"/>
+            <view class="cp-nulldata-text" style="color:{{$nulldata$textColor}}">{{$nulldata$text}}</view>
+        </view>
+    </view>
+
+    </scroll-view>
+    
+    <view class="cp-loadmore" wx:else>
+        <view class="cp-loadmore-main" style="padding:{{$loadmore$padding}} 0;">
+            <view class="cp-loadmore-icon" style="border-color:{{$loadmore$iconColor}}"  wx:if="{{$loadmore$icon}}"><view style="background-color: {{$loadmore$iconColor}}"/></view>
+            <view class="cp-loadmore-text" style="color:{{$loadmore$textColor}}">{{$loadmore$text}}</view>
+        </view>
+    </view>
+
+    <view class="toolbar"  wx:if="{{product}}">
+        <navigator class="action" url="/pages/webview?url=http://www.baidu.com/">
+            <view class="icon icon-service"/>
+            <view class="text">客服</view>
+        </navigator>
+        <navigator class="action" url="/pages/product/shopcart">
+            <view class="icon icon-shopcart"/>
+            <view class="text">购物车</view>
+        </navigator>
+        <button class="button" type="primary" size="large" bindtap="addcart" data-wpyaddcart-a="">加入购物车</button>
+        <button class="button" type="base" size="large" bindtap="buynow" data-wpybuynow-a="">立即购买</button>
+    </view>
+    <wxs src="../../wxs/filter.wxs" module="filter"/>
+
+    <wxc-popup class="J_SKU" locked="false" animation-mode="bottom" align="bottom">
+        <view class="cp-sku" catchtap="$sku$tap"  wx:if="{{$sku$preloaded}}">
+            <view class="cp-sku-product">
+                <view class="cp-sku-product-cover" wx:if="{{$sku$skuimage}}"><image src="{{filter.thumbnail($sku$skuimage, $sku$optimize)}}" mode="scaleToFill"/></view>
+                <view class="cp-sku-product-price" wx:if="{{$sku$skuprice}}"><text class="price">{{$sku$skuprice}}</text></view>
+                <view class="cp-sku-product-stock" wx:if="{{$sku$skustock}}">库存：{{$sku$skustock}}</view>
+            </view>
+            <scroll-view class="cp-sku-scroll" scroll-y>
+                <view class="cp-sku-main">
+                    <block wx:for="{{$sku$datalist}}" wx:for-index="$sku$index" wx:for-item="$sku$item" wx:key="$sku$key">
+                        <radio-group class="cp-sku-group" bindchange="$sku$onRadioChange" data-key="{{$sku$item.id}}">
+                            <view class="cp-sku-label">{{$sku$item.className}}</view>
+                            <view class="cp-sku-value">
+                                <block wx:for="{{$sku$item.attributes}}" wx:for-index="$sku$index" wx:for-item="$sku$child" wx:key="$sku$key">
+                                    <label class="{{$sku$child.checked ? 'is-checked': ''}}">
+                                        <radio value="{{$sku$child.id}}" checked="{{$sku$child.checked}}"/>
+                                        {{$sku$child.attributeName}}
+                                    </label>
+                                </block>
+                            </view>
+                        </radio-group>
+                    </block>
+                    <view class="cp-sku-count">
+                        <label class="cp-sku-label">数量</label>
+                        <wxc-counter class="counter" number="{{$sku$skucount}}" max="{{$sku$skustock}}" min="1"  bind:changenumber="$sku$onChangeCounter"/>
+                    </view>
+                </view>
+            </scroll-view>
+            <view class="cp-sku-tool">
+                <!-- <button type="warn" size="large" catchtap="onReset">重置</button> -->
+                <button type="base" size="large" catchtap="$sku$onSubmit">确定</button>
+            </view>
+        </view>
+    </wxc-popup>

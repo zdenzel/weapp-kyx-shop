@@ -1,0 +1,249 @@
+
+<script>
+import wepy from 'wepy'
+import cityData from '@/utils/cityData'
+
+export default class CitySelect extends wepy.component {
+
+    props = {
+        selected: {
+            type: String,
+            default: '',
+            twoWay: true,
+            coerce(val) {
+                console.log('coerce selected', val)
+                return val || ''
+            }
+        }
+    }
+
+    data = {
+        cityData: [],
+        provinces: [],
+        citys: [],
+        countys: [],
+        province: '',
+        city: '',
+        county: '',
+        value: [0, 0, 0],
+        values: [0, 0, 0],
+        isReady: false
+    }
+
+    events = {
+        showCityselect() {
+            let popup = this.$wxpage.selectComponent('.J_Cityselect');
+            popup && popup.show();
+            this.onReinit();
+        },
+        hideCityselect() {
+            let popup = this.$wxpage.selectComponent('.J_Cityselect');
+            popup && popup.hide();
+        }
+    }
+
+    watch = {
+    }
+
+    methods = {
+        tap() {},
+        onCancel() {
+            this.$emit('hideCityselect');
+        },
+        onConfirm() {
+            this.selected = `${this.province} ${this.city} ${this.county}`;
+            this.$emit('hideCityselect');
+            this.$apply();
+        },
+        onChange(e) {
+            let val = e.detail.value;
+            let t = this.values;
+
+            if (val[0] != t[0]) {
+                console.log('province no ');
+                let citys = [];
+                let countys = [];
+
+                for (let i = 0; i < this.cityData[val[0]].sub.length; i++) {
+                    citys.push(this.cityData[val[0]].sub[i].name)
+                }
+                for (let i = 0; i < this.cityData[val[0]].sub[0].sub.length; i++) {
+                    countys.push(this.cityData[val[0]].sub[0].sub[i].name)
+                }
+
+                this.province = this.provinces[val[0]];
+                this.city = this.cityData[val[0]].sub[0].name;
+                this.citys = citys;
+                this.county = this.cityData[val[0]].sub[0].sub[0].name;
+                this.countys = countys;
+                this.values = val;
+                this.value = [val[0], 0, 0];
+
+                return;
+            }
+            if (val[1] != t[1]) {
+                console.log('city no');
+                let countys = [];
+
+                for (let i = 0; i < this.cityData[val[0]].sub[val[1]].sub.length; i++) {
+                    countys.push(this.cityData[val[0]].sub[val[1]].sub[i].name)
+                }
+
+                this.city = this.citys[val[1]];
+                this.county = this.cityData[val[0]].sub[val[1]].sub[0].name;
+                this.countys = countys;
+                this.values = val;
+                this.value = [val[0], val[1], 0];
+                return;
+            }
+            if (val[2] != t[2]) {
+                console.log('county no');
+                this.county = this.countys[val[2]];
+                this.values = val;
+                return;
+            }
+        }
+    }
+
+    onReinit() {
+
+        this.isReady = false;
+
+        let selected = this.selected.split(' ') || [];
+        let provinces = [];
+        let citys = [];
+        let countys = [];
+
+        //添加省份列表
+        for (let i = 0; i < this.cityData.length; i++) {
+            provinces.push(this.cityData[i].name);
+        }
+        //省份index
+        let provinceIndex = provinces.findIndex(n => n == selected[0]);
+        provinceIndex = provinceIndex < 0 ? 0 : provinceIndex;
+        //添加城市列表
+        for (let i = 0; i < this.cityData[provinceIndex].sub.length; i++) {
+            citys.push(this.cityData[provinceIndex].sub[i].name)
+        }
+        //城市index
+        let cityIndex = citys.findIndex(n => n == selected[1]);
+        cityIndex = cityIndex < 0 ? 0 : cityIndex;
+        //添加县区列表
+        for (let i = 0; i < this.cityData[provinceIndex].sub[cityIndex].sub.length; i++) {
+            countys.push(this.cityData[provinceIndex].sub[cityIndex].sub[i].name)
+        }
+        //县区index
+        let countyIndex = countys.findIndex(n => n == selected[2]);
+        countyIndex = countyIndex < 0 ? 0 : countyIndex;
+
+        //设置默认值
+        this.provinces = provinces;
+        this.citys = citys;
+        this.countys = countys;
+
+        this.value = [provinceIndex, cityIndex, countyIndex];
+        this.values = [provinceIndex, cityIndex, countyIndex];
+
+        this.province = this.cityData[provinceIndex].name;
+        this.city = this.cityData[provinceIndex].sub[cityIndex].name;
+        this.county = this.cityData[provinceIndex].sub[cityIndex].sub[countyIndex].name;
+
+        //数据准备完成
+        this.isReady = true;
+
+        this.$apply();
+    }
+
+    onLoad() {
+
+        //全国城市数据
+        this.cityData = cityData;
+
+        this.onReinit();
+
+    }
+}
+
+</script>
+
+<template>
+    <wxc-popup class="J_Cityselect" locked="false" animation-mode="bottom" align="bottom">
+        <view class="cp-cityselect" @tap.stop="tap">
+            <view class="cp-cityselect-tool">
+                <button class="cp-cityselect-cancel" @tap.stop="onCancel">取消</button>
+                <button class="cp-cityselect-confirm" @tap.stop="onConfirm">确定</button>
+            </view>
+            <picker-view class="cp-cityselect-view" indicator-style="height: 4em;" value="{{value}}" bindchange="onChange" wx:if="{{isReady}}">
+                <picker-view-column class="cp-cityselect-view-column">
+                    <view class="cp-cityselect-text" wx:for="{{provinces}}" wx:key="item">{{item}}</view>
+                </picker-view-column>
+                <picker-view-column class="cp-cityselect-view-column">
+                    <view class="cp-cityselect-text" wx:for="{{citys}}" wx:key="item">{{item}}</view>
+                </picker-view-column>
+                <picker-view-column class="cp-cityselect-view-column">
+                    <view class="cp-cityselect-text" wx:for="{{countys}}" wx:key="item">{{item}}</view>
+                </picker-view-column>
+            </picker-view>
+        </view>
+    </wxc-popup>
+</template>
+
+<style lang="less">
+@import 'src/common/styles/config.less';
+.cp-cityselect {
+    width: 100%;
+    background-color: #fff;
+    position: relative;
+    z-index: 1000;
+}
+
+.cp-cityselect-cancel,
+.cp-cityselect-confirm{
+    display: block;
+    border: none;
+    outline: none;
+    margin: 0;
+    padding: 1em 1.5em;
+    height: auto;
+    line-height: inherit;
+    border-radius: 0;
+    background-color: transparent;
+    color: @color-gray;
+
+    font-size: @font-size-large;
+    &:after { display: none;}
+    &.button-hover{
+        background-color: @color-forecolor;
+    }
+}
+.cp-cityselect-confirm{
+    color: @color-primary;
+}
+
+.cp-cityselect-tool{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    background-color: @color-maincolor;
+}
+
+.cp-cityselect-view {
+    display: block;
+    // width: 100%;
+    height: 12em;
+    padding: 0 0.5em;
+    background-color: white;
+}
+
+.cp-cityselect-text {
+    height: 100%;
+    line-height: 1.5em;
+    padding: 0 0.5em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+</style>

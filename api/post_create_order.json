@@ -1,0 +1,24 @@
+{
+    "products": [
+        {
+            "id": 1,
+            "sid": [11,12]
+        },
+        {
+            "id": 2,
+            "sid": [21,22]
+        }
+    ],
+    "products": [{"id":1,"sid":1,"bid":1}],
+    "consigneeId": 1,
+    "message": "请帮我打包的好看些。"
+}
+
+
+{
+    "status": 1,
+    "message": "提示信息",
+    "result": {
+        "id": 1
+    }
+}

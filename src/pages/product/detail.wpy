@@ -1,0 +1,422 @@
+
+<script>
+import _ from 'lodash'
+import wepy from 'wepy'
+
+import utils from '@/utils'
+import api from '@/config/api'
+
+import filter from '../../wxs/filter.wxs'
+
+import previewImage from '@/mixins/previewImage'
+
+import nulldata from '@/components/nulldata'
+import loadmore from '@/components/loadmore'
+import sku from '@/components/product/sku'
+import score from '@/components/product/score'
+import comments from '@/components/product/comments'
+import htmlParser from '@/components/htmlParser'
+
+const devWidth = 750
+const winWidth = wepy.getSystemInfoSync().windowWidth
+const winRatio = winWidth / devWidth
+
+import { getStore, connect } from 'wepy-redux'
+import { addShopCart, setShopBuyList } from '@/store/actions'
+const store = getStore()
+
+export default class ProductDetail extends wepy.page {
+    config = {
+        usingComponents: {
+            'wxc-cc': '/packages/@minui/wxc-cc/dist/index',
+            'wxc-flex': '/packages/@minui/wxc-flex/dist/index',
+            'wxc-avatar': '/packages/@minui/wxc-avatar/dist/index',
+            'wxc-elip': '/packages/@minui/wxc-elip/dist/index',
+            'wxc-icon': '/packages/@minui/wxc-icon/dist/index',
+            'wxc-label': '/packages/@minui/wxc-label/dist/index',
+            'wxc-loadmore': '/packages/@minui/wxc-loadmore/dist/index',
+
+            'wxc-abnor': '/packages/@minui/wxc-abnor/dist/index',
+            'wxc-countdown': '/packages/@minui/wxc-countdown/dist/index',
+            'wxc-counter': '/packages/@minui/wxc-counter/dist/index',
+            'wxc-loading': '/packages/@minui/wxc-loading/dist/index',
+            'wxc-mask': '/packages/@minui/wxc-mask/dist/index',
+
+            'wxc-dialog': '/packages/@minui/wxc-dialog/dist/index',
+            'wxc-popup': '/packages/@minui/wxc-popup/dist/index',
+            'wxc-toast': '/packages/@minui/wxc-toast/dist/index'
+        },
+        enablePullDownRefresh: true
+    }
+
+    components = {
+        nulldata,
+        nocomments: nulldata,
+        loadmore,
+        sku,
+        score,
+        comments,
+        htmlParser
+    }
+
+    wxs = {
+        filter
+    }
+
+    mixins = [previewImage]
+
+    data = {
+        winWidth,
+        preloaded: false,
+        isloading: false,
+        activeId: 0,
+        previewIndex: null,
+        product: null,
+        content: null,
+        comments: null,
+        skudata: {
+            pid: null,
+            sid: null,
+            type: 1,
+            datalist: null,
+            selected: null,
+            skustock: 0,
+            skuimage: null,
+            skuprice: '0.00',
+            skucount: 0,
+            skutitle: null,
+            skuAttrText: '请选择'
+        }
+    }
+
+    computed = {
+        skuparams(){
+            return {
+                id: this.skudata.pid,
+                sid: this.skudata.sid,
+                uid: this.skudata.uid,
+                type: this.skudata.type,
+                cover: this.skudata.skuimage,
+                title: this.skudata.skutitle,
+                price: this.skudata.skuprice,
+                count: this.skudata.skucount,
+                stock: this.skudata.skustock,
+                skuAttrText: this.skudata.skuAttrText,
+            }
+        }
+    }
+
+    methods = {
+        onSwiperChange(e) {
+            this.swiperIndex = e.detail.current;
+        },
+        addcart(){
+            // if(!this.skudata.sid){
+            //     this.showPorductSku('addcart');
+            //     return;
+            // }
+            this.showPorductSku('addcart');
+            // store.dispatch(addShopCart(this.skuparams)).then(res => {
+            //     wx.navigateTo({
+            //         url: '/pages/product/shopcart'
+            //     });
+            // });
+        },
+        buynow(){
+            // if(!this.skudata.sid){
+            //     this.showPorductSku('buynow');
+            //     return;
+            // }
+            this.showPorductSku('buynow');
+            // store.dispatch(setShopBuyList(this.skuparams)).then(res => {
+            //     wx.navigateTo({
+            //         url: '/pages/order/confirm'
+            //     });
+            // });
+        }
+    }
+
+    showPorductSku(type){
+        this.$broadcast('showSkuPopup', type);
+    }
+
+    async getProductDetail(){
+
+        let data = {
+            id: this.activeId,
+        }
+
+        await utils.request(api.product.info, { data }).then(({result}) => {
+            this.product = result;
+            this.content = result.details;
+            let skudata = _.assign({}, this.skudata, {
+                pid: result.id,
+                uid: wepy.$instance.globalData.uid,
+                datalist: result.skuList,
+                skutitle: result.title,
+                skuprice: result.price,
+                skuimage: result.previewList[0]
+            });
+            this.skudata = _.assign({}, skudata, {
+                defaults: skudata
+            });
+            this.$apply();
+            //调用通知接口通知组件更新数据
+            this.$invoke('htmlParser', 'htmlParserNotice');
+        }).catch(e=>{ });
+    }
+
+    async getProductComments(){
+
+        let data = {
+            id: this.activeId,
+        }
+
+        await utils.request(api.product.comments, { data }).then(({result}) => {
+            this.comments = result;
+            this.$apply();
+        }).catch(e=>{ });
+    }
+
+    async getInitialData(isLoadmore) {
+
+        this.isloading = true;
+        
+        await this.getProductDetail();
+        await this.getProductComments();
+
+        this.isloading = false;
+        this.$apply();
+    }
+
+    async onLoad(option) {
+        this.activeId = option.id || 1;
+        await this.getInitialData();
+
+        this.preloaded = true;
+        this.$apply();
+    }
+
+    async onPullDownRefresh() {
+        //下拉刷新数据
+        console.log('下拉刷新数据');
+        wepy.stopPullDownRefresh();
+        await this.getInitialData();
+    }
+}
+
+</script>
+
+<template>
+    <scroll-view class="details" scroll-y wx:if="{{preloaded}}">
+        <block  wx:if="{{product}}">
+            <view class="swiper">
+                <swiper class="swiper" bindchange="onSwiperChange" autoplay="{{true}}" interval="{{4500}}" duration="{{500}}">
+                    <repeat for="{{product.previewList}}">
+                        <swiper-item @tap="previewImage({{item}},{{product.previewList}})">
+                            <image src="{{filter.thumbnail(item,winWidth+'x'+winWidth)}}" mode="scaleToFill"></image>
+                        </swiper-item>
+                    </repeat>
+                </swiper>
+                <view class="dots">
+                    <repeat for="{{product.previewList}}" index="index">
+                        <text class="{{previewIndex==index?'active':''}}"></text>
+                    </repeat>
+                </view>
+            </view>
+            <view class="box infos">
+                <view class="title">{{product.title}}</view>
+                <view class="price">{{skudata.skuprice || product.price}}</view>
+            </view>
+            <view class="box stock" @tap="showPorductSku()">
+                <text class="label">已选</text>
+                <text class="text">{{skudata.sid ? skudata.skuAttrText +'，'+ skudata.skucount +'件' : skudata.skuAttrText}}</text>
+            </view>
+            <view class="box attrs">
+                <view class="item" wx:if="{{product.attribute.year}}">
+                    <text class="label">年份</text>
+                    <text class="text">{{product.attribute.year}}年</text>
+                </view>
+                <view class="item" wx:if="{{product.attribute.year}}">
+                    <text class="label">类型</text>
+                    <text class="text">{{product.attribute.type}}</text>
+                </view>
+                <view class="item" wx:if="{{product.attribute.weight}}">
+                    <text class="label">净重</text>
+                    <text class="text">{{product.attribute.weight}}kg</text>
+                </view>
+                <view class="item" wx:if="{{product.attribute.area}}">
+                    <text class="label">茶区</text>
+                    <text class="text">{{product.attribute.area}}</text>
+                </view>
+                <view class="item" wx:if="{{product.attribute.spec}}">
+                    <text class="label">规格</text>
+                    <text class="text">{{product.attribute.spec}}</text>
+                </view>
+            </view>
+            <view class="box comments" wx:if="{{comments}}">
+                <view class="head">商品评价({{comments.totalCount}})</view>
+                <view class="lead">
+                    <view>
+                        <text class="score-text">好评度：{{comments.totalScore/5*100}}%</text>
+                        <repeat>
+                            <score class="score-chart" :score="comments.totalScore"></score>
+                        </repeat>
+                    </view>
+                    <view class="links">
+                        <navigator url="/pages/product/comments?id={{activeId}}">查看全部</navigator>
+                    </view>
+                </view>
+                <view class="body" wx:if="{{comments && comments.totalCount}}">
+                    <repeat>
+                        <comments :datalist="comments.datalist"></comments>
+                    </repeat>
+                </view>
+                <nocomments text="还没有评价" wx:else></nocomments>
+            </view>
+            <view class="box contents">
+                <view class="head">商品详情</view>
+                <view class="body">
+                    <htmlParser name="details" :content.sync="content"></htmlParser>
+                </view>
+            </view>
+        </block>
+        <nulldata text="没有该商品数据" wx:else></nulldata>
+    </scroll-view>
+    <loadmore wx:else></loadmore>
+    <view class="toolbar" wx:if="{{product}}">
+        <navigator class="action" url="/pages/webview?url=http://www.baidu.com/">
+            <view class="icon icon-service"></view>
+            <view class="text">客服</view>
+        </navigator>
+        <navigator class="action" url="/pages/product/shopcart">
+            <view class="icon icon-shopcart"></view>
+            <view class="text">购物车</view>
+        </navigator>
+        <button class="button" type="primary" size="large" @tap="addcart()">加入购物车</button>
+        <button class="button" type="base" size="large" @tap="buynow()">立即购买</button>
+    </view>
+    <sku :skudata.sync="skudata"></sku>
+</template>
+
+<style lang="less">
+@import 'src/common/styles/config.less';
+.swiper{ height: 750rpx;}
+.box{
+    margin-top: @margin;
+    background-color: @color-maincolor;
+    &:first-child{ margin-top: 0;}
+    .head{
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: @margin @margin*1.5 @margin @margin*2.5;
+        position: relative;
+        border-bottom: 3rpx solid @color-border;
+        font-size: @font-size-large;
+        &:before{
+            content: '';
+            width: 6rpx;
+            height: 1em;
+            margin-top: -.5em;
+            position: absolute;
+            left: @margin*1.5;
+            top: 50%;
+            background-color: @color-base;
+        }
+    }
+    .lead{
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: @margin @margin*1.5;
+        background-color: @color-backcolor;
+    }
+}
+.infos{
+    margin-top: 4rpx;
+    padding: @margin @margin*1.5;
+    .title{ font-size: @font-size-large; }
+    .price{ font-size: @font-size-bigger; }
+}
+.stock{
+    padding: @margin*1.5;
+    .label{
+        width: 100rpx;
+        color: @color-gray;
+    }
+}
+.attrs{
+    background-color: transparent;
+    .item{
+        padding: @margin @margin*1.5;
+        margin-top: 2rpx;
+        background-color: @color-maincolor;
+    }
+    .label{
+        width: 100rpx;
+        color: @color-gray;
+    }
+}
+.comments{
+    .lead{
+        .score-text, .score-chart{
+            margin-right: @margin;
+        }
+    }
+    .body{
+        padding: 0 @margin*1.5;
+    }
+}
+.contents{
+    .body{
+        padding: @margin*1.5;
+    }
+}
+.details{
+    // flex: 1;
+    // display: flex;
+    // flex-direction: column;
+    // position: relative;
+    padding-bottom: 50px;
+}
+
+.toolbar{
+    // flex: 1;
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 50px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    margin: 0;
+    padding: 0;
+    z-index: 100;
+
+    background-color: @color-maincolor;
+    border-top: 2rpx solid @color-border;
+    box-sizing: border-box;
+    .button{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0;
+        height: 100%;
+        width: 240rpx;
+        padding: 0;
+    }
+    .action{
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        line-height: 1.2;
+        border-left: 2rpx solid @color-border;
+        font-size: @font-size-small;
+        &:first-child{ border-left: 0;}
+        .icon{ font-size: 46rpx; }
+    }
+}
+</style>

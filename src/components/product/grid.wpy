@@ -1,0 +1,171 @@
+
+<script>
+import wepy from 'wepy'
+import filter from '../../wxs/filter.wxs'
+import score from '@/components/product/score'
+
+const devWidth = 750
+const winRatio = wepy.getSystemInfoSync().windowWidth / devWidth
+
+export default class GridProduct extends wepy.component {
+
+    components = {
+        score
+    }
+
+    props = {
+        datalist: {
+            type: Array,
+            default: null
+        },
+        //列数
+        column: {
+            type: [String,Number],
+            default: 2
+        },
+        //外补白
+        margin: {
+            type: [String,Number],
+            default: 20
+        },
+        //内补白
+        padding: {
+            type: [String,Number],
+            default: 0
+        },
+        //图片比例
+        ratio: {
+            type: Array,
+            default: [1,1]
+        },
+        route: {
+            type: String,
+            default: '/pages/product/detail'
+        },
+        boxBackColor: {
+            type: String,
+            default: null,
+            coerce (val) {
+                if(val) {
+                    return 'background-color:' + val
+                }
+            }
+        },
+        imgBackColor: {
+            type: String,
+            default: null,
+            coerce (val) {
+                if(val) {
+                    return 'background-color:' + val
+                }
+            }
+        }
+    }
+
+    wxs = {
+        filter
+    }
+
+    data = {
+        width: devWidth
+    }
+
+    computed = {
+        imageRatio(){
+            let imageRatio = 1
+            try{
+                imageRatio = this.ratio[1] / this.ratio[0]
+                if(isNaN(imageRatio)){
+                    imageRatio = 1
+                }
+            }catch(e){}
+
+            return imageRatio
+        },
+        itemWidth(){
+            return ((this.width - this.column * this.margin - this.margin) / this.column) - this.padding*2
+        },
+        imageWidth(){
+            return this.itemWidth
+        },
+        imageHeight(){
+            return this.itemWidth * this.imageRatio
+        },
+        imageOptimize(){
+            return Math.ceil(this.imageWidth) + 'x' + Math.ceil(this.imageHeight)
+        }
+
+    }
+    
+}
+</script>
+
+<template>
+    <view style="padding:{{margin}}rpx">
+        <view class="cp-grid-product">
+            <repeat for="{{datalist}}" index="index" item="product" key="id">
+                <navigator class="cp-product-item" url="/pages/product/detail?id={{product.id}}" style="width:{{itemWidth}}rpx;padding:{{padding}}rpx;margin-top:{{index>=column?margin:0}}rpx;{{boxBackColor}}">
+                    <view class="cp-product-cover" style="width:{{imageWidth}}rpx;height:{{imageHeight}}rpx;{{imgBackColor}}">
+                        <image src="{{filter.thumbnail(product.cover,imageOptimize)}}" mode="scaleToFill"></image>
+                    </view>
+                    <view class="cp-product-context" style="margin-top: {{margin}}rpx;">
+                        <wxc-elip class="cp-product-row cp-product-title">{{product.title}}</wxc-elip>
+                        <wxc-elip class="cp-product-row cp-product-price"><view class="price">{{product.price}}</view></wxc-elip>
+                        <wxc-flex class="cp-product-row cp-product-score" main="start">
+                            <view class="score">
+                                <score :score="product.score"></score>
+                            </view>
+                            <view class="comment">
+                                <text>({{product.comment}}人评价)</text>
+                            </view>
+                        </wxc-flex>
+                    </view>
+                </navigator>
+            </repeat>
+        </view>
+    </view>
+</template>
+
+<style lang="less">
+@import 'src/common/styles/config.less';
+.cp-grid-product{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+
+    .cp-product-cover{
+        width: 300rpx;
+        height: 300rpx;
+        background-color: @color-forecolor;
+        position: relative;
+        image{ width: 100%; height: 100%;}
+    }
+    .cp-product-row{
+        display: block;
+    }
+    .cp-product-title{
+        // font-size: @font-size-large;
+        color: @color-base;
+    }
+    .cp-product-price{
+        // font-size: @font-size-large;
+        .price{ color: @color-primary;}
+    }
+    .cp-product-score{
+        font-size: @font-size-small;
+        .comment{ margin-left: .5em; }
+    }
+    .cp-product-context{
+        flex: 1;
+        margin-top: @margin/2;
+    }
+    .cp-product-item{
+        display: block;
+        overflow: hidden;
+        position: relative;
+        &.navigator-hover{
+            background-color: transparent;
+        }
+    }
+}
+</style>
