@@ -2,7 +2,7 @@
  * @Author: zdenzel
  * @Date:   2018-03-14 23:38:28
  * @Last Modified by:   denzel
- * @Last Modified time: 2018-04-06 00:09:51
+ * @Last Modified time: 2018-04-23 21:40:20
  */
 
 import wepy from 'wepy'
@@ -10,7 +10,7 @@ import { createAction } from 'redux-actions'
 
 import types from '../types/catalog'
 
-import api from '@/config/api'
+import api from '@/utils/api'
 import utils from '@/utils'
 
 

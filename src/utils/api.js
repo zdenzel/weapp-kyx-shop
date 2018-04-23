@@ -1,5 +1,5 @@
 //是否为生产模式
-const isProdMode = false;
+const isProdMode = true;
 //配置API默认地址
 const baseUrl = isProdMode ? 'https://api.keyixing.com/' : 'https://keyixingapi.local.co.bendan.name/';
 //输出API接口

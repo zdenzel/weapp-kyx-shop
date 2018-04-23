@@ -1,6 +1,6 @@
 import wepy from 'wepy'
 // import jwtDecode from 'jwt-decode'
-import api from '@/config/api.js'
+import api from '@/utils/api.js'
 
 const formatTime = date => {
     const year = date.getFullYear()

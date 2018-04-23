@@ -2,7 +2,7 @@
 import _ from 'lodash'
 import wepy from 'wepy'
 import utils from '@/utils'
-import api from '@/config/api'
+import api from '@/utils/api'
 
 import filter from '../wxs/filter.wxs'
 import commonMixin from '@/mixins/common'

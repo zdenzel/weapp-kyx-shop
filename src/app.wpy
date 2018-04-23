@@ -5,7 +5,7 @@ import Promise from 'promise-polyfill'
 import 'wepy-async-function'
 
 import utils from '@/utils'
-import api from '@/config/api'
+import api from '@/utils/api'
 
 import { setStore } from 'wepy-redux'
 import configStore from '@/store'

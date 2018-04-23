@@ -4,7 +4,7 @@
 import wepy from 'wepy'
 
 import utils from '@/utils'
-import api from '@/config/api'
+import api from '@/utils/api'
 
 import inputMixin from '@/mixins/input'
 import products from '@/components/order/products'

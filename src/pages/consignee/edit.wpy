@@ -8,7 +8,7 @@ import nulldata from '@/components/nulldata';
 import loadmore from '@/components/loadmore';
 import cityselect from '@/components/cityselect';
 
-import api from '@/config/api'
+import api from '@/utils/api'
 import utils from '@/utils'
 
 export default class AddressDetail extends wepy.page {

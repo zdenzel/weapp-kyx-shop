@@ -6,7 +6,7 @@ import filter from '../wxs/filter.wxs'
 import minuiMixin from '@/mixins/minui'
 
 import utils from '@/utils'
-import api from '@/config/api'
+import api from '@/utils/api'
 
 import nulldata from '@/components/nulldata'
 import loadmore from '@/components/loadmore'

@@ -34,7 +34,8 @@ export default class OrderInformation extends wepy.page {
         },
     }
 
-    onLoad() {
+    async onLoad(option) {
+        // this.success = option.status;
         this.success = true;
         this.order = { id: 1, actualAmount: '999.00' };
     }
