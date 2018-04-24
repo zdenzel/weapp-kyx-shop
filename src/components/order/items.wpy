@@ -86,7 +86,7 @@ export default class OrderItems extends wepy.component {
                     success: res => {
                         console.log('success', res);
                         wepy.navigateTo({
-                            url: `/pages/order/result?id=${order.id}&success=true&price=${order.totalAmount}`
+                            url: `/pages/order/result?id=${order.id}&status=success&price=${order.totalAmount}`
                         });
                     },
                     fail: res => {

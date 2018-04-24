@@ -17,27 +17,28 @@ export default class OrderInformation extends wepy.page {
     mixins = []
 
     data = {
-        success: false,
-        order: null
+        id: 0,
+        price: '0.00',
+        status: 'warn',
     }
 
     methods = {
         tapOrderPage(){
-            wx.redirectTo({
-                url: `/pages/order/detail?id=${this.order.id}`
+            wepy.redirectTo({
+                url: `/pages/order/detail?id=${id}`
             })
         },
         tapHomePage(){
-            wx.switchTab({
+            wepy.switchTab({
                 url: `/pages/home`
             })
         },
     }
 
     async onLoad(option) {
-        // this.success = option.status;
-        this.success = true;
-        this.order = { id: 1, actualAmount: '999.00' };
+        this.id = option.id || 0;
+        this.price = option.price || '0.00';
+        this.status = option.status || 'warn';
     }
 }
 
@@ -46,9 +47,9 @@ export default class OrderInformation extends wepy.page {
 <template>
     <view class="order-information">
         <view class="order-information-main">
-            <view class="order-information-icon"><icon type="{{success?'success':'warn'}}" size="48" color="{{isSuccess?colors.success:colors.warn}}"></icon></view>
-            <view class="order-information-title">订单支付成功</view>
-            <view class="order-information-text">支付金额：<text class="price">{{order.actualAmount}}</text></view>
+            <view class="order-information-icon"><icon type="{{status}}" size="48" color="{{status=='success'?colors.success:colors.warn}}"></icon></view>
+            <view class="order-information-title">{{status=='success'?'订单支付成功了':'订单支付失败了'}}</view>
+            <view class="order-information-text">支付金额：<text class="price">{{price}}</text></view>
             <view class="order-information-tool">
                 <button type="primary" size="large" @tap.stop="tapOrderPage">查看订单</button>
                 <button type="base" size="large" @tap.stop="tapHomePage" >回到首页</button>

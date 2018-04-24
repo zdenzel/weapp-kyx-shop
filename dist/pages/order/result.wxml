@@ -1,9 +1,9 @@
 
     <view class="order-information">
         <view class="order-information-main">
-            <view class="order-information-icon"><icon type="{{success?'success':'warn'}}" size="48" color="{{isSuccess?colors.success:colors.warn}}"/></view>
-            <view class="order-information-title">订单支付成功</view>
-            <view class="order-information-text">支付金额：<text class="price">{{order.actualAmount}}</text></view>
+            <view class="order-information-icon"><icon type="{{status}}" size="48" color="{{status=='success'?colors.success:colors.warn}}"/></view>
+            <view class="order-information-title">{{status=='success'?'订单支付成功了':'订单支付失败了'}}</view>
+            <view class="order-information-text">支付金额：<text class="price">{{price}}</text></view>
             <view class="order-information-tool">
                 <button type="primary" size="large" catchtap="tapOrderPage">查看订单</button>
                 <button type="base" size="large" catchtap="tapHomePage">回到首页</button>

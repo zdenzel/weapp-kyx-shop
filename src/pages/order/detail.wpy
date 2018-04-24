@@ -91,10 +91,13 @@ export default class OrderDetail extends wepy.page {
                     signType: result.signType,
                     paySign: result.paySign,
                     complete: res => {
-                        console.log('complete', res)
+                        console.log('complete', res);
                     },
                     success: res => {
-                        console.log('success', res)
+                        console.log('success', res);
+                        wepy.navigateTo({
+                            url: `/pages/order/result?id=${order.id}&status=success&price=${order.totalAmount}`
+                        });
                     },
                     fail: res => {
                         console.log('fail', res)
