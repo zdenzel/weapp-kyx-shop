@@ -42,7 +42,8 @@ export default class HomePage extends wepy.page {
             'wxc-dialog': '/packages/@minui/wxc-dialog/dist/index',
             'wxc-popup': '/packages/@minui/wxc-popup/dist/index',
             'wxc-toast': '/packages/@minui/wxc-toast/dist/index'
-        }
+        },
+        enablePullDownRefresh: true
     }
 
     components = {
@@ -94,27 +95,31 @@ export default class HomePage extends wepy.page {
 
     async getInitialData(){
         this.isloading = true;
+        await store.dispatch(getCatalogList());
         await utils.request(api.homepage).then(({ result })=>{
             this.freeQuota = result.freeQuota;
             this.slideList = result.slideList;
             this.newSaleList = result.newSaleList;
             this.hotSaleList = result.hotSaleList;
             this.hotReviewList = result.hotReviewList;
-
             this.$apply();
         }).catch(e=>{});
 
         this.isloading = false;
+        this.$apply();
+    }
+    
+    async onPullDownRefresh() {
+        //下拉刷新数据
+        console.log('下拉刷新数据');
+        await this.getInitialData();
+        wepy.stopPullDownRefresh();
     }
 
-    onLoad() {
-        Promise.all([
-            store.dispatch(getCatalogList()),
-            this.getInitialData(),
-        ]).then(e=>{
-            this.preloaded = true;
-            this.$apply();
-        });
+    async onLoad() {
+        await this.getInitialData();
+        this.preloaded = true;
+        this.$apply();
     }
 }
 

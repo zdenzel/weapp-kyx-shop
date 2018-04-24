@@ -190,8 +190,8 @@ export default class ProductList extends wepy.page {
     async onPullDownRefresh() {
         //下拉刷新数据
         console.log('下拉刷新数据');
-        await this.getInitialData();
         wepy.stopPullDownRefresh();
+        await this.getInitialData();
     }
 }
 

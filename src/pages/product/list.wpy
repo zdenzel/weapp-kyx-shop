@@ -45,7 +45,7 @@ export default class ProductList extends wepy.page {
             'wxc-popup': '/packages/@minui/wxc-popup/dist/index',
             'wxc-toast': '/packages/@minui/wxc-toast/dist/index'
         },
-        enablePullDownRefresh: true
+        // enablePullDownRefresh: true
     }
 
     components = {
