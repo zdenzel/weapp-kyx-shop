@@ -1,7 +1,8 @@
 import wepy from 'wepy'
 //是否为生产模式
 const isProdMode = true;
-const staticUrl = isProdMode ? 'https://api.keyixing.com/applet' : 'https://keyixingapi.local.co.bendan.name/applet';
+// const staticUrl = isProdMode ? 'https://api.keyixing.com/applet' : 'https://keyixingapi.local.co.bendan.name/applet';
+const staticUrl = isProdMode ? 'http://static.keyixing.com/applet' : 'https://keyixingapi.local.co.bendan.name/applet';
 export default class common extends wepy.mixin {
     data = {
         staticUrl,

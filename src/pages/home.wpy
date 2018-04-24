@@ -107,11 +107,14 @@ export default class HomePage extends wepy.page {
         this.isloading = false;
     }
 
-    async onLoad() {
-        await store.dispatch(getCatalogList());
-        await this.getInitialData();
-        this.preloaded = true;
-        this.$apply();
+    onLoad() {
+        Promise.all([
+            store.dispatch(getCatalogList()),
+            this.getInitialData(),
+        ]).then(e=>{
+            this.preloaded = true;
+            this.$apply();
+        });
     }
 }
 
