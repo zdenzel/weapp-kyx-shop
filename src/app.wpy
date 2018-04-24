@@ -34,7 +34,7 @@ export default class extends wepy.app {
             'pages/order/list',
             'pages/order/detail',
             'pages/order/confirm',
-            'pages/order/information',
+            'pages/order/result',
 
             'pages/consignee/list',
             'pages/consignee/edit',
@@ -85,6 +85,7 @@ export default class extends wepy.app {
 
     globalData = {
         deviceRadio: deviceRadio,
+        shareInfo: {},
         userInfo: null,
         token: null
     }
@@ -137,6 +138,7 @@ export default class extends wepy.app {
     async onLaunch() {
         console.log(wepy)
         await utils.login()
+        await utils.getShareInfo()
         let params = { uid: this.globalData.uid };
         store.dispatch(getShopCart(params));
     }

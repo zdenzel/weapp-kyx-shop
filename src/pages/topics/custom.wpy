@@ -176,7 +176,7 @@ export default class CustomTopics extends wepy.page {
                 covertext: null
             }
         },
-        onSubmit() {
+        async onSubmit() {
 
             if (!this.customInfo.material) {
                 utils.showToast('请选择茶叶毛料');
@@ -247,8 +247,8 @@ export default class CustomTopics extends wepy.page {
                 custom: custom
             };
 
-            store.dispatch(addShopCart(products)).then(res => {
-                wx.navigateTo({
+            await store.dispatch(addShopCart(products)).then(res => {
+                wepy.navigateTo({
                     url: '/pages/product/shopcart'
                 });
             });
@@ -266,44 +266,30 @@ export default class CustomTopics extends wepy.page {
         }
     }
 
-    getInitialData(){
-        return new Promise((resolve, reject) => {
-            utils.request(api.topics.custom).then(({ result }) => {
-                console.log('成功了', result);
-
-                this.materialList = result.materialList;
-                this.shapeList = result.shapeList;
-                this.packageList = result.packageList;
-                this.capacityList = result.capacityList;
-                this.specList = result.specList;
-                this.nefiList = result.nefiList;
-                this.coverList = result.coverList;
-                this.isloading = false;
-                this.$apply();
-                resolve();
-            }).catch(err => {
-                console.log('失败了', err);
-                this.isloading = false;
-                reject();
-            });
-        })
+    async getInitialData(){
+        await utils.request(api.topics.custom).then(({ result }) => {
+            this.materialList = result.materialList;
+            this.shapeList = result.shapeList;
+            this.packageList = result.packageList;
+            this.capacityList = result.capacityList;
+            this.specList = result.specList;
+            this.nefiList = result.nefiList;
+            this.coverList = result.coverList;
+        }).catch(e=>{});
+        this.$apply();
     }
 
-    onLoad(option) {
-        this.getInitialData().then(e => {
-            this.preloaded = true;
-            this.$apply();
-        });
+    async onLoad(option) {
+        await this.getInitialData();
+        this.preloaded = true;
+        this.$apply();
     }
 
-    onPullDownRefresh() {
+    async onPullDownRefresh() {
         //下拉刷新数据
         console.log('下拉刷新数据');
-        this.getInitialData().then(res => {
-            wepy.stopPullDownRefresh()
-        }).catch(err => {
-            wepy.stopPullDownRefresh()
-        })
+        await this.getInitialData();
+        wepy.stopPullDownRefresh()
     }
 }
 

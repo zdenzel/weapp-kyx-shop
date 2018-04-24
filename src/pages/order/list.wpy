@@ -63,14 +63,16 @@ export default class OrderLists extends wepy.page {
     }
 
     methods = {
-        onTabClick({ key }){
+        async onTabClick({ key }){
             if(key != this.activeId){
                 this.activeId = key;
                 this.orderList = null;
                 this.totalPage = 1;
                 this.currentPage = 1;
-                console.log('执行数据更新');
-                this.getInitialData();
+                this.isloading = true;
+                await this.getInitialData();
+                this.isloading = false;
+                this.$apply();
             }
         }
     }
@@ -80,7 +82,6 @@ export default class OrderLists extends wepy.page {
         if (isLoadmore) {
             currentPage = this.currentPage + 1;
         } else {
-            this.orderList = null;
             this.totalPage = 1;
             currentPage = 1;
         }
@@ -91,25 +92,21 @@ export default class OrderLists extends wepy.page {
             limit: this.limit
         }
 
-        console.log('getInitialData', data)
-
-        this.isloading = true;
-
         await utils.request(api.order.list, { data }).then(({result}) => {
-            if(result.datalist.length){
+            try{
+                if(!result.datalist.length){ return; }
                 if(isLoadmore){
                     this.orderList = _.concat(this.orderList, result.datalist);
                 } else{
                     this.orderList = _.cloneDeep(result.datalist);
                 }
-                this.totalPage = result.totalPage;
-                this.currentPage = currentPage;
-                this.$apply();
-            }
+            }catch(e){}
+            this.totalPage = result.totalPage;
+            this.currentPage = currentPage;
         }).catch(e=>{});
 
-        this.isloading = false;
         this.$apply();
+
     }
 
     async onLoad(option) {
@@ -119,18 +116,21 @@ export default class OrderLists extends wepy.page {
         this.$apply();
     }
 
-    onReachBottom(){
+    async onReachBottom(){
         //上拉加载更多
         console.log('上拉加载更多');
         if (this.currentPage >= this.totalPage) { return; }
-        this.getInitialData('loadmore');
+        this.isloading = true;
+        await this.getInitialData('loadmore');
+        this.isloading = false;
+        this.$apply();
     }
 
     async onPullDownRefresh() {
         //下拉刷新数据
         console.log('下拉刷新数据');
-        wepy.stopPullDownRefresh();
         await this.getInitialData();
+        wepy.stopPullDownRefresh();
     }
 }
 
@@ -139,9 +139,11 @@ export default class OrderLists extends wepy.page {
 <template>
 <tabbar class="statusbar" :datalist.sync="orderStatus" :defaultKey.sync="activeId" @on-change.user="onTabClick"></tabbar>
 <view class="contain" wx:if="{{preloaded}}">
-    <orderitems :datalist.sync="orderList" wx:if="{{orderList}}"></orderitems>
-    <loadmore wx:if="{{isloading}}"></loadmore>
+    <block wx:if="{{orderList}}">
+        <orderitems :datalist.sync="orderList"></orderitems>
+    </block>
     <nulldata wx:if="{{!orderList && !isloading}}"></nulldata>
+    <loadmore wx:if="{{isloading}}"></loadmore>
 </view>
 <loadmore wx:else></loadmore>
 </template>

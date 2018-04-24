@@ -58,11 +58,11 @@ export default class OrderDetail extends wepy.page {
     methods = {
         tapConsignee(){
             if(this.consignee){
-                wx.navigateTo({
+                wepy.navigateTo({
                     url: `/pages/consignee/list?sid=${this.consignee.id}&isOpt=true`
                 })
             } else{
-                wx.navigateTo({
+                wepy.navigateTo({
                     url: `/pages/consignee/edit?isOpt=true`
                 })
             }

@@ -202,6 +202,12 @@ async function getuid() {
     }
 }
 
+async function getShareInfo(){
+    await request(api.share.default).then(({ result }) => {
+        wepy.$instance.globalData.shareInfo = result || {};
+    }).catch(e => { })
+}
+
 /**
  * 调用微信登录
  */
@@ -288,6 +294,7 @@ module.exports = {
     checkSession,
     login,
     getUserInfo,
+    getShareInfo,
     redirect,
     showToast
 }

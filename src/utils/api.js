@@ -9,6 +9,10 @@ export default {
     payment: baseUrl + 'pay',
 
     homepage: baseUrl + 'homepage',
+
+    share: {
+        default: baseUrl + 'share/default',
+    },
     
     user: {
         login: baseUrl + 'user/login',

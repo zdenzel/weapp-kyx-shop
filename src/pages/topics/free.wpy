@@ -98,7 +98,7 @@ export default class FreeTopics extends wepy.page {
             console.log('now', this.selected.length)
 
         },
-        onSubmit(){
+        async onSubmit(){
             if(!this.selected || !this.selected.length){
                 utils.showToast('请选择商品');
                 return;
@@ -121,8 +121,8 @@ export default class FreeTopics extends wepy.page {
                 }
             });
 
-            store.dispatch(setShopBuyList(products)).then(res => {
-                wx.navigateTo({
+            await store.dispatch(setShopBuyList(products)).then(res => {
+                wepy.navigateTo({
                     url: '/pages/order/confirm'
                 });
             });
@@ -132,34 +132,28 @@ export default class FreeTopics extends wepy.page {
     events = {
     }
 
-    getTopicsFree(option, isLoadmore){
-        this.isloading = true;
+    async getTopicsFree(option, isLoadmore){
         //请求免费试喝
         let data = Object.assign({page: 1, limit: 10}, option);
         //接口访问
-        return new Promise(async (resolve, reject) => {
-
-            utils.request(api.topics.free, { data }).then(({ result }) => {
-                console.log('成功了', result);
+        await utils.request(api.topics.free, { data }).then(({ result }) => {
+            try{
+                if(result.datalist.length){ return; }
                 if(isLoadmore){
                     this.productList = _.concat(this.productList, result.datalist);
                 } else{
                     this.productList = _.cloneDeep(result.datalist);
                 }
-                this.amount = result.amount;
-                this.totalPage = result.totalPage;
-                this.isloading = false;
-                this.$apply();
-                resolve()
-            }).catch(err => {
-                this.isloading = false;
-                console.log('失败了', err);
-            });
+            }catch(e){}
+            this.amount = result.amount;
+            this.totalPage = result.totalPage;
+            this.$apply();
+        }).catch(e=>{});
 
-        });
+        this.$apply();
     }
 
-    getInitialData(isLoadmore){
+    async getInitialData(isLoadmore){
         if(isLoadmore){
             this.currentPage = this.currentPage + 1;
         } else{
@@ -172,34 +166,32 @@ export default class FreeTopics extends wepy.page {
             limit: this.limit
         }
 
-        console.log('getInitialData', data)
+        await this.getTopicsFree(data, isLoadmore);
 
-        return this.getTopicsFree(data, isLoadmore);
+        this.$apply();
     }
 
-    onLoad(res) {
-        console.log(res);
-        this.getInitialData().then(() => {
-            this.preloaded = true;
-            this.$apply();
-        });
+    async onLoad(option) {
+        await this.getInitialData();
+        this.preloaded = true;
+        this.$apply();
     }
 
-    onReachBottom(){
+    async onReachBottom(){
         //上拉加载更多
         console.log('上拉加载更多');
         if (this.currentPage >= this.totalPage) { return; }
-        this.getInitialData('loadmore');
+        this.isloading = true;
+        await this.getInitialData('loadmore');
+        this.isloading = false;
+        this.$apply();
     }
     
-    onPullDownRefresh() {
+    async onPullDownRefresh() {
         //下拉刷新数据
         console.log('下拉刷新数据');
-        this.getInitialData().then(res => {
-            wepy.stopPullDownRefresh()
-        }).catch(err => {
-            wepy.stopPullDownRefresh()
-        })
+        await this.getInitialData();
+        wepy.stopPullDownRefresh()
     }
 }
 

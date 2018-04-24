@@ -119,7 +119,7 @@ export default class AddressList extends wepy.page {
         if(isLoadmore){
             currentPage = this.currentPage + 1;
         } else{
-            this.consigneeList = null;
+            // this.consigneeList = null;
             this.totalPage = 1;
             currentPage = 1;
         }
@@ -129,21 +129,19 @@ export default class AddressList extends wepy.page {
             limit: this.limit
         }
 
-        console.log('getInitialData', data);
-
-        this.isloading = true;
         await utils.request(api.consignee.list, { data }).then(({result}) => {
-            console.log('成功了', result);
-            if(isLoadmore){
-                this.consigneeList = _.concat(this.consigneeList, result.datalist);
-            } else{
-                this.consigneeList = _.cloneDeep(result.datalist);
-            }
+            try{
+                if(!result.datalist.length){ return; }
+                if(isLoadmore){
+                    this.consigneeList = _.concat(this.consigneeList, result.datalist);
+                } else{
+                    this.consigneeList = _.cloneDeep(result.datalist);
+                }
+            }catch(e){}
             this.totalPage = result.totalPage;
             this.currentPage = currentPage;
         }).catch(e=>{})
 
-        this.isloading = false;
         this.$apply();
     }
 
@@ -162,14 +160,17 @@ export default class AddressList extends wepy.page {
         //上拉加载更多
         console.log('上拉加载更多');
         if (this.currentPage >= this.totalPage) { return; }
+        this.isloading = true;
         await this.getInitialData('loadmore');
+        this.isloading = false;
+        this.$apply();
     }
 
     async onPullDownRefresh() {
         //下拉刷新数据
         console.log('下拉刷新数据');
-        wepy.stopPullDownRefresh();
         await this.getInitialData();
+        wepy.stopPullDownRefresh();
     }
 }
 

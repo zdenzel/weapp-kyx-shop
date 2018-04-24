@@ -1,6 +1,6 @@
 
-    <view class="products"  wx:if="{{preloaded}}">
-        
+<block  wx:if="{{preloaded}}">
+    
     <scroll-view class="tabbar catalog" bindscroll="$tabbar$onScroll" scroll-left="{{$tabbar$offsetLeft}}" scroll-x="true"  wx:if="{{preloaded}}">
         <view class="tabbar-contain {{$tabbar$isFlex?'is-flex':''}}" style="{{$tabbar$mainStyle}}">
             <navigator class="tabbar-button" url="/pages/home" open-type="switchTab"><text>首页</text></navigator>
@@ -25,28 +25,27 @@
         </view>
     </scroll-view>
 
-        <view class="product">
-            <wxc-flex class="product-tool" main="between" cross="center">
-                <wxc-flex>
-                    <view class="btn {{sortValue == 'isPopular' ? 'active' : ''}}" bindtap="tapSort" data-wpytapsort-a="popular">
-                        <text>人气</text>
-                    </view>
-                    <view class="btn {{(sortValue == 'isPriceDown' || sortValue == 'isPriceUp') ? 'active' : ''}}" bindtap="tapSort" data-wpytapsort-a="price">
-                        <text>价格</text>
-                        <text class="icon icon-sort-{{sortValue == 'isPriceDown' ? 'down' : 'up'}}" wx:if="{{(sortValue == 'isPriceDown' || sortValue == 'isPriceUp')}}"/>
-                    </view>
-                </wxc-flex>
-                <wxc-flex>
-                    <!-- <view class="btn" bindtap="tapGridList()">
-                        <text class="icon icon-{{isGridList ? 'grid' : 'list'}}"></text>
-                    </view> -->
-                    <view class="btn {{filterValue ? 'active' : ''}}" bindtap="showFilter" data-wpyshowfilter-a="">
-                        <text>筛选</text>
-                        <text class="icon icon-filter"/>
-                    </view>
-                </wxc-flex>
-            </wxc-flex>
-            
+    <wxc-flex class="filters" main="between" cross="center">
+        <wxc-flex>
+            <view class="btn {{sortValue == 'isPopular' ? 'active' : ''}}" bindtap="tapSort" data-wpytapsort-a="popular">
+                <text>人气</text>
+            </view>
+            <view class="btn {{(sortValue == 'isPriceDown' || sortValue == 'isPriceUp') ? 'active' : ''}}" bindtap="tapSort" data-wpytapsort-a="price">
+                <text>价格</text>
+                <text class="icon icon-sort-{{sortValue == 'isPriceDown' ? 'down' : 'up'}}" wx:if="{{(sortValue == 'isPriceDown' || sortValue == 'isPriceUp')}}"/>
+            </view>
+        </wxc-flex>
+        <wxc-flex>
+            <!-- <view class="btn" bindtap="tapGridList()">
+                <text class="icon icon-{{isGridList ? 'grid' : 'list'}}"></text>
+            </view> -->
+            <view class="btn {{filterValue ? 'active' : ''}}" bindtap="showFilter" data-wpyshowfilter-a="">
+                <text>筛选</text>
+                <text class="icon icon-filter"/>
+            </view>
+        </wxc-flex>
+    </wxc-flex>
+    
     <wxc-popup class="J_Filter" locked="false" animation-mode="right" align="right">
         <view class="cp-filter" catchtap="$filter$tap">
             <scroll-view class="cp-filter-scroll" scroll-y>
@@ -84,9 +83,10 @@
         </view>
     </wxc-popup>
 
-            <block wx:if="{{productList}}">
-                <view class="product-list">
-                    <wxs src="../../wxs/filter.wxs" module="filter"/>
+    <view class="products">
+        <block wx:if="{{productList}}">
+            <view class="product-list">
+                <wxs src="../../wxs/filter.wxs" module="filter"/>
 
     <view style="padding:{{$grids$margin}}rpx" wx:if="{{isGridList}}">
         <view class="cp-grid-product">
@@ -129,7 +129,7 @@
         </view>
     </view>
 
-                    <wxs src="../../wxs/filter.wxs" module="filter"/>
+                <wxs src="../../wxs/filter.wxs" module="filter"/>
 
     <view style="padding:{{$items$margin}}rpx 0;" wx:else>
         <view class="cp-item-product">
@@ -172,9 +172,9 @@
         </view>
     </view>
 
-                </view>
-            </block>
-            
+            </view>
+        </block>
+        
     <view class="cp-loadmore" wx:if="{{isloading}}">
         <view class="cp-loadmore-main" style="padding:{{$loadmore$padding}} 0;">
             <view class="cp-loadmore-icon" style="border-color:{{$loadmore$iconColor}}"  wx:if="{{$loadmore$icon}}"><view style="background-color: {{$loadmore$iconColor}}"/></view>
@@ -182,7 +182,7 @@
         </view>
     </view>
 
-            
+        
     <view class="cp-nulldata" wx:if="{{!productList && !isloading}}">
         <view class="cp-nulldata-main" style="padding:{{$nulldata$padding}} 0;">
             <view class="cp-nulldata-icon icon icon-nulldata" style="color:{{$nulldata$iconColor}}"/>
@@ -190,9 +190,9 @@
         </view>
     </view>
 
-        </view>
     </view>
-    
+</block>
+
     <view class="cp-loadmore" wx:else>
         <view class="cp-loadmore-main" style="padding:{{$loadmore$padding}} 0;">
             <view class="cp-loadmore-icon" style="border-color:{{$loadmore$iconColor}}"  wx:if="{{$loadmore$icon}}"><view style="background-color: {{$loadmore$iconColor}}"/></view>

@@ -117,7 +117,7 @@ export default class ProductDetail extends wepy.page {
             // }
             this.showPorductSku('addcart');
             // store.dispatch(addShopCart(this.skuparams)).then(res => {
-            //     wx.navigateTo({
+            //     wepy.navigateTo({
             //         url: '/pages/product/shopcart'
             //     });
             // });
@@ -129,7 +129,7 @@ export default class ProductDetail extends wepy.page {
             // }
             this.showPorductSku('buynow');
             // store.dispatch(setShopBuyList(this.skuparams)).then(res => {
-            //     wx.navigateTo({
+            //     wepy.navigateTo({
             //         url: '/pages/order/confirm'
             //     });
             // });
@@ -180,17 +180,15 @@ export default class ProductDetail extends wepy.page {
 
     async getInitialData(isLoadmore) {
 
-        this.isloading = true;
-        
         await this.getProductDetail();
         await this.getProductComments();
 
-        this.isloading = false;
         this.$apply();
     }
 
     async onLoad(option) {
         this.activeId = option.id || 1;
+
         await this.getInitialData();
 
         this.preloaded = true;
@@ -200,8 +198,22 @@ export default class ProductDetail extends wepy.page {
     async onPullDownRefresh() {
         //下拉刷新数据
         console.log('下拉刷新数据');
-        wepy.stopPullDownRefresh();
         await this.getInitialData();
+        wepy.stopPullDownRefresh();
+    }
+
+    onShareAppMessage(res){
+        if (res.from === 'button') {
+            // 来自页面内转发按钮
+            console.log(res.target)
+        }
+        return {
+            path: `/pages/product/detail?id${this.activeId}`,
+            title: `${this.product.title} - ${wepy.$instance.globalData.shareInfo.title}`,
+            imageUrl: this.product.previewList[0].image || wepy.$instance.globalData.shareInfo.imageUrl,
+            success: res => { },
+            fail: res => { }
+        }
     }
 }
 

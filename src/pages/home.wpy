@@ -70,8 +70,18 @@ export default class HomePage extends wepy.page {
         hotReviewList: null
     }
 
-    onShareAppMessage(){
-        
+    onShareAppMessage(res){
+        if (res.from === 'button') {
+            // 来自页面内转发按钮
+            console.log(res.target)
+        }
+        return {
+            path: '/pages/home',
+            title: wepy.$instance.globalData.shareInfo.title,
+            imageUrl: wepy.$instance.globalData.shareInfo.imageUrl,
+            success: res => { },
+            fail: res => { }
+        }
     }
 
     computed = {
@@ -87,14 +97,13 @@ export default class HomePage extends wepy.page {
             this.slideIndex = e.detail.current;
         },
         onTabChange({key}){
-            wx.navigateTo({
+            wepy.navigateTo({
                 url: `/pages/product/list?id=${key}`
             })
         }
     }
 
     async getInitialData(){
-        this.isloading = true;
         await store.dispatch(getCatalogList());
         await utils.request(api.homepage).then(({ result })=>{
             this.freeQuota = result.freeQuota;
@@ -102,10 +111,8 @@ export default class HomePage extends wepy.page {
             this.newSaleList = result.newSaleList;
             this.hotSaleList = result.hotSaleList;
             this.hotReviewList = result.hotReviewList;
-            this.$apply();
         }).catch(e=>{});
 
-        this.isloading = false;
         this.$apply();
     }
     

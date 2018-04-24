@@ -129,14 +129,14 @@ export default class ProductFilter extends wepy.component {
                 }
                 if(this.type == 'addcart'){
                     store.dispatch(addShopCart(data)).then(res => {
-                        wx.navigateTo({
+                        wepy.navigateTo({
                             url: '/pages/product/shopcart'
                         });
                     });
                 }
                 if(this.type == 'buynow'){
                     store.dispatch(setShopBuyList(data)).then(res => {
-                        wx.navigateTo({
+                        wepy.navigateTo({
                             url: '/pages/order/confirm'
                         });
                     });

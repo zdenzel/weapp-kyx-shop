@@ -71,8 +71,8 @@ export default class OrderItems extends wepy.component {
                 }
             })
         },
-        async tapOrderPayment(id){
-            let data = { id };
+        async tapOrderPayment(order){
+            let data = { id: order.id };
             await utils.request(api.payment, { data }).then(({ result })=>{
                 wepy.requestPayment({
                     timeStamp: result.timeStamp,
@@ -81,10 +81,13 @@ export default class OrderItems extends wepy.component {
                     signType: result.signType,
                     paySign: result.paySign,
                     complete: res => {
-                        console.log('complete', res)
+                        console.log('complete', res);
                     },
                     success: res => {
-                        console.log('success', res)
+                        console.log('success', res);
+                        wepy.navigateTo({
+                            url: `/pages/order/result?id=${order.id}&success=true&price=${order.totalAmount}`
+                        });
                     },
                     fail: res => {
                         console.log('fail', res)
@@ -176,7 +179,7 @@ export default class OrderItems extends wepy.component {
                                 <button type="warn" @tap="tapOrderCancel({{order.id}})">取消订单</button>
                             </view>
                             <view class="btn" wx:if="{{order.payStatus==0}}">
-                                <button type="base" @tap="tapOrderPayment({{order.id}})">马上支付</button>
+                                <button type="base" @tap="tapOrderPayment({{order}})">马上支付</button>
                             </view>
                         </block>
                         <block wx:if="{{order.status==2}}">

@@ -59,7 +59,6 @@ export default class ProductDetail extends wepy.page {
         if (isLoadmore) {
             currentPage = this.currentPage + 1;
         } else {
-            this.orderList = null;
             this.totalPage = 1;
             currentPage = 1;
         }
@@ -70,16 +69,12 @@ export default class ProductDetail extends wepy.page {
             limit: this.limit
         }
         
-        this.isloading = true;
-
         await utils.request(api.product.comments, { data }).then(({result}) => {
             this.comments = result;
             this.totalPage = result.totalPage;
             this.currentPage = currentPage;
-            this.$apply();
         }).catch(e=>{ });
 
-        this.isloading = false;
         this.$apply();
     }
 
@@ -90,18 +85,21 @@ export default class ProductDetail extends wepy.page {
         this.$apply();
     }
 
-    onReachBottom(){
+    async onReachBottom(){
         //上拉加载更多
         console.log('上拉加载更多');
         if (this.currentPage >= this.totalPage) { return; }
-        this.getInitialData('loadmore');
+        this.isloading = true;
+        await this.getInitialData('loadmore');
+        this.isloading = false;
+        this.$apply();
     }
 
     async onPullDownRefresh() {
         //下拉刷新数据
         console.log('下拉刷新数据');
-        wepy.stopPullDownRefresh();
         await this.getInitialData();
+        wepy.stopPullDownRefresh();
     }
 }
 

@@ -113,7 +113,7 @@ export default class PageShopCart extends wepy.page {
             }
 
             store.dispatch(setShopBuyList()).then(res => {
-                wx.navigateTo({
+                wepy.navigateTo({
                     url: '/pages/order/confirm'
                 });
             });

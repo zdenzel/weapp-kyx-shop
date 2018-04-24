@@ -1,12 +1,14 @@
 
     
-    <form class="searchbar {{$searchbar$keyword ? 'inputing':''}} {{$searchbar$skin}}" style="{{$searchbar$style}}" report-submit="{{$searchbar$true}}" bindsubmit="$searchbar$formSubmit" bindreset="$searchbar$formReset">
+<form class="searchbar {{$searchbar$keyword ? 'inputing':''}} {{$searchbar$skin}}" style="{{$searchbar$style}}" report-submit="{{$searchbar$true}}" bindsubmit="$searchbar$formSubmit" bindreset="$searchbar$formReset">
+    <view class="container">
         <view class="wrapper">
             <input type="text" value="{{$searchbar$keyword}}" confirm-type="search" bindinput="$searchbar$inputTyping" bindconfirm="$searchbar$formSubmit" placeholder="搜索产品名"/>
             <button class="submit" form-type="submit"><text class="icon icon-search"/></button>
             <button class="cancel" form-type="reset">取消</button>
         </view>
-    </form>
+    </view>
+</form>
 
     <view class="catalog">
         <scroll-view class="catalog-nav" scroll-y="true">

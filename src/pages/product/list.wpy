@@ -45,7 +45,7 @@ export default class ProductList extends wepy.page {
             'wxc-popup': '/packages/@minui/wxc-popup/dist/index',
             'wxc-toast': '/packages/@minui/wxc-toast/dist/index'
         },
-        // enablePullDownRefresh: true
+        enablePullDownRefresh: true
     }
 
     components = {
@@ -78,7 +78,7 @@ export default class ProductList extends wepy.page {
     }
 
     methods = {
-        onTabChange({ key }) {
+        async onTabChange({ key }) {
 
             if (this.activeId == key) { return; }
 
@@ -91,8 +91,10 @@ export default class ProductList extends wepy.page {
             this.productList = null;
             this.totalPage = 1;
             this.currentPage = 1;
-
-            this.getInitialData();
+            this.isloading = true;
+            await this.getInitialData();
+            this.isloading = false;
+            this.$apply();
         },
         tapGridList(e) {
             //切换列表方式
@@ -101,7 +103,7 @@ export default class ProductList extends wepy.page {
         showFilter(e) {
             this.$broadcast('showFilter');
         },
-        tapSort(type) {
+        async tapSort(type) {
             if (type == 'popular' && this.sortValue == 'isPopular') { return; }
             //切换排序方式
             switch (type) {
@@ -114,10 +116,14 @@ export default class ProductList extends wepy.page {
                 default:
                     this.sortValue = null;
             }
-            this.getInitialData();
+            this.productList = null;
+            this.isloading = true;
+            await this.getInitialData();
+            this.isloading = false;
+            this.$apply();
 
         },
-        submitFilter(result) {
+        async submitFilter(result) {
             this.filterValue = _.cloneDeep(result);
             try{
                 this.yearValue = result.find(k => k.key == 'year').val[0];
@@ -129,7 +135,11 @@ export default class ProductList extends wepy.page {
             }catch(e){
                 this.typeValue = null
             }
-            this.getInitialData();
+            this.productList = null;
+            this.isloading = true;
+            await this.getInitialData();
+            this.isloading = false;
+            this.$apply();
         }
     }
 
@@ -142,7 +152,6 @@ export default class ProductList extends wepy.page {
         if (isLoadmore) {
             currentPage = this.currentPage + 1;
         } else {
-            this.productList = null;
             this.totalPage = 1;
             currentPage = 1;
         }
@@ -156,26 +165,22 @@ export default class ProductList extends wepy.page {
             limit: this.limit
         }
 
-        console.log('getInitialData', data)
-
-        this.isloading = true;
         if(!isLoadmore){
             await this.getProductFilter();
         }
         await utils.request(api.product.list, { data }).then(({result}) => {
-            if(result.datalist.length){
+            try{
+                if(!result.datalist.length){ return; }
                 if (isLoadmore) {
                     this.productList = _.concat(this.productList, result.datalist);
                 } else {
                     this.productList = _.cloneDeep(result.datalist);
                 }
-            }
+            }catch(e){}
             this.totalPage = result.totalPage;
             this.currentPage = currentPage;
-            this.$apply();
-        });
+        }).catch(e=>{});
 
-        this.isloading = false;
         this.$apply();
     }
 
@@ -216,81 +221,71 @@ export default class ProductList extends wepy.page {
         //上拉加载更多
         console.log('上拉加载更多');
         if (this.currentPage >= this.totalPage) { return; }
+        this.isloading = true;
         await this.getInitialData('loadmore');
+        this.isloading = false;
+        this.$apply();
     }
     
     async onPullDownRefresh() {
         //下拉刷新数据
         console.log('下拉刷新数据');
-        wepy.stopPullDownRefresh();
         await this.getInitialData();
+        wepy.stopPullDownRefresh();
     }
 }
 
 </script>
 <template>
-    <view class="products" wx:if="{{preloaded}}">
-        <tabbar class="catalog" :datalist.sync="catalogList" :defaultKey.sync="activeId" @on-change.user="onTabChange" wx:if="{{preloaded}}">
-            <navigator class="tabbar-button" url="/pages/home" open-type="switchTab" slot="before"><text>首页</text></navigator>
-            <navigator class="tabbar-button" url="/pages/topics/free" slot="after"><text>免费试喝</text></navigator>
-            <navigator class="tabbar-button" url="/pages/topics/custom" slot="after"><text>个性定制</text></navigator>
-        </tabbar>
-        <view class="product">
-            <wxc-flex class="product-tool" main="between" cross="center">
-                <wxc-flex>
-                    <view class="btn {{sortValue == 'isPopular' ? 'active' : ''}}" @tap="tapSort('popular')">
-                        <text>人气</text>
-                    </view>
-                    <view class="btn {{(sortValue == 'isPriceDown' || sortValue == 'isPriceUp') ? 'active' : ''}}" @tap="tapSort('price')">
-                        <text>价格</text>
-                        <text class="icon icon-sort-{{sortValue == 'isPriceDown' ? 'down' : 'up'}}" wx:if="{{(sortValue == 'isPriceDown' || sortValue == 'isPriceUp')}}"></text>
-                    </view>
-                </wxc-flex>
-                <wxc-flex>
-                    <!-- <view class="btn" @tap="tapGridList()">
-                        <text class="icon icon-{{isGridList ? 'grid' : 'list'}}"></text>
-                    </view> -->
-                    <view class="btn {{filterValue ? 'active' : ''}}" @tap="showFilter()">
-                        <text>筛选</text>
-                        <text class="icon icon-filter"></text>
-                    </view>
-                </wxc-flex>
-            </wxc-flex>
-            <filter :datalist.sync="filterList" :checked.sync="filterValue" @on-submit.user="submitFilter"></filter>
-            <block wx:if="{{productList}}">
-                <view class="product-list">
-                    <grids :datalist.sync="productList" wx:if="{{isGridList}}"></grids>
-                    <items :datalist.sync="productList" wx:else></items>
-                </view>
-            </block>
-            <loadmore wx:if="{{isloading}}"></loadmore>
-            <nulldata wx:if="{{!productList && !isloading}}"></nulldata>
-        </view>
+<block wx:if="{{preloaded}}">
+    <tabbar class="catalog" :datalist.sync="catalogList" :defaultKey.sync="activeId" @on-change.user="onTabChange" wx:if="{{preloaded}}">
+        <navigator class="tabbar-button" url="/pages/home" open-type="switchTab" slot="before"><text>首页</text></navigator>
+        <navigator class="tabbar-button" url="/pages/topics/free" slot="after"><text>免费试喝</text></navigator>
+        <navigator class="tabbar-button" url="/pages/topics/custom" slot="after"><text>个性定制</text></navigator>
+    </tabbar>
+    <wxc-flex class="filters" main="between" cross="center">
+        <wxc-flex>
+            <view class="btn {{sortValue == 'isPopular' ? 'active' : ''}}" @tap="tapSort('popular')">
+                <text>人气</text>
+            </view>
+            <view class="btn {{(sortValue == 'isPriceDown' || sortValue == 'isPriceUp') ? 'active' : ''}}" @tap="tapSort('price')">
+                <text>价格</text>
+                <text class="icon icon-sort-{{sortValue == 'isPriceDown' ? 'down' : 'up'}}" wx:if="{{(sortValue == 'isPriceDown' || sortValue == 'isPriceUp')}}"></text>
+            </view>
+        </wxc-flex>
+        <wxc-flex>
+            <!-- <view class="btn" @tap="tapGridList()">
+                <text class="icon icon-{{isGridList ? 'grid' : 'list'}}"></text>
+            </view> -->
+            <view class="btn {{filterValue ? 'active' : ''}}" @tap="showFilter()">
+                <text>筛选</text>
+                <text class="icon icon-filter"></text>
+            </view>
+        </wxc-flex>
+    </wxc-flex>
+    <filter :datalist.sync="filterList" :checked.sync="filterValue" @on-submit.user="submitFilter"></filter>
+    <view class="products">
+        <block wx:if="{{productList}}">
+            <view class="product-list">
+                <grids :datalist.sync="productList" wx:if="{{isGridList}}"></grids>
+                <items :datalist.sync="productList" wx:else></items>
+            </view>
+        </block>
+        <loadmore wx:if="{{isloading}}"></loadmore>
+        <nulldata wx:if="{{!productList && !isloading}}"></nulldata>
     </view>
-    <loadmore wx:else></loadmore>
+</block>
+<loadmore wx:else></loadmore>
 </template>
 <style lang="less">
 @import 'src/common/styles/config.less';
-.products {
-    padding-top: 100rpx;
-    position: relative;
-}
 
-.catalog{
-    position: fixed;
-    z-index: 10;
-}
-.product {
-    padding-top: 100rpx;
-}
-
-.product-tool {
+.filters{
     display: block;
     height: 60rpx;
     padding: @margin;
-    position: fixed;
-    right: 0;
-    left: 0;
+    position: -webkit-sticky;
+    position: sticky;
     top: 100rpx;
     z-index: 2;
     background-color: @color-maincolor;
@@ -318,6 +313,11 @@ export default class ProductList extends wepy.page {
             vertical-align: middle;
         } // font-size: @font-size-large;
     }
+}
+
+.products {
+    // padding-top: 100rpx;
+    position: relative;
 }
 
 </style>

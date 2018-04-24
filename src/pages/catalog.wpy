@@ -43,7 +43,7 @@ export default class Catalog extends wepy.page {
 
     methods = {
         onSearch(keyword){
-            wx.navigateTo({
+            wepy.navigateTo({
                 url: `/pages/search?keyword=${keyword}`
             });
         }
