@@ -152,6 +152,10 @@
     </view>
 
     <view class="toolbar"  wx:if="{{product}}">
+        <navigator class="action" url="/pages/home" open-type="switchTab">
+            <view class="icon icon-home"/>
+            <view class="text">首页</view>
+        </navigator>
         <button class="action" open-type="contact" type="default-light" session-from="{{product.id +'|'+product.title}}">
             <view class="icon icon-service"/>
             <view class="text">客服</view>
@@ -164,8 +168,8 @@
             <view class="icon icon-shopcart"/>
             <view class="text">购物车</view>
         </navigator>
-        <button class="button" type="primary" size="large" bindtap="addcart" data-wpyaddcart-a="">加入购物车</button>
-        <button class="button" type="base" size="large" bindtap="buynow" data-wpybuynow-a="">立即购买</button>
+        <button class="button addcart" type="primary" size="large" bindtap="addcart" data-wpyaddcart-a="">加入购物车</button>
+        <button class="button buynow" type="base" size="large" bindtap="buynow" data-wpybuynow-a="">立即购买</button>
     </view>
     <wxs src="../../wxs/filter.wxs" module="filter"/>
 

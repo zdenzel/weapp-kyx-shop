@@ -1,1 +1,1 @@
-"use strict";function warning(o){"undefined"!=typeof console&&"function"==typeof console.error&&console.error(o);try{throw new Error(o)}catch(o){}}exports.__esModule=!0,exports.default=warning;
+"use strict";function warning(e){"undefined"!=typeof console&&console.error;try{throw new Error(e)}catch(e){}}exports.__esModule=!0,exports.default=warning;

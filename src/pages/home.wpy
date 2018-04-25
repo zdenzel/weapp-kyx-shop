@@ -70,20 +70,6 @@ export default class HomePage extends wepy.page {
         hotReviewList: null
     }
 
-    onShareAppMessage(res){
-        if (res.from === 'button') {
-            // 来自页面内转发按钮
-            console.log(res.target)
-        }
-        return {
-            path: '/pages/home',
-            title: wepy.$instance.globalData.shareInfo.title,
-            imageUrl: wepy.$instance.globalData.shareInfo.imageUrl,
-            success: res => { },
-            fail: res => { }
-        }
-    }
-
     computed = {
         slideOptimize(){
             let width = winWidth;
@@ -127,6 +113,20 @@ export default class HomePage extends wepy.page {
         await this.getInitialData();
         this.preloaded = true;
         this.$apply();
+    }
+
+    onShareAppMessage(res){
+        if (res.from === 'button') {
+            // 来自页面内转发按钮
+            console.log(res.target)
+        }
+        return {
+            path: '/pages/home?isShare=true',
+            title: wepy.$instance.globalData.shareInfo.title,
+            imageUrl: wepy.$instance.globalData.shareInfo.imageUrl,
+            success: res => { },
+            fail: res => { }
+        }
     }
 }
 
