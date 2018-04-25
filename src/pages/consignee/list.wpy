@@ -58,7 +58,6 @@ export default class AddressList extends wepy.page {
             let data = { id };
             wepy.showLoading();
             await utils.request(api.consignee.default, { data, method: 'post' }).then(({result}) => {
-                wepy.hideLoading();
                 try{
                     this.consigneeList.map(item => {
                         item.isDefault = false;
@@ -70,17 +69,21 @@ export default class AddressList extends wepy.page {
                     })
                 } catch(e) {}
             }).catch(e=>{
-                wepy.hideLoading();
-                utils.showToast(e.message)
+                wepy.showModal({
+                    title: '温馨提示',
+                    content: e.message,
+                    showCancel: false
+                })
             });
+            wepy.hideLoading();
             this.$apply();
         },
         tapDelete(id){
             console.log('tapDelete');
             let data = { id };
             wepy.showModal({
-                // title: '温馨提示',
-                content: '确定要删除吗？'
+                title: '温馨提示',
+                content: '请确认要删除该地址吗？'
             }).then(async (res) => {
                 if(res.confirm){
                     //执行删除
@@ -93,7 +96,11 @@ export default class AddressList extends wepy.page {
                         } catch(e) {}
                     }).catch(e=>{
                         wepy.hideLoading();
-                        utils.showToast(e.message)
+                        wepy.showModal({
+                            title: '温馨提示',
+                            content: e.message,
+                            showCancel: false
+                        })
                     });
 
                     this.$apply();

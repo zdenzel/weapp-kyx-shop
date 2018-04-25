@@ -61,19 +61,22 @@ export default class OrderDetail extends wepy.page {
 
             wepy.showModal({
                 title: '温馨提示',
-                content: '确定要取消订单吗？'
+                content: '请确认要取消该订单吗？'
             }).then(async (res) => {
                 if(res.confirm){
                     //执行删除
                     wepy.showLoading();
                     await utils.request(api.order.cancel, {data}).then(res=>{
+                        utils.showToast('取消成功');
                         this.order.status = 5;
                         this.$apply();
-                        utils.showToast('取消成功');
-                    }).catch(({ message })=>{
-                        utils.showToast(message)
+                    }).catch(e=>{
+                        wepy.showModal({
+                            title: '温馨提示',
+                            content: e.message,
+                            showCancel: false
+                        });
                     });
-
                     wepy.hideLoading();
 
                     this.$apply();
@@ -83,6 +86,8 @@ export default class OrderDetail extends wepy.page {
         async tapOrderPayment(){
             let { id } = this.order;
             let data = { id };
+            
+            wepy.showLoading();
             await utils.request(api.payment, { data }).then(({ result })=>{
                 wepy.requestPayment({
                     timeStamp: result.timeStamp,
@@ -103,9 +108,14 @@ export default class OrderDetail extends wepy.page {
                         console.log('fail', res)
                     }
                 });
-            }).catch(({ message })=>{
-                utils.showToast(message)
+            }).catch(e=>{
+                wepy.showModal({
+                    title: '温馨提示',
+                    content: e.message,
+                    showCancel: false
+                });
             });
+            wepy.hideLoading();
             
         },
         tapOrderConfirm(){
@@ -123,8 +133,12 @@ export default class OrderDetail extends wepy.page {
                     await utils.request(api.order.confirm, {data}).then(res=>{
                         this.order.status = 4;
                         this.$apply();
-                    }).catch(({ message })=>{
-                        utils.showToast(message)
+                    }).catch(e=>{
+                        wepy.showModal({
+                            title: '温馨提示',
+                            content: e.message,
+                            showCancel: false
+                        });
                     });
 
                     wepy.hideLoading();

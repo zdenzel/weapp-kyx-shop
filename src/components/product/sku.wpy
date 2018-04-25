@@ -40,7 +40,7 @@ export default class ProductFilter extends wepy.component {
         skustock: 0,
         skuimage: null,
         skuprice: '0.00',
-        skucount: 0,
+        skucount: 1,
         skuAttrText: '请选择',
     }
 
@@ -103,13 +103,17 @@ export default class ProductFilter extends wepy.component {
         onChangeCounter(e){
             this.skucount = e.detail.number || 1;
             this.$apply();
-            this.skufetch();
+            this.sku2data();
         },
         onCancel() {
             this.$emit('on-cancel');
             this.$emit('hideSkuPopup');
         },
         onSubmit() {
+            if((this.datalist && !this.datalist.length) && !this.skudata.skustock){
+                utils.showToast('当前没有库存');
+                return;
+            }
             const data = {
                 id: this.skudata.pid,
                 sid: this.skudata.sid,
@@ -123,7 +127,7 @@ export default class ProductFilter extends wepy.component {
                 skuAttrText: this.skudata.skuAttrText,
             }
             if(this.type){
-                if(!data.sid){
+                if(this.datalist.length && !data.sid){
                     utils.showToast('请选择属性');
                     return;
                 }
@@ -168,18 +172,17 @@ export default class ProductFilter extends wepy.component {
             skuObj[`aid${i+1}`] = n.val;
         });
         let data = Object.assign({ id: this.pid }, skuObj);
-        console.log(data)
         await utils.request(api.product.sku, { data }).then(({result}) => {
             this.sid = result.id;
             this.pid = result.productId;
             this.skustock = result.count;
-            this.skucount = result.count ? this.skucount ? this.skucount : 1 : 0;
+            this.skucount = this.skucount || 1;
             this.skuprice = result.price;
             this.$apply();
         }).catch(e=>{
             this.sid = null;
             this.skustock = 0;
-            this.skucount = 0;
+            this.skucount = 1;
             this.$apply();
         });
 
@@ -207,6 +210,7 @@ export default class ProductFilter extends wepy.component {
             skucount: this.skucount,
             skuAttrText: this.skuAttrText,
         });
+        console.log(this.skudata)
         this.$apply();
     }
 
@@ -230,15 +234,16 @@ export default class ProductFilter extends wepy.component {
                     return n;
                 });
 
-                this.pid = this.skudata.pid;
-                this.sid = this.skudata.sid;
-                this.skuimage = this.skudata.skuimage;
-                this.skuprice = this.skudata.skuprice;
-                this.skustock = this.skudata.skustock;
-                this.skucount = this.skudata.skucount;
-                this.skuAttrText = this.skudata.skuAttrText;
-
             }catch(e){}
+
+
+            this.pid = this.skudata.pid;
+            this.sid = this.skudata.sid;
+            this.skuimage = this.skudata.skuimage;
+            this.skuprice = this.skudata.skuprice;
+            this.skustock = this.skudata.skustock;
+            this.skucount = this.skudata.skucount;
+            this.skuAttrText = this.skudata.skuAttrText;
 
             this.preloaded = true;
 
@@ -365,21 +370,19 @@ export default class ProductFilter extends wepy.component {
     padding: @margin/2;
 }
 .cp-sku-tool{
-    height: 100rpx;
     display: flex;
     background-color: @color-border;
     button{
+        flex: 1;
+        display: block;
         height: 100rpx;
         line-height: 100rpx;
-        display: block;
-        flex-flow: 1;
-        width: 100%;
         border-radius: 0;
-        margin-left: 1rpx;
-        &:first-child{
-            margin-left: 0;
-            margin-right: 1rpx;
-        }
+        // margin-left: 1rpx;
+        // &:first-child{
+        //     margin-left: 0;
+        //     margin-right: 1rpx;
+        // }
     }
 }
 </style>

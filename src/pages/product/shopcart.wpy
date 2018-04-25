@@ -90,8 +90,8 @@ export default class PageShopCart extends wepy.page {
         },
         onDelCart(param){
             wx.showModal({
-                // title: '温馨提示',
-                content: '确定要删除该商品吗？',
+                title: '温馨提示',
+                content: '请确认要删除该商品吗？',
                 success: (res) => {
                     if(res.confirm){
                         //执行删除

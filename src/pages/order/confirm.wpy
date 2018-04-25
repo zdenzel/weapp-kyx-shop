@@ -98,20 +98,22 @@ export default class OrderDetail extends wepy.page {
                 });
             }
 
+            wepy.showLoading();
             await utils.request(api.order.create, { data, method: 'POST' }).then( async ({result})=>{
 
-                this.delStorageConsignee();
+                await this.delStorageConsignee();
                 await store.dispatch(removeShopBuyList());
-                
                 wepy.redirectTo({
                     url: `/pages/order/detail?id=${result}`
                 });
             }).catch(e=>{
                 wepy.showModal({
-                    title: '提交失败',
-                    content: e.message
+                    title: '温馨提示',
+                    content: e.message,
+                    showCancel: false
                 });
             });
+            wepy.hideLoading();
         }
     }
 

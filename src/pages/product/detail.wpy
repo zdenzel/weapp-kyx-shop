@@ -83,7 +83,7 @@ export default class ProductDetail extends wepy.page {
             skustock: 0,
             skuimage: null,
             skuprice: '0.00',
-            skucount: 0,
+            skucount: 1,
             skutitle: null,
             skuAttrText: '请选择'
         }
@@ -155,6 +155,7 @@ export default class ProductDetail extends wepy.page {
                 datalist: result.skuList,
                 skutitle: result.title,
                 skuprice: result.price,
+                skustock: result.stockCount,
                 skuimage: result.previewList[0]
             });
             this.skudata = _.assign({}, skudata, {
@@ -242,7 +243,8 @@ export default class ProductDetail extends wepy.page {
             </view>
             <view class="box stock" @tap="showPorductSku()">
                 <text class="label">已选</text>
-                <text class="text">{{skudata.sid ? skudata.skuAttrText +'，'+ skudata.skucount +'件' : skudata.skuAttrText}}</text>
+                <text class="text" wx:if="{{product.skuList}}">{{skudata.sid ? skudata.skuAttrText +'，'+ skudata.skucount +'件' : skudata.skuAttrText}}</text>
+                <text class="text" wx:else>{{skudata.skucount}}件</text>
             </view>
             <view class="box attrs">
                 <view class="item" wx:if="{{product.attribute.year}}">
@@ -297,10 +299,14 @@ export default class ProductDetail extends wepy.page {
     </scroll-view>
     <loadmore wx:else></loadmore>
     <view class="toolbar" wx:if="{{product}}">
-        <navigator class="action" url="/pages/webview?url=http://www.baidu.com/">
+        <button class="action" open-type="contact" type="default-light" session-from="{{product.id +'|'+product.title}}">
             <view class="icon icon-service"></view>
             <view class="text">客服</view>
-        </navigator>
+        </button>
+        <!-- <contact-button class="action" type="default-light" session-from="weapp">
+            <view class="icon icon-service"></view>
+            <view class="text">客服</view>
+        </contact-button> -->
         <navigator class="action" url="/pages/product/shopcart">
             <view class="icon icon-shopcart"></view>
             <view class="text">购物车</view>
@@ -425,9 +431,15 @@ export default class ProductDetail extends wepy.page {
         align-items: center;
         justify-content: center;
         line-height: 1.2;
+        padding: 0;
+        outline: none;
+        border-radius: 0;
         border-left: 2rpx solid @color-border;
         font-size: @font-size-small;
+        background-color: transparent;
+        color: @color-base;
         &:first-child{ border-left: 0;}
+        &:after{ display: none;}
         .icon{ font-size: 46rpx; }
     }
 }

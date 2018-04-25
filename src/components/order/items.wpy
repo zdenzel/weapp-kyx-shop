@@ -47,7 +47,7 @@ export default class OrderItems extends wepy.component {
             let data = { id }
             wepy.showModal({
                 title: '温馨提示',
-                content: '确定要取消订单吗？'
+                content: '请确认要取消该订单吗？'
             }).then(async (res) => {
                 if(res.confirm){
                     //执行删除
@@ -61,10 +61,13 @@ export default class OrderItems extends wepy.component {
                                 return n
                             });
                         } catch(e) {}
-                    }).catch(({ message })=>{
-                        utils.showToast(message)
+                    }).catch(e=>{
+                        wepy.showModal({
+                            title: '温馨提示',
+                            content: e.message,
+                            showCancel: false
+                        })
                     });
-
                     wepy.hideLoading();
 
                     this.$apply();
@@ -73,6 +76,8 @@ export default class OrderItems extends wepy.component {
         },
         async tapOrderPayment(order){
             let data = { id: order.id };
+
+            wepy.showLoading();
             await utils.request(api.payment, { data }).then(({ result })=>{
                 wepy.requestPayment({
                     timeStamp: result.timeStamp,
@@ -93,9 +98,14 @@ export default class OrderItems extends wepy.component {
                         console.log('fail', res)
                     }
                 });
-            }).catch(({ message })=>{
-                utils.showToast(message)
+            }).catch(e=>{
+                wepy.showModal({
+                    title: '温馨提示',
+                    content: e.message,
+                    showCancel: false
+                })
             });
+            wepy.hideLoading();
             
         },
         tapOrderConfirm(id){
@@ -117,8 +127,12 @@ export default class OrderItems extends wepy.component {
                                 return n
                             });
                         } catch(e) {}
-                    }).catch(({ message })=>{
-                        utils.showToast(message)
+                    }).catch(e=>{
+                        wepy.showModal({
+                            title: '温馨提示',
+                            content: e.message,
+                            showCancel: false
+                        })
                     });
 
                     wepy.hideLoading();

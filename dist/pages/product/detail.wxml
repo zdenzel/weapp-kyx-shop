@@ -22,7 +22,8 @@
             </view>
             <view class="box stock" bindtap="showPorductSku" data-wpyshowporductsku-a="">
                 <text class="label">已选</text>
-                <text class="text">{{skudata.sid ? skudata.skuAttrText +'，'+ skudata.skucount +'件' : skudata.skuAttrText}}</text>
+                <text class="text" wx:if="{{product.skuList}}">{{skudata.sid ? skudata.skuAttrText +'，'+ skudata.skucount +'件' : skudata.skuAttrText}}</text>
+                <text class="text" wx:else>{{skudata.skucount}}件</text>
             </view>
             <view class="box attrs">
                 <view class="item" wx:if="{{product.attribute.year}}">
@@ -151,10 +152,14 @@
     </view>
 
     <view class="toolbar"  wx:if="{{product}}">
-        <navigator class="action" url="/pages/webview?url=http://www.baidu.com/">
+        <button class="action" open-type="contact" type="default-light" session-from="{{product.id +'|'+product.title}}">
             <view class="icon icon-service"/>
             <view class="text">客服</view>
-        </navigator>
+        </button>
+        <!-- <contact-button class="action" type="default-light" session-from="weapp">
+            <view class="icon icon-service"></view>
+            <view class="text">客服</view>
+        </contact-button> -->
         <navigator class="action" url="/pages/product/shopcart">
             <view class="icon icon-shopcart"/>
             <view class="text">购物车</view>

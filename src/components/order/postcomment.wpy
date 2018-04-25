@@ -91,8 +91,12 @@ export default class OrderPostComment extends wepy.component {
             await utils.request(api.order.comment, { data, method: 'POST' }).then(({ result }) => {
                 this.$emit('on-submit', data);
                 this.$emit('hidePostComment');
-            }).catch(e=>{   
-                utils.showToast('提交失败了');
+            }).catch(e=>{
+                wepy.showModal({
+                    title: '温馨提示',
+                    content: e.message,
+                    showCancel: false
+                });
             })
             wepy.hideLoading();
         },
