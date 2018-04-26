@@ -1,18 +1,18 @@
 
-    <view class="mycenter">
-        <view class="header">
-            <wxc-cc>
-                <view class="user-info">
-                    <view class="user-avatar">
-                        <wxc-avatar src="{{userInfo.avatarUrl}}"/>
-                    </view>
-                    <view class="user-name">
-                        <text>{{userInfo.nickName}}</text>
-                    </view>
+<view class="mycenter"  wx:if="{{preloaded}}">
+    <view class="header">
+        <wxc-cc>
+            <view class="user-info">
+                <view class="user-avatar">
+                    <wxc-avatar src="{{userInfo.avatarUrl}}"/>
                 </view>
-            </wxc-cc>
-        </view>
-        
+                <view class="user-name">
+                    <text>{{userInfo.nickName}}</text>
+                </view>
+            </view>
+        </wxc-cc>
+    </view>
+    
     <scroll-view class="tabbar tabbar" bindscroll="$tabbar$onScroll" scroll-left="{{$tabbar$offsetLeft}}" scroll-x="true"  wx:if="{{$tabbar$datalist}}">
         <view class="tabbar-contain {{$tabbar$isFlex?'is-flex':''}}" style="{{$tabbar$mainStyle}}">
             
@@ -37,18 +37,25 @@
         </view>
     </scroll-view>
 
-        <wxc-flex class="menu" main="around">
-            <navigator class="normal" url="/pages/shopcart" open-type="switchTab">
-                <text class="icon icon-shopcart"/>
-                <text class="text">购物车</text>
-            </navigator>
-            <navigator class="normal" url="/pages/consignee/list">
-                <text class="icon icon-location"/>
-                <text class="text">收货地址</text>
-            </navigator>
-            <navigator class="normal" url="/pages/help/faq">
-                <text class="icon icon-question"/>
-                <text class="text">常见问题</text>
-            </navigator>
-        </wxc-flex>
+    <wxc-flex class="menu" main="around">
+        <navigator class="normal" url="/pages/shopcart" open-type="switchTab">
+            <text class="icon icon-shopcart"/>
+            <text class="text">购物车</text>
+        </navigator>
+        <navigator class="normal" url="/pages/consignee/list">
+            <text class="icon icon-location"/>
+            <text class="text">收货地址</text>
+        </navigator>
+        <navigator class="normal" url="/pages/help/faq">
+            <text class="icon icon-question"/>
+            <text class="text">常见问题</text>
+        </navigator>
+    </wxc-flex>
+</view>
+
+    <view class="cp-loadmore" wx:else>
+        <view class="cp-loadmore-main" style="padding:{{$loadmore$padding}} 0;">
+            <view class="cp-loadmore-icon" style="border-color:{{$loadmore$iconColor}}"  wx:if="{{$loadmore$icon}}"><view style="background-color: {{$loadmore$iconColor}}"/></view>
+            <view class="cp-loadmore-text" style="color:{{$loadmore$textColor}}">{{$loadmore$text}}</view>
+        </view>
     </view>

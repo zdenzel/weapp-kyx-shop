@@ -4,6 +4,8 @@ import wepy from 'wepy'
 import utils from '@/utils'
 import api from '@/utils/api'
 import tabbar from '@/components/tabbar'
+import loadmore from '@/components/loadmore'
+import nulldata from '@/components/nulldata'
 
 export default class MyCenter extends wepy.page {
     config = {
@@ -25,18 +27,22 @@ export default class MyCenter extends wepy.page {
             'wxc-dialog': '/packages/@minui/wxc-dialog/dist/index',
             'wxc-popup': '/packages/@minui/wxc-popup/dist/index',
             'wxc-toast': '/packages/@minui/wxc-toast/dist/index'
-        }
+        },
+        enablePullDownRefresh: true
     }
 
     components = {
-        tabbar
+        tabbar,
+        loadmore,
+        nulldata
     }
 
     mixins = []
 
     data = {
+        preloaded:false,
         userInfo: {},
-        orderStatus: [
+        orderTypes: [
             { id: 0, name: '全部', badge: 0 },
             { id: 1, name: '待付款', badge: 0 },
             { id: 2, name: '待发货', badge: 0 },
@@ -46,52 +52,66 @@ export default class MyCenter extends wepy.page {
         activeKey: 0
     }
 
-    methods = {
+    async getInitialData() {
+        await utils.request(api.order.types).then(({result}) => {
+            try{
+                this.orderTypes = _.cloneDeep(result);
+            }catch(e){}
+        }).catch(e=>{});
+
+        this.$apply();
+
     }
-
-    events = {
-
+    
+    async onPullDownRefresh() {
+        //下拉刷新数据
+        console.log('下拉刷新数据');
+        await this.getInitialData();
+        wepy.stopPullDownRefresh();
     }
 
     async onLoad() {
-        let { userInfo } = await utils.getUserInfo()
-        this.userInfo = userInfo
-        this.$apply()
+        await this.getInitialData();
+        let { userInfo } = await utils.getUserInfo();
+        this.userInfo = userInfo;
+        this.preloaded = true;
+        this.$apply();
     }
 }
 
 </script>
 
 <template>
-    <view class="mycenter">
-        <view class="header">
-            <wxc-cc>
-                <view class="user-info">
-                    <view class="user-avatar">
-                        <wxc-avatar src="{{userInfo.avatarUrl}}"></wxc-avatar>
-                    </view>
-                    <view class="user-name">
-                        <text>{{userInfo.nickName}}</text>
-                    </view>
+<view class="mycenter" wx:if="{{preloaded}}">
+    <view class="header">
+        <wxc-cc>
+            <view class="user-info">
+                <view class="user-avatar">
+                    <wxc-avatar src="{{userInfo.avatarUrl}}"></wxc-avatar>
                 </view>
-            </wxc-cc>
-        </view>
-        <tabbar class="tabbar" :datalist.sync="orderStatus" alive="false" isFlex route="/pages/order/list"></tabbar>
-        <wxc-flex class="menu" main="around">
-            <navigator class="normal" url="/pages/shopcart" open-type="switchTab">
-                <text class="icon icon-shopcart"></text>
-                <text class="text">购物车</text>
-            </navigator>
-            <navigator class="normal" url="/pages/consignee/list">
-                <text class="icon icon-location"></text>
-                <text class="text">收货地址</text>
-            </navigator>
-            <navigator class="normal" url="/pages/help/faq">
-                <text class="icon icon-question"></text>
-                <text class="text">常见问题</text>
-            </navigator>
-        </wxc-flex>
+                <view class="user-name">
+                    <text>{{userInfo.nickName}}</text>
+                </view>
+            </view>
+        </wxc-cc>
     </view>
+    <tabbar class="tabbar" :datalist.sync="orderTypes" alive="false" isFlex route="/pages/order/list"></tabbar>
+    <wxc-flex class="menu" main="around">
+        <navigator class="normal" url="/pages/shopcart" open-type="switchTab">
+            <text class="icon icon-shopcart"></text>
+            <text class="text">购物车</text>
+        </navigator>
+        <navigator class="normal" url="/pages/consignee/list">
+            <text class="icon icon-location"></text>
+            <text class="text">收货地址</text>
+        </navigator>
+        <navigator class="normal" url="/pages/help/faq">
+            <text class="icon icon-question"></text>
+            <text class="text">常见问题</text>
+        </navigator>
+    </wxc-flex>
+</view>
+<loadmore wx:else></loadmore>
 </template>
 
 <style lang="less">

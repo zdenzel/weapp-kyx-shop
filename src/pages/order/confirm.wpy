@@ -180,9 +180,9 @@ export default class OrderDetail extends wepy.page {
                 })
             })
             if(areaFreight){
-                freightAmount = Math.ceil( ( nowCount - areaFreight.expressStart ) / areaFreight.expressPlus ) * areaFreight.plusPrice + parseInt(areaFreight.price);
+                freightAmount = Math.ceil( ( nowCount - Number(areaFreight.expressStart) ) / Number(areaFreight.expressPlus) ) * Number(areaFreight.plusPrice) + Number(areaFreight.price);
             } else{
-                freightAmount = Math.ceil( ( nowCount - expressStart ) / expressPlus ) * plusPrice + parseInt(price);
+                freightAmount = Math.ceil( ( nowCount - Number(expressStart) ) / Number(expressPlus) ) * Number(plusPrice) + Number(price);
             }
         } catch(e){}
 

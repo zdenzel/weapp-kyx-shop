@@ -1,44 +1,46 @@
 <wxs src="../wxs/filter.wxs" module="filter"/>
 
-<form class="shopcart" report-submit="true" bindsubmit="formSubmit"  wx:if="{{shopCartList.length}}">
-    <view class="shopcart-contain">
-        <block wx:for="{{shopCartList}}" wx:for-index="index" wx:for-item="product" wx:key="product.id">
-            <wxc-flex class="shopcart-product">
-                <view class="shopcart-product-check" catchtap="onCheckOne" data-wpyoncheckone-a="{{product}}">
-                    <text class="icon icon-radio{{ product.isSelected ? '-cur': '' }}"/>
-                </view>
-                <navigator class="shopcart-product-cover" url="/pages/product/detail?id={{product.id}}">
-                    <image src="{{filter.thumbnail(product.cover,optimize)}}" mode="scaleToFill"/>
-                </navigator>
-                <wxc-flex class="shopcart-product-main" main="between" dir="top">
-                    <wxc-flex class="shopcart-product-contain" dir="top">
-                        <view class="shopcart-product-title">{{product.title}}</view>
-                        <view class="shopcart-product-text">{{product.skuAttrText}}</view>
+<block  wx:if="{{shopCartList.length}}">
+    <form class="shopcart" report-submit="true" bindsubmit="formSubmit">
+        <view class="shopcart-contain">
+            <block wx:for="{{shopCartList}}" wx:for-index="index" wx:for-item="product" wx:key="product.id">
+                <wxc-flex class="shopcart-product">
+                    <view class="shopcart-product-check" catchtap="onCheckOne" data-wpyoncheckone-a="{{product}}">
+                        <text class="icon icon-radio{{ product.isSelected ? '-cur': '' }}"/>
+                    </view>
+                    <navigator class="shopcart-product-cover" url="/pages/product/detail?id={{product.id}}">
+                        <image src="{{filter.thumbnail(product.cover,optimize)}}" mode="scaleToFill"/>
+                    </navigator>
+                    <wxc-flex class="shopcart-product-main" main="between" dir="top">
+                        <wxc-flex class="shopcart-product-contain" dir="top">
+                            <view class="shopcart-product-title">{{product.title}}</view>
+                            <view class="shopcart-product-text">{{product.skuAttrText}}</view>
+                        </wxc-flex>
+                        <wxc-flex class="shopcart-product-count" main="between" cross="center">
+                            <text class="price">{{product.price}}</text>
+                            <wxc-counter class="counter" number="{{product.count || 1}}" max="{{product.stock || 1}}" min="1"  bind:changenumber="onChangeCounter" data-value="{{product}}"/>
+                        </wxc-flex>
+                        <text class="icon icon-close" catchtap="onDelCart" data-wpyondelcart-a="{{product}}"/>
                     </wxc-flex>
-                    <wxc-flex class="shopcart-product-count" main="between" cross="center">
-                        <text class="price">{{product.price}}</text>
-                        <wxc-counter class="counter" number="{{product.count || 1}}" max="{{product.stock || 1}}" min="1"  bind:changenumber="onChangeCounter" data-value="{{product}}"/>
-                    </wxc-flex>
-                    <text class="icon icon-close" catchtap="onDelCart" data-wpyondelcart-a="{{product}}"/>
                 </wxc-flex>
+            </block>
+        </view>
+        <wxc-flex class="shopcart-toolbar">
+            <wxc-flex class="contain" cross="center" main="between">
+                <view class="check">
+                    <label catchtap="onCheckAll" data-wpyoncheckall-a="">
+                        <text class="icon icon-radio{{ isSelectedAll ? '-cur': '' }}"/>
+                        <text>全选</text>
+                    </label>
+                </view>
+                <view class="amount">
+                    合计：<text class="price">{{totalAmount}}</text>
+                </view>
             </wxc-flex>
-        </block>
-    </view>
-    <wxc-flex class="shopcart-toolbar">
-        <wxc-flex class="contain" cross="center" main="between">
-            <view class="check">
-                <label catchtap="onCheckAll" data-wpyoncheckall-a="">
-                    <text class="icon icon-radio{{ isSelectedAll ? '-cur': '' }}"/>
-                    <text>全选</text>
-                </label>
-            </view>
-            <view class="amount">
-                合计：<text class="price">{{totalAmount}}</text>
-            </view>
+            <button class="submit" type="base" size="bigger" form-type="submit">结算</button>
         </wxc-flex>
-        <button class="submit" type="base" size="bigger" form-type="submit">结算</button>
-    </wxc-flex>
-</form>
+    </form>
+</block>
 
     <view class="cp-nulldata" wx:else>
         <view class="cp-nulldata-main" style="padding:{{$nulldata$padding}} 0;">

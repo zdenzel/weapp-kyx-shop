@@ -33,7 +33,20 @@
 		},
 		"miniprogram": {
 			"current": -1,
-			"list": []
+			"list": [
+				{
+					"id": 0,
+					"name": "测试分享回路",
+					"pathName": "pages/product/detail",
+					"query": "id=54&isShare=true"
+				},
+				{
+					"id": 1,
+					"name": "测试支付回路",
+					"pathName": "pages/order/result",
+					"query": "id=1&status=error&price=200"
+				}
+			]
 		}
 	}
 }

@@ -49,12 +49,12 @@ export default class OrderLists extends wepy.page {
         isloading: false,
         activeId: 0,
         activeIndex: 0,
-        orderStatus: [
-            { id: 0, name: '全部', badge: 0, content: '全部' },
-            { id: 1, name: '待付款', badge: 0, content: '待付款' },
-            { id: 2, name: '待发货', badge: 0, content: '待发货' },
-            { id: 3, name: '待收货', badge: 0, content: '待收货' },
-            { id: 4, name: '已完成', badge: 0, content: '已完成' }
+        orderTypes: [
+            { id: 0, name: '全部', badge: 0 },
+            { id: 1, name: '待付款', badge: 0 },
+            { id: 2, name: '待发货', badge: 0 },
+            { id: 3, name: '待收货', badge: 0 },
+            { id: 4, name: '已完成', badge: 0 }
         ],
         orderList: null,
         limit: 10,
@@ -92,6 +92,13 @@ export default class OrderLists extends wepy.page {
             limit: this.limit
         }
 
+        await utils.request(api.order.types).then(({result}) => {
+            try{
+                this.orderTypes = _.cloneDeep(result);
+            }catch(e){}
+            this.$apply();
+        }).catch(e=>{});
+
         await utils.request(api.order.list, { data }).then(({result}) => {
             try{
                 if(!result.datalist.length){ return; }
@@ -103,6 +110,7 @@ export default class OrderLists extends wepy.page {
             }catch(e){}
             this.totalPage = result.totalPage;
             this.currentPage = currentPage;
+            this.$apply();
         }).catch(e=>{});
 
         this.$apply();
@@ -137,7 +145,7 @@ export default class OrderLists extends wepy.page {
 </script>
 
 <template>
-<tabbar class="statusbar" :datalist.sync="orderStatus" :defaultKey.sync="activeId" @on-change.user="onTabClick"></tabbar>
+<tabbar class="statusbar" :datalist.sync="orderTypes" :defaultKey.sync="activeId" @on-change.user="onTabClick"></tabbar>
 <view class="contain" wx:if="{{preloaded}}">
     <block wx:if="{{orderList}}">
         <orderitems :datalist.sync="orderList"></orderitems>

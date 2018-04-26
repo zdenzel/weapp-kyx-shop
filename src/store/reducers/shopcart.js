@@ -2,7 +2,7 @@
  * @Author: zdenzel
  * @Date:   2018-03-14 23:23:42
  * @Last Modified by:   denzel
- * @Last Modified time: 2018-04-20 01:42:41
+ * @Last Modified time: 2018-04-27 01:18:03
  */
 
 import _ from 'lodash'
@@ -20,6 +20,7 @@ const initState = {
     shopBuyType: 1,
     isSelectedAll: false,
     totalAmount: 0,
+    shopCartCount: 0,
 }
 
 const getSelectStatus = (state) => {
@@ -48,8 +49,9 @@ const reducers = handleActions({
         let shopCartList = Array.from(new Set(shopCartData.filter(item => item.uid == payload.uid)))
         let isSelectedAll = getSelectStatus(shopCartList)
         let totalAmount = getTotalAmount(shopCartList)
+        let shopCartCount = shopCartList.length
 
-        return { ...state, shopCartData, shopCartList, isSelectedAll, totalAmount }
+        return { ...state, shopCartData, shopCartList, isSelectedAll, totalAmount, shopCartCount }
     },
     [types.SET_SHOP_CART](state, { type, payload }) {
         let shopCartData = state.shopCartData.concat()
@@ -65,10 +67,11 @@ const reducers = handleActions({
         let shopCartList = shopCartData.filter(item => item.uid == payload.uid)
         let isSelectedAll = getSelectStatus(shopCartList)
         let totalAmount = getTotalAmount(shopCartList)
+        let shopCartCount = shopCartList.length
 
         wepy.setStorageSync(SHOP_CART_LIST, shopCartData)
 
-        return { ...state, shopCartData, shopCartList, isSelectedAll, totalAmount }
+        return { ...state, shopCartData, shopCartList, isSelectedAll, totalAmount, shopCartCount }
     },
     [types.DEL_SHOP_CART](state, { type, payload }) {
         let shopCartData = state.shopCartData.concat()
@@ -81,10 +84,11 @@ const reducers = handleActions({
         let shopCartList = shopCartData.filter(item => item.uid == payload.uid)
         let isSelectedAll = getSelectStatus(shopCartList)
         let totalAmount = getTotalAmount(shopCartList)
+        let shopCartCount = shopCartList.length
 
         wepy.setStorageSync(SHOP_CART_LIST, shopCartData)
 
-        return { ...state, shopCartData, shopCartList, isSelectedAll, totalAmount }
+        return { ...state, shopCartData, shopCartList, isSelectedAll, totalAmount, shopCartCount }
     },
     [types.ADD_SHOP_CART](state, { type, payload }) {
         let shopCartData = state.shopCartData.concat()
@@ -95,7 +99,7 @@ const reducers = handleActions({
                     shopCartData = shopCartData.map(item => {
                         if(item.id == payload.id && item.uid == payload.uid && item.sid == payload.sid){
                             item.isSelected = true
-                            item.count = item.count + payload.count
+                            item.count = item.stock < item.count ? item.count + payload.count : item.count;
                         }
                         return item
                     })
@@ -108,10 +112,11 @@ const reducers = handleActions({
         let shopCartList = shopCartData.filter(item => item.uid == payload.uid)
         let isSelectedAll = getSelectStatus(shopCartList)
         let totalAmount = getTotalAmount(shopCartList)
+        let shopCartCount = shopCartList.length
 
         wepy.setStorageSync(SHOP_CART_LIST, shopCartData)
 
-        return { ...state, shopCartData, shopCartList, isSelectedAll, totalAmount }
+        return { ...state, shopCartData, shopCartList, isSelectedAll, totalAmount, shopCartCount }
     },
     [types.CHECK_ONE_SHOP_CART](state, { type, payload }) {
         let shopCartData = state.shopCartData.concat()
@@ -207,10 +212,11 @@ const reducers = handleActions({
         let shopCartList = shopCartData.filter(item => item.uid == uid)
         let isSelectedAll = getSelectStatus(shopCartList)
         let totalAmount = getTotalAmount(shopCartList)
+        let shopCartCount = shopCartList.length
         wepy.setStorageSync(SHOP_CART_LIST, shopCartData)
         wepy.setStorageSync(SHOP_BUY_LIST, shopBuyList)
 
-        return { ...state, shopCartData, shopCartList, shopBuyList, isSelectedAll, totalAmount }
+        return { ...state, shopCartData, shopCartList, shopBuyList, isSelectedAll, totalAmount, shopCartCount }
     },
 
 }, initState);

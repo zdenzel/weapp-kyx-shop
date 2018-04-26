@@ -208,7 +208,7 @@ export default class AddressList extends wepy.page {
                             <text class="icon icon-close" @tap.stop="tapDelete({{consignee.id}})"></text>
                         </view>
                     </view>
-                    <view class="item-consignee-toolbar" wx:if="{{!isOpt}}">
+                    <view class="item-consignee-toolbar">
                         <view>
                             <label @tap.stop="tapDefault({{consignee.id}})">
                                 <text class="icon icon-radio{{consignee.isDefault ? '-cur': ''}}"></text>

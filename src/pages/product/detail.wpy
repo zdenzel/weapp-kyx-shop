@@ -24,6 +24,9 @@ const winRatio = winWidth / devWidth
 import { getStore, connect } from 'wepy-redux'
 import { addShopCart, setShopBuyList } from '@/store/actions'
 const store = getStore()
+@connect({
+    shopCartCount: state => state.shopcart.shopCartCount,
+})
 
 export default class ProductDetail extends wepy.page {
     config = {
@@ -108,7 +111,7 @@ export default class ProductDetail extends wepy.page {
 
     methods = {
         onSwiperChange(e) {
-            this.swiperIndex = e.detail.current;
+            this.previewIndex = e.detail.current;
         },
         addcart(){
             // if(!this.skudata.sid){
@@ -188,7 +191,7 @@ export default class ProductDetail extends wepy.page {
     }
 
     async onLoad(option) {
-        this.activeId = option.id || 1;
+        this.activeId = option.id || 0;
         this.isShare = option.isShare == 'true';
 
         await this.getInitialData();
@@ -205,12 +208,8 @@ export default class ProductDetail extends wepy.page {
     }
 
     onShareAppMessage(res){
-        if (res.from === 'button') {
-            // 来自页面内转发按钮
-            console.log(res.target)
-        }
         return {
-            path: `/pages/product/detail?id${this.activeId}&isShare=true`,
+            path: `/pages/product/detail?id=${this.product.id}&isShare=true`,
             title: `${this.product.title} - ${wepy.$instance.globalData.shareInfo.title}`,
             imageUrl: this.product.previewList[0].image || wepy.$instance.globalData.shareInfo.imageUrl,
             success: res => { },
@@ -228,7 +227,8 @@ export default class ProductDetail extends wepy.page {
                 <swiper class="swiper" bindchange="onSwiperChange" autoplay="{{true}}" interval="{{4500}}" duration="{{500}}">
                     <repeat for="{{product.previewList}}">
                         <swiper-item @tap="previewImage({{item}},{{product.previewList}})">
-                            <image src="{{filter.thumbnail(item,winWidth+'x'+winWidth)}}" mode="scaleToFill"></image>
+                            <!-- <image src="{{filter.thumbnail(item,winWidth+'x'+winWidth)}}" mode="scaleToFill"></image> -->
+                            <image src="{{item}}" mode="scaleToFill"></image>
                         </swiper-item>
                     </repeat>
                 </swiper>
@@ -258,7 +258,7 @@ export default class ProductDetail extends wepy.page {
                 </view>
                 <view class="item" wx:if="{{product.attribute.weight}}">
                     <text class="label">净重</text>
-                    <text class="text">{{product.attribute.weight}}kg</text>
+                    <text class="text">{{product.attribute.weight}}g</text>
                 </view>
                 <view class="item" wx:if="{{product.attribute.area}}">
                     <text class="label">茶区</text>
@@ -315,6 +315,7 @@ export default class ProductDetail extends wepy.page {
         <navigator class="action" url="/pages/product/shopcart">
             <view class="icon icon-shopcart"></view>
             <view class="text">购物车</view>
+            <text class="badge" wx:if="{{shopCartCount}}">{{shopCartCount}}</text>
         </navigator>
         <button class="button addcart" type="primary" size="large" @tap="addcart()">加入购物车</button>
         <button class="button buynow" type="base" size="large" @tap="buynow()">立即购买</button>
@@ -424,6 +425,7 @@ export default class ProductDetail extends wepy.page {
         display: flex;
         align-items: center;
         justify-content: center;
+        position: relative;
         border-radius: 0;
         height: 100%;
         width: 210rpx;
@@ -435,6 +437,7 @@ export default class ProductDetail extends wepy.page {
         flex-direction: column;
         align-items: center;
         justify-content: center;
+        position: relative;
         line-height: 1.2;
         padding: 0;
         outline: none;
@@ -449,6 +452,23 @@ export default class ProductDetail extends wepy.page {
             margin-bottom: 5rpx;
             font-size: 46rpx;
         }
+    }
+    .badge{
+        min-width: 30rpx;
+        line-height: normal;
+        padding: 0 .25em;
+        height: 40rpx;
+        line-height: 40rpx;
+        position: absolute;
+        right: 10rpx;
+        top: 10rpx;
+
+        text-align: center;
+
+        background-color: @color-primary;
+        font-size: @font-size-mini;
+        color: @color-invert;
+        border-radius: 25rpx;
     }
 }
 </style>

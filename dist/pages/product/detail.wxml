@@ -6,7 +6,8 @@
                 <swiper class="swiper" bindchange="onSwiperChange" autoplay="{{true}}" interval="{{4500}}" duration="{{500}}">
                     <block wx:for="{{product.previewList}}" wx:for-index="index" wx:for-item="item" wx:key="key">
                         <swiper-item bindtap="previewImage" data-wpypreviewimage-a="{{item}}" data-wpypreviewimage-b="{{product.previewList}}">
-                            <image src="{{filter.thumbnail(item,winWidth+'x'+winWidth)}}" mode="scaleToFill"/>
+                            <!-- <image src="{{filter.thumbnail(item,winWidth+'x'+winWidth)}}" mode="scaleToFill"></image> -->
+                            <image src="{{item}}" mode="scaleToFill"/>
                         </swiper-item>
                     </block>
                 </swiper>
@@ -36,7 +37,7 @@
                 </view>
                 <view class="item" wx:if="{{product.attribute.weight}}">
                     <text class="label">净重</text>
-                    <text class="text">{{product.attribute.weight}}kg</text>
+                    <text class="text">{{product.attribute.weight}}g</text>
                 </view>
                 <view class="item" wx:if="{{product.attribute.area}}">
                     <text class="label">茶区</text>
@@ -167,6 +168,7 @@
         <navigator class="action" url="/pages/product/shopcart">
             <view class="icon icon-shopcart"/>
             <view class="text">购物车</view>
+            <text class="badge" wx:if="{{shopCartCount}}">{{shopCartCount}}</text>
         </navigator>
         <button class="button addcart" type="primary" size="large" bindtap="addcart" data-wpyaddcart-a="">加入购物车</button>
         <button class="button buynow" type="base" size="large" bindtap="buynow" data-wpybuynow-a="">立即购买</button>

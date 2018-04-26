@@ -99,6 +99,15 @@ export default class FreeTopics extends wepy.page {
 
         },
         async onSubmit(){
+            if(!this.amount){
+                wepy.showModal({
+                    title: '温馨提示',
+                    content: '今天的试喝名额已经领完了',
+                    showCancel: false
+                });
+                return;
+            }
+            
             if(!this.selected || !this.selected.length){
                 utils.showToast('请选择商品');
                 return;
@@ -138,7 +147,7 @@ export default class FreeTopics extends wepy.page {
         //接口访问
         await utils.request(api.topics.free, { data }).then(({ result }) => {
             try{
-                if(result.datalist.length){ return; }
+                if(!result.datalist.length){ return; }
                 if(isLoadmore){
                     this.productList = _.concat(this.productList, result.datalist);
                 } else{

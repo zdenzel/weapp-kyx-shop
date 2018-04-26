@@ -23,7 +23,7 @@
                             <text class="icon icon-close" catchtap="tapDelete" data-wpytapdelete-a="{{consignee.id}}"/>
                         </view>
                     </view>
-                    <view class="item-consignee-toolbar" wx:if="{{!isOpt}}">
+                    <view class="item-consignee-toolbar">
                         <view>
                             <label catchtap="tapDefault" data-wpytapdefault-a="{{consignee.id}}">
                                 <text class="icon icon-radio{{consignee.isDefault ? '-cur': ''}}"/>
