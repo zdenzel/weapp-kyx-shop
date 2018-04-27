@@ -1,0 +1,4 @@
+@import "./../components/nulldata.wxss";
+@import "./../components/loadmore.wxss";
+@import "./../components/tabbar.wxss";
+.header{padding:60rpx;text-align:center;background-color:#452713}.header .user-avatar{width:170rpx;height:170rpx;overflow:hidden;background-color:#fff;border:5rpx solid #fff;border-radius:50%}.header .user-name{margin-top:20rpx;font-size:40rpx;color:#e9e0cc}.tabbar{background:#e9e0cc}.menu{display:block;padding:60rpx;margin-top:20rpx;background-color:#e9e0cc}.menu .menu-button{padding:20rpx}.menu .icon,.menu .text{display:block;text-align:center}.menu .icon{font-size:64rpx;margin-bottom:20rpx}

@@ -1,0 +1,61 @@
+
+<view class="mycenter"  wx:if="{{preloaded}}">
+    <view class="header">
+        <wxc-cc>
+            <view class="user-info">
+                <view class="user-avatar">
+                    <wxc-avatar src="{{userInfo.avatarUrl}}"/>
+                </view>
+                <view class="user-name">
+                    <text>{{userInfo.nickName}}</text>
+                </view>
+            </view>
+        </wxc-cc>
+    </view>
+    
+    <scroll-view class="tabbar tabbar" bindscroll="$tabbar$onScroll" scroll-left="{{$tabbar$offsetLeft}}" scroll-x="true"  wx:if="{{$tabbar$datalist}}">
+        <view class="tabbar-contain {{$tabbar$isFlex?'is-flex':''}}" style="{{$tabbar$mainStyle}}">
+            
+            <block wx:if="{{$tabbar$route}}">
+                <block wx:for="{{$tabbar$datalist}}" wx:for-index="$tabbar$index" wx:for-item="$tabbar$item" wx:key="$tabbar$key">
+                    <navigator class="tabbar-button {{$tabbar$alive!='false'&&$tabbar$defaultKey==($tabbar$item[$tabbar$key])?'active':''}}" url="{{$tabbar$item.route || $tabbar$route+'?'+ $tabbar$key +'='+ $tabbar$item[$tabbar$key]}}" id="tabbar-{{$tabbar$item[$tabbar$key]}}" data-index="{{$tabbar$index}}" style="{{$tabbar$itemStyle}}">
+                        <text class="label">{{$tabbar$item[$tabbar$label]}}</text>
+                        <text class="badge" wx:if="{{$tabbar$item[$tabbar$badge]}}">{{$tabbar$item[$tabbar$badge]}}</text>
+                    </navigator>
+                </block>
+            </block>
+            <block wx:else>
+                <block wx:for="{{$tabbar$datalist}}" wx:for-index="$tabbar$index" wx:for-item="$tabbar$item" wx:key="$tabbar$key">
+                    <view class="tabbar-button {{$tabbar$alive!='false'&&$tabbar$defaultKey==($tabbar$item[$tabbar$key])?'active':''}}" style="{{$tabbar$itemStyle}}" bindtap="$tabbar$onClick" id="tabbar-{{$tabbar$item[$tabbar$key]}}" data-key="{{$tabbar$item[$tabbar$key]}}" data-index="{{$tabbar$index}}">
+                        <text class="label">{{$tabbar$item[$tabbar$label]}}</text>
+                        <text class="badge" wx:if="{{$tabbar$item[$tabbar$badge]}}">{{$tabbar$item[$tabbar$badge]}}</text>
+                    </view>
+                </block>
+            </block>
+            
+            
+        </view>
+    </scroll-view>
+
+    <wxc-flex class="menu" main="around">
+        <navigator class="normal" url="/pages/shopcart" open-type="switchTab">
+            <text class="icon icon-shopcart"/>
+            <text class="text">购物车</text>
+        </navigator>
+        <navigator class="normal" url="/pages/consignee/list">
+            <text class="icon icon-location"/>
+            <text class="text">收货地址</text>
+        </navigator>
+        <navigator class="normal" url="/pages/help/faq">
+            <text class="icon icon-question"/>
+            <text class="text">常见问题</text>
+        </navigator>
+    </wxc-flex>
+</view>
+
+    <view class="cp-loadmore" wx:else>
+        <view class="cp-loadmore-main" style="padding:{{$loadmore$padding}} 0;">
+            <view class="cp-loadmore-icon" style="border-color:{{$loadmore$iconColor}}"  wx:if="{{$loadmore$icon}}"><view style="background-color: {{$loadmore$iconColor}}"/></view>
+            <view class="cp-loadmore-text" style="color:{{$loadmore$textColor}}">{{$loadmore$text}}</view>
+        </view>
+    </view>

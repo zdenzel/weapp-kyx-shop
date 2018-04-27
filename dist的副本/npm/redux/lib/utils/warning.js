@@ -1,0 +1,1 @@
+"use strict";function warning(e){"undefined"!=typeof console&&console.error;try{throw new Error(e)}catch(e){}}exports.__esModule=!0,exports.default=warning;

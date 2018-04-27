@@ -179,6 +179,7 @@ export default class ProductList extends wepy.page {
             }catch(e){}
             this.totalPage = result.totalPage;
             this.currentPage = currentPage;
+            this.$apply();
         }).catch(e=>{});
 
         this.$apply();

@@ -31,7 +31,7 @@ module.exports = {
           outputStyle: 'compressed'
         },*/
         babel: {
-            sourceMap: true,
+            sourceMap: !prod,
             presets: [
                 'env'
             ],
@@ -53,12 +53,12 @@ module.exports = {
                 'mangle': true,
                 'mangle-props': true,
                 'minify': true,
-                'sourcemap': true,
+                'sourcemap': !prod,
                 'compress': {
                     'warnings': false,
                     'dead_code': true,
-                    'drop_console': false,
-                    'drop_debugger': true
+                    'drop_console': prod,
+                    'drop_debugger': prod
                 }
             }
         },
@@ -76,48 +76,5 @@ module.exports = {
     },
     appConfig: {
         noPromiseAPI: ['createSelectorQuery']
-    }
-}
-
-if (prod) {
-
-    delete module.exports.compilers.babel.sourcesMap;
-    // 压缩sass
-    // module.exports.compilers['sass'] = {outputStyle: 'compressed'}
-
-    // 压缩less
-    module.exports.compilers['less'] = { compress: true }
-
-    // 压缩js
-    module.exports.plugins = {
-        uglifyjs: {
-            filter: /\.(js|wpy|vue)$/,
-            config: {
-                'warnings': false,
-                'comments': false,
-                'beautify': false,
-                'mangle': true,
-                'mangle-props': true,
-                'minify': true,
-                'sourcemap': false,
-                'compress': {
-                    'warnings': false,
-                    'dead_code': true,
-                    'drop_console': true,
-                    'drop_debugger': true
-                }
-            }
-        },
-        imagemin: {
-            filter: /\.(jpg|png|jpeg)$/,
-            config: {
-                jpg: {
-                    quality: 80
-                },
-                png: {
-                    quality: 80
-                }
-            }
-        }
     }
 }

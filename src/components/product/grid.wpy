@@ -106,7 +106,7 @@ export default class GridProduct extends wepy.component {
             <repeat for="{{datalist}}" index="index" item="product" key="id">
                 <navigator class="cp-product-item" url="/pages/product/detail?id={{product.id}}" style="width:{{itemWidth}}rpx;padding:{{padding}}rpx;margin-top:{{index>=column?margin:0}}rpx;{{boxBackColor}}">
                     <view class="cp-product-cover" style="width:{{imageWidth}}rpx;height:{{imageHeight}}rpx;{{imgBackColor}}">
-                        <image src="{{filter.thumbnail(product.cover,imageOptimize)}}" mode="scaleToFill"></image>
+                        <image src="{{filter.thumbnail(product.cover, imageOptimize)}}" mode="scaleToFill"></image>
                     </view>
                     <view class="cp-product-context" style="margin-top: {{margin}}rpx;">
                         <wxc-elip class="cp-product-row cp-product-title">{{product.title}}</wxc-elip>

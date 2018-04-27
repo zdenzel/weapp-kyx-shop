@@ -1,0 +1,137 @@
+
+
+    <scroll-view class="tabbar statusbar" bindscroll="$tabbar$onScroll" scroll-left="{{$tabbar$offsetLeft}}" scroll-x="true"  wx:if="{{$tabbar$datalist}}">
+        <view class="tabbar-contain {{$tabbar$isFlex?'is-flex':''}}" style="{{$tabbar$mainStyle}}">
+            
+            <block wx:if="{{$tabbar$route}}">
+                <block wx:for="{{$tabbar$datalist}}" wx:for-index="$tabbar$index" wx:for-item="$tabbar$item" wx:key="$tabbar$key">
+                    <navigator class="tabbar-button {{$tabbar$alive!='false'&&$tabbar$defaultKey==($tabbar$item[$tabbar$key])?'active':''}}" url="{{$tabbar$item.route || $tabbar$route+'?'+ $tabbar$key +'='+ $tabbar$item[$tabbar$key]}}" id="tabbar-{{$tabbar$item[$tabbar$key]}}" data-index="{{$tabbar$index}}" style="{{$tabbar$itemStyle}}">
+                        <text class="label">{{$tabbar$item[$tabbar$label]}}</text>
+                        <text class="badge" wx:if="{{$tabbar$item[$tabbar$badge]}}">{{$tabbar$item[$tabbar$badge]}}</text>
+                    </navigator>
+                </block>
+            </block>
+            <block wx:else>
+                <block wx:for="{{$tabbar$datalist}}" wx:for-index="$tabbar$index" wx:for-item="$tabbar$item" wx:key="$tabbar$key">
+                    <view class="tabbar-button {{$tabbar$alive!='false'&&$tabbar$defaultKey==($tabbar$item[$tabbar$key])?'active':''}}" style="{{$tabbar$itemStyle}}" bindtap="$tabbar$onClick" id="tabbar-{{$tabbar$item[$tabbar$key]}}" data-key="{{$tabbar$item[$tabbar$key]}}" data-index="{{$tabbar$index}}">
+                        <text class="label">{{$tabbar$item[$tabbar$label]}}</text>
+                        <text class="badge" wx:if="{{$tabbar$item[$tabbar$badge]}}">{{$tabbar$item[$tabbar$badge]}}</text>
+                    </view>
+                </block>
+            </block>
+            
+            
+        </view>
+    </scroll-view>
+
+<view class="contain"  wx:if="{{preloaded}}">
+    <block wx:if="{{orderList}}">
+        <wxs src="../../wxs/filter.wxs" module="filter"/>
+
+    <view class="cp-order-items"  wx:if="{{$orderitems$datalist}}">
+        <block wx:for="{{$orderitems$datalist}}" wx:for-index="$orderitems$index" wx:for-item="$orderitems$order" wx:key="$orderitems$key">
+            <view class="cp-oi-item is-complete">
+                <wxc-flex class="cp-oii-head" main="between">
+                    <text class="cp-oii-code">订单编号：{{$orderitems$order.code}}</text>
+                    <text class="cp-oii-status">{{filter.status2str($orderitems$order.status,'order')}}</text>
+                </wxc-flex>
+                <navigator class="cp-oii-main" url="/pages/order/detail?id={{$orderitems$order.id}}">
+                    <wxc-flex class="cp-oii-product" wx:for="{{$orderitems$order.productList}}" wx:for-item="product" wx:key="product.id">
+                        <image class="cp-oiip-cover" src="{{filter.thumbnail(product.cover,$orderitems$optimize)}}" mode="scaleToFill"/>
+                        <wxc-flex class="cp-oiip-main" dir="top" main="between">
+                            <view class="cp-oiip-info">
+                                <text class="cp-oiip-row cp-oiip-title">{{product.title}}</text>
+                                <text class="cp-oiip-row cp-oiip-text">{{product.skuAttrText}}</text>
+                            </view>
+                            <wxc-flex class="cp-oiip-count" main="between" cross="center">
+                                <text class="price">{{product.price}}</text>
+                                <text class="count">x{{product.count}}</text>
+                            </wxc-flex>
+                        </wxc-flex>
+                    </wxc-flex>
+                </navigator>
+                <view class="cp-oii-foot">
+                    <wxc-flex class="cp-oii-info" main="between" dir="right">
+                        <view wx:if="{{$orderitems$order.payStatus==1}}">合计（含运费）：<text class="price">{{$orderitems$order.actualAmount}}</text></view>
+                        <view wx:else>合计（含运费）：<text class="price">{{$orderitems$order.totalAmount}}</text></view>
+                    </wxc-flex>
+                    <wxc-flex class="cp-oii-tool" main="end" wrap="wrap">
+                        <block wx:if="{{$orderitems$order.status==1}}">
+                            <view class="btn">
+                                <button type="warn" bindtap="$orderitems$tapOrderCancel" data-wpytapordercancel-a="{{$orderitems$order.id}}">取消订单</button>
+                            </view>
+                            <view class="btn" wx:if="{{$orderitems$order.payStatus==0}}">
+                                <button type="base" bindtap="$orderitems$tapOrderPayment" data-wpytaporderpayment-a="{{$orderitems$order}}">马上支付</button>
+                            </view>
+                        </block>
+                        <block wx:if="{{$orderitems$order.status==2}}">
+                            <view class="btn">
+                                <button type="warn" bindtap="$orderitems$tapOrderCancel" data-wpytapordercancel-a="{{$orderitems$order.id}}">取消订单</button>
+                            </view>
+                        </block>
+                        <block wx:if="{{$orderitems$order.status==3}}">
+                            <view class="btn">
+                                <button type="base" bindtap="$orderitems$tapOrderConfirm" data-wpytaporderconfirm-a="{{$orderitems$order.id}}">确认收货</button>
+                            </view>
+                        </block>
+                        <block wx:if="{{$orderitems$order.status==4}}">
+                            <view class="btn" wx:if="{{!$orderitems$order.isCommented}}">
+                                <button type="base" bindtap="$orderitems$tapOrderComment" data-wpytapordercomment-a="{{$orderitems$order}}">发表评价</button>
+                            </view>
+                        </block>
+                    </wxc-flex>
+                </view>
+            </view>
+        </block>
+    </view>
+    <wxs src="../../wxs/filter.wxs" module="filter"/>
+
+    <wxc-popup class="J_POST_COMMENT" locked="false" animation-mode="bottom" align="bottom">
+        <view class="cp-post-comment" catchtap="$orderitems$postcomment$tap">
+            <view class="cp-post-comment-header">
+                <view class="cp-post-comment-cover"><image src="{{filter.thumbnail($orderitems$postcomment$cover, $orderitems$postcomment$optimize)}}" mode="scaleToFill"/></view>
+                <view class="cp-post-comment-label">评分</view>
+                <view class="cp-post-comment-score">
+                    <text class="icon icon-star-fill {{$orderitems$postcomment$score>=1?'active':''}}" bindtap="$orderitems$postcomment$tapScore" data-wpytapscore-a="1"/>
+                    <text class="icon icon-star-fill {{$orderitems$postcomment$score>=2?'active':''}}" bindtap="$orderitems$postcomment$tapScore" data-wpytapscore-a="2"/>
+                    <text class="icon icon-star-fill {{$orderitems$postcomment$score>=3?'active':''}}" bindtap="$orderitems$postcomment$tapScore" data-wpytapscore-a="3"/>
+                    <text class="icon icon-star-fill {{$orderitems$postcomment$score>=4?'active':''}}" bindtap="$orderitems$postcomment$tapScore" data-wpytapscore-a="4"/>
+                    <text class="icon icon-star-fill {{$orderitems$postcomment$score>=5?'active':''}}" bindtap="$orderitems$postcomment$tapScore" data-wpytapscore-a="5"/>
+                </view>
+            </view>
+            <view class="cp-post-comment-content">
+                <textarea value="{{$orderitems$postcomment$content}}" maxlength="300" bindinput="$orderitems$postcomment$input" bindblur="$orderitems$postcomment$input" data-store="content" data-trim="line" placeholder="觉得产品怎样？发表一下吧"/>
+            </view>
+            <view class="cp-post-comment-toolbar">
+                <!-- <button type="warn" size="large" catchtap="onReset">重置</button> -->
+                <button type="base" size="large" catchtap="$orderitems$postcomment$onSubmit">确定提交</button>
+            </view>
+        </view>
+    </wxc-popup>
+
+
+    </block>
+    
+    <view class="cp-nulldata" wx:if="{{!orderList && !isloading}}">
+        <view class="cp-nulldata-main" style="padding:{{$nulldata$padding}} 0;">
+            <view class="cp-nulldata-icon icon icon-nulldata" style="color:{{$nulldata$iconColor}}"/>
+            <view class="cp-nulldata-text" style="color:{{$nulldata$textColor}}">{{$nulldata$text}}</view>
+        </view>
+    </view>
+
+    
+    <view class="cp-loadmore" wx:if="{{isloading}}">
+        <view class="cp-loadmore-main" style="padding:{{$loadmore$padding}} 0;">
+            <view class="cp-loadmore-icon" style="border-color:{{$loadmore$iconColor}}"  wx:if="{{$loadmore$icon}}"><view style="background-color: {{$loadmore$iconColor}}"/></view>
+            <view class="cp-loadmore-text" style="color:{{$loadmore$textColor}}">{{$loadmore$text}}</view>
+        </view>
+    </view>
+
+</view>
+
+    <view class="cp-loadmore" wx:else>
+        <view class="cp-loadmore-main" style="padding:{{$loadmore$padding}} 0;">
+            <view class="cp-loadmore-icon" style="border-color:{{$loadmore$iconColor}}"  wx:if="{{$loadmore$icon}}"><view style="background-color: {{$loadmore$iconColor}}"/></view>
+            <view class="cp-loadmore-text" style="color:{{$loadmore$textColor}}">{{$loadmore$text}}</view>
+        </view>
+    </view>

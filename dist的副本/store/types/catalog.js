@@ -1,0 +1,1 @@
+"use strict";Object.defineProperty(exports,"__esModule",{value:!0}),exports.default={GET_CATALOG_LIST:"GET_CATALOG_LIST"};
