@@ -123,8 +123,12 @@ export default class ListClassify extends wepy.component {
     &:before{ top: 0; }
     &:after{ bottom: 0; }
     .container{
+        width: 100%;
+        height: 100rpx;
         padding: 15rpx;
+        overflow: hidden;
         position: relative;
+        box-sizing: border-box;
     }
     .wrapper{
         margin: 0;
