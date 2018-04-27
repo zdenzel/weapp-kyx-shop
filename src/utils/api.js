@@ -43,6 +43,7 @@ export default {
         cancel: baseUrl + 'order/cancel',
         confirm: baseUrl + 'order/confirm',
         comment: baseUrl + 'order/comment',
+        statistics: baseUrl + 'order/statistics',
     },
 
     consignee: {

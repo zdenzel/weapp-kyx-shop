@@ -50,11 +50,11 @@ export default class OrderLists extends wepy.page {
         activeId: 0,
         activeIndex: 0,
         orderTypes: [
-            { id: 0, name: '全部', badge: 0 },
-            { id: 1, name: '待付款', badge: 0 },
-            { id: 2, name: '待发货', badge: 0 },
-            { id: 3, name: '待收货', badge: 0 },
-            { id: 4, name: '已完成', badge: 0 }
+            { id: 0, name: '全部', count: 0 },
+            { id: 1, name: '待付款', count: 0 },
+            { id: 2, name: '待发货', count: 0 },
+            { id: 3, name: '待收货', count: 0 },
+            { id: 4, name: '已完成', count: 0 }
         ],
         orderList: null,
         limit: 10,
@@ -92,9 +92,9 @@ export default class OrderLists extends wepy.page {
             limit: this.limit
         }
 
-        await utils.request(api.order.types).then(({result}) => {
+        await utils.request(api.order.statistics).then(({result}) => {
             try{
-                this.orderTypes = _.cloneDeep(result);
+                this.orderTypes = result;
             }catch(e){}
             this.$apply();
         }).catch(e=>{});
@@ -105,7 +105,7 @@ export default class OrderLists extends wepy.page {
                 if(isLoadmore){
                     this.orderList = _.concat(this.orderList, result.datalist);
                 } else{
-                    this.orderList = _.cloneDeep(result.datalist);
+                    this.orderList = result.datalist;
                 }
             }catch(e){}
             this.totalPage = result.totalPage;
@@ -145,7 +145,7 @@ export default class OrderLists extends wepy.page {
 </script>
 
 <template>
-<tabbar class="statusbar" :datalist.sync="orderTypes" :defaultKey.sync="activeId" @on-change.user="onTabClick"></tabbar>
+<tabbar class="statusbar" badge="count" :datalist.sync="orderTypes" :defaultKey.sync="activeId" @on-change.user="onTabClick"></tabbar>
 <view class="contain" wx:if="{{preloaded}}">
     <block wx:if="{{orderList}}">
         <orderitems :datalist.sync="orderList"></orderitems>

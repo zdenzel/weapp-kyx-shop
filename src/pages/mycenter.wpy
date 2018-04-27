@@ -42,21 +42,16 @@ export default class MyCenter extends wepy.page {
     data = {
         preloaded:false,
         userInfo: {},
-        orderTypes: [
-            { id: 0, name: '全部', badge: 0 },
-            { id: 1, name: '待付款', badge: 0 },
-            { id: 2, name: '待发货', badge: 0 },
-            { id: 3, name: '待收货', badge: 0 },
-            { id: 4, name: '已完成', badge: 0 }
-        ],
+        orderTypes: null,
         activeKey: 0
     }
 
     async getInitialData() {
-        await utils.request(api.order.types).then(({result}) => {
+        await utils.request(api.order.statistics).then(({result}) => {
             try{
-                this.orderTypes = _.cloneDeep(result);
+                this.orderTypes = result;
             }catch(e){}
+            this.$apply();
         }).catch(e=>{});
 
         this.$apply();
@@ -95,7 +90,7 @@ export default class MyCenter extends wepy.page {
             </view>
         </wxc-cc>
     </view>
-    <tabbar class="tabbar" :datalist.sync="orderTypes" alive="false" isFlex route="/pages/order/list"></tabbar>
+    <tabbar class="tabbar" badge="count" :datalist.sync="orderTypes" alive="false" isFlex route="/pages/order/list"></tabbar>
     <wxc-flex class="menu" main="around">
         <navigator class="normal" url="/pages/shopcart" open-type="switchTab">
             <text class="icon icon-shopcart"></text>
