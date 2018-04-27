@@ -144,7 +144,7 @@ export default class Tabbar extends wepy.component {
     position: sticky;
     left: 0;
     top: 0;
-    z-index: 10;
+    z-index: 100;
     white-space: nowrap;
     background-image: url('@{assets-url}/images/bg.jpg');
     background-color: @color-backcolor;

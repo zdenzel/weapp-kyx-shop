@@ -105,10 +105,10 @@ export default class CustomTopics extends wepy.page {
         tap() {},
         onSelectMaterial(item) {
             this.materialList = this.materialList.map(n => {
-                n.isSelected = !!(n.id == item.id);
+                n.checked = !!(n.id == item.id);
                 return n;
             });
-            this.customInfo.material = this.materialList.find(n => n.isSelected);
+            this.customInfo.material = this.materialList.find(n => n.checked);
         },
         onPickerChange(e) {
             const { name } = e.currentTarget.dataset;
@@ -305,7 +305,7 @@ export default class CustomTopics extends wepy.page {
         <view class="dzui-cells-body">
             <repeat for="{{materialList}}" item="item">
                 <view class="custom-product" @tap.stop="onSelectMaterial({{item}})">
-                    <text class="checkbox icon icon-checkbox{{ item.isSelected ? '-cur': '' }}"></text>
+                    <text class="checkbox icon icon-checkbox{{ item.checked ? '-cur': '' }}"></text>
                     <view class="custom-product-cover">
                         <image src="{{filter.thumbnail(item.cover,optimize)}}" mode="scaleToFill"></image>
                     </view>

@@ -42,6 +42,17 @@
             </block>
         </view>
     </view>
+    
+<form class="searchbar {{$searchbar$keyword ? 'inputing':''}} {{$searchbar$skin}}" style="{{$searchbar$style}}" report-submit="{{$searchbar$true}}" bindsubmit="$searchbar$formSubmit" bindreset="$searchbar$formReset">
+    <view class="container">
+        <view class="wrapper">
+            <input type="text" value="{{$searchbar$keyword}}" confirm-type="search" bindinput="$searchbar$inputTyping" bindconfirm="$searchbar$formSubmit" placeholder="搜索产品名"/>
+            <button class="submit" form-type="submit"><text class="icon icon-search"/></button>
+            <button class="cancel" form-type="reset">取消</button>
+        </view>
+    </view>
+</form>
+
     <view class="lively">
         <view class="item auto-h">
             <navigator class="half" url="/pages/topics/free">

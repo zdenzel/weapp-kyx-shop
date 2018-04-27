@@ -10,7 +10,7 @@
         <view class="dzui-cells-body">
             <block wx:for="{{materialList}}" wx:for-index="index" wx:for-item="item" wx:key="key">
                 <view class="custom-product" catchtap="onSelectMaterial" data-wpyonselectmaterial-a="{{item}}">
-                    <text class="checkbox icon icon-checkbox{{ item.isSelected ? '-cur': '' }}"/>
+                    <text class="checkbox icon icon-checkbox{{ item.checked ? '-cur': '' }}"/>
                     <view class="custom-product-cover">
                         <image src="{{filter.thumbnail(item.cover,optimize)}}" mode="scaleToFill"/>
                     </view>

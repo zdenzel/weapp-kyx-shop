@@ -1,3 +1,4 @@
+@import "./../components/searchbar.wxss";
 @import "./../components/product/grid.wxss";
 @import "./../components/loadmore.wxss";
 @import "./../components/tabbar.wxss";

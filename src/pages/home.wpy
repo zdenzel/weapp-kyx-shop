@@ -11,6 +11,8 @@ import tabbar from '@/components/tabbar'
 import loadmore from '@/components/loadmore'
 import products from '@/components/product/grid'
 
+import searchbar from '@/components/searchbar'
+
 const devWidth = 750
 const winWidth = wepy.getSystemInfoSync().windowWidth
 const winRatio = winWidth / devWidth
@@ -49,7 +51,8 @@ export default class HomePage extends wepy.page {
     components = {
         tabbar,
         loadmore,
-        products
+        products,
+        searchbar
     }
 
     mixins = [commonMixin]
@@ -79,6 +82,11 @@ export default class HomePage extends wepy.page {
     }
 
     methods = {
+        onSearch(keyword){
+            wepy.navigateTo({
+                url: `/pages/search?keyword=${keyword}`
+            });
+        },
         onSlideChange(e) {
             this.slideIndex = e.detail.current;
         },
@@ -154,6 +162,7 @@ export default class HomePage extends wepy.page {
             </repeat>
         </view>
     </view>
+    <searchbar @on-search.user="onSearch"></searchbar>
     <view class="lively">
         <view class="item auto-h">
             <navigator class="half" url="/pages/topics/free">
