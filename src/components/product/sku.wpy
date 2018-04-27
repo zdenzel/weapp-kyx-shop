@@ -110,10 +110,6 @@ export default class ProductFilter extends wepy.component {
             this.$emit('hideSkuPopup');
         },
         onSubmit() {
-            if((this.datalist && !this.datalist.length) && !this.skudata.skustock){
-                utils.showToast('当前没有库存');
-                return;
-            }
             const data = {
                 id: this.skudata.pid,
                 sid: this.skudata.sid,
@@ -126,11 +122,20 @@ export default class ProductFilter extends wepy.component {
                 stock: this.skudata.skustock,
                 skuAttrText: this.skudata.skuAttrText,
             }
+
+            if(!this.skudata.skustock){
+                utils.showToast('当前没有库存');
+                return;
+            }
+            if(this.datalist && this.datalist.length && !data.sid){
+                utils.showToast('请选择属性');
+                return;
+            }
+            if(!this.skudata.skucount){
+                utils.showToast('请选择数量');
+                return;
+            }
             if(this.type){
-                if(this.datalist.length && !data.sid){
-                    utils.showToast('请选择属性');
-                    return;
-                }
                 if(this.type == 'addcart'){
                     store.dispatch(addShopCart(data)).then(res => {
                         wepy.navigateTo({
@@ -182,7 +187,7 @@ export default class ProductFilter extends wepy.component {
         }).catch(e=>{
             this.sid = null;
             this.skustock = 0;
-            this.skucount = 1;
+            this.skucount = 180;
             this.$apply();
         });
 
@@ -262,9 +267,9 @@ export default class ProductFilter extends wepy.component {
     <wxc-popup class="J_SKU" locked="false" animation-mode="bottom" align="bottom">
         <view class="cp-sku" @tap.stop="tap" wx:if="{{preloaded}}">
             <view class="cp-sku-product">
-                <view class="cp-sku-product-cover" wx:if="{{skuimage}}"><image src="{{filter.thumbnail(skuimage, optimize)}}" mode="scaleToFill"></image></view>
-                <view class="cp-sku-product-price" wx:if="{{skuprice}}"><text class="price">{{skuprice}}</text></view>
-                <view class="cp-sku-product-stock" wx:if="{{skustock}}">库存：{{skustock}}</view>
+                <view class="cp-sku-product-cover"><image src="{{filter.thumbnail(skuimage, optimize)}}" mode="scaleToFill"></image></view>
+                <view class="cp-sku-product-price"><text class="price">{{skuprice}}</text></view>
+                <view class="cp-sku-product-stock">库存：{{skustock}}</view>
             </view>
             <scroll-view class="cp-sku-scroll" scroll-y>
                 <view class="cp-sku-main">

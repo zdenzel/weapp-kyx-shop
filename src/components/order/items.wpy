@@ -184,8 +184,7 @@ export default class OrderItems extends wepy.component {
                 </navigator>
                 <view class="cp-oii-foot">
                     <wxc-flex class="cp-oii-info" main="between" dir="right">
-                        <view wx:if="{{order.payStatus==1}}">合计（含运费）：<text class="price">{{order.actualAmount}}</text></view>
-                        <view wx:else>合计（含运费）：<text class="price">{{order.totalAmount}}</text></view>
+                        <view>合计（含运费）：<text class="price">{{order.totalAmount}}</text></view>
                     </wxc-flex>
                     <wxc-flex class="cp-oii-tool" main="end" wrap="wrap">
                         <block wx:if="{{order.status==1}}">
@@ -198,7 +197,7 @@ export default class OrderItems extends wepy.component {
                         </block>
                         <block wx:if="{{order.status==2}}">
                             <view class="btn">
-                                <button type="warn" @tap="tapOrderCancel({{order.id}})">取消订单</button>
+                                <navigator class="button base" url="/pages/order/detail?id={{order.id}}">查看订单</navigator>
                             </view>
                         </block>
                         <block wx:if="{{order.status==3}}">

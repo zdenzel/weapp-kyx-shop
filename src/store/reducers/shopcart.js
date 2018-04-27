@@ -2,7 +2,7 @@
  * @Author: zdenzel
  * @Date:   2018-03-14 23:23:42
  * @Last Modified by:   denzel
- * @Last Modified time: 2018-04-27 01:18:03
+ * @Last Modified time: 2018-04-28 00:53:19
  */
 
 import _ from 'lodash'
@@ -99,7 +99,8 @@ const reducers = handleActions({
                     shopCartData = shopCartData.map(item => {
                         if(item.id == payload.id && item.uid == payload.uid && item.sid == payload.sid){
                             item.isSelected = true
-                            item.count = item.stock < item.count ? item.count + payload.count : item.count;
+                            let count = item.count + payload.count
+                            item.count = item.stock > count ? count : item.stock;
                         }
                         return item
                     })

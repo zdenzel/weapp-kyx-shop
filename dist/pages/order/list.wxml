@@ -52,8 +52,7 @@
                 </navigator>
                 <view class="cp-oii-foot">
                     <wxc-flex class="cp-oii-info" main="between" dir="right">
-                        <view wx:if="{{$orderitems$order.payStatus==1}}">合计（含运费）：<text class="price">{{$orderitems$order.actualAmount}}</text></view>
-                        <view wx:else>合计（含运费）：<text class="price">{{$orderitems$order.totalAmount}}</text></view>
+                        <view>合计（含运费）：<text class="price">{{$orderitems$order.totalAmount}}</text></view>
                     </wxc-flex>
                     <wxc-flex class="cp-oii-tool" main="end" wrap="wrap">
                         <block wx:if="{{$orderitems$order.status==1}}">
@@ -66,7 +65,7 @@
                         </block>
                         <block wx:if="{{$orderitems$order.status==2}}">
                             <view class="btn">
-                                <button type="warn" bindtap="$orderitems$tapOrderCancel" data-wpytapordercancel-a="{{$orderitems$order.id}}">取消订单</button>
+                                <navigator class="button base" url="/pages/order/detail?id={{$orderitems$order.id}}">查看订单</navigator>
                             </view>
                         </block>
                         <block wx:if="{{$orderitems$order.status==3}}">

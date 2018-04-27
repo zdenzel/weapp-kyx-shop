@@ -92,23 +92,6 @@ export default class ProductDetail extends wepy.page {
         }
     }
 
-    computed = {
-        skuparams(){
-            return {
-                id: this.skudata.pid,
-                sid: this.skudata.sid,
-                uid: this.skudata.uid,
-                type: this.skudata.type,
-                cover: this.skudata.skuimage,
-                title: this.skudata.skutitle,
-                price: this.skudata.skuprice,
-                count: this.skudata.skucount,
-                stock: this.skudata.skustock,
-                skuAttrText: this.skudata.skuAttrText,
-            }
-        }
-    }
-
     methods = {
         onSwiperChange(e) {
             this.previewIndex = e.detail.current;

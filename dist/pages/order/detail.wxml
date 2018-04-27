@@ -44,7 +44,7 @@
             </wxc-flex>
             <wxc-flex class="amount" main="between" cross="center" wx:if="{{order.payStatus==1}}">
                 <text>实付款（含运费）</text>
-                <text class="price">{{order.actualAmount}}</text>
+                <text class="price">{{order.totalAmount}}</text>
             </wxc-flex>
             <wxc-flex class="amount" main="between" cross="center" wx:else>
                 <text>应付款（含运费）</text>
@@ -71,9 +71,6 @@
                 </view>
             </block>
             <block wx:if="{{order.status==2}}">
-                <view class="btn">
-                    <button type="warn" bindtap="tapOrderCancel" data-wpytapordercancel-a="">取消订单</button>
-                </view>
             </block>
             <block wx:if="{{order.status==3}}">
                 <view class="btn">

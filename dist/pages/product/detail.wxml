@@ -178,9 +178,9 @@
     <wxc-popup class="J_SKU" locked="false" animation-mode="bottom" align="bottom">
         <view class="cp-sku" catchtap="$sku$tap"  wx:if="{{$sku$preloaded}}">
             <view class="cp-sku-product">
-                <view class="cp-sku-product-cover" wx:if="{{$sku$skuimage}}"><image src="{{filter.thumbnail($sku$skuimage, $sku$optimize)}}" mode="scaleToFill"/></view>
-                <view class="cp-sku-product-price" wx:if="{{$sku$skuprice}}"><text class="price">{{$sku$skuprice}}</text></view>
-                <view class="cp-sku-product-stock" wx:if="{{$sku$skustock}}">库存：{{$sku$skustock}}</view>
+                <view class="cp-sku-product-cover"><image src="{{filter.thumbnail($sku$skuimage, $sku$optimize)}}" mode="scaleToFill"/></view>
+                <view class="cp-sku-product-price"><text class="price">{{$sku$skuprice}}</text></view>
+                <view class="cp-sku-product-stock">库存：{{$sku$skustock}}</view>
             </view>
             <scroll-view class="cp-sku-scroll" scroll-y>
                 <view class="cp-sku-main">
