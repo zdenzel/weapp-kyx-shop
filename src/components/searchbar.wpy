@@ -101,9 +101,12 @@ export default class ListClassify extends wepy.component {
 
 .searchbar{
     display: block;
+    width: 100%;
     height: 100rpx;
+    // overflow: hidden;
     position: -webkit-sticky;
     position: sticky;
+    right: 0;
     left: 0;
     top: 0;
     z-index: 10;
