@@ -143,7 +143,7 @@ export default class ListClassify extends wepy.component {
         border: 2rpx solid @color-border;
         border-radius: 70rpx;
 
-        background-color: #fff;
+        background-color: @color-maincolor;
 
         transition: all ease 400ms;
     }
@@ -160,6 +160,7 @@ export default class ListClassify extends wepy.component {
         padding: 0;
 
         font-size: @font-size-base;
+        background-color: transparent;
     }
     button{
         margin: 0;
