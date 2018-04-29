@@ -73,7 +73,7 @@ export default class ProductDetail extends wepy.page {
             this.comments = result;
             this.totalPage = result.totalPage;
             this.currentPage = currentPage;
-        }).catch(e=>{ });
+        }).catch(e=>{});
 
         this.$apply();
     }

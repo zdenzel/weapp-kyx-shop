@@ -107,7 +107,9 @@ export default class OrderLists extends wepy.page {
                 } else{
                     this.orderList = result.datalist;
                 }
-            }catch(e){}
+            }catch(e){
+                this.orderList = null;
+            }
             this.totalPage = result.totalPage;
             this.currentPage = currentPage;
             this.$apply();

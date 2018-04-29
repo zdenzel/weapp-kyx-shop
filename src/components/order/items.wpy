@@ -165,7 +165,8 @@ export default class OrderItems extends wepy.component {
             <view class="cp-oi-item is-complete">
                 <wxc-flex class="cp-oii-head" main="between">
                     <text class="cp-oii-code">订单编号：{{order.code}}</text>
-                    <text class="cp-oii-status">{{filter.status2str(order.status,'order')}}</text>
+                    <text class="cp-oii-status" wx:if="{{order.status==4}}">{{order.isCommented?'已完成':'待评价'}}</text>
+                    <text class="cp-oii-status" wx:else>{{filter.status2str(order.status,'order')}}</text>
                 </wxc-flex>
                 <navigator class="cp-oii-main" url="/pages/order/detail?id={{order.id}}">
                     <wxc-flex class="cp-oii-product" wx:for="{{order.productList}}" wx:for-item="product" wx:key="product.id">

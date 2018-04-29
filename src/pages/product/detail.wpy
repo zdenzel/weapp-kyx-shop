@@ -96,34 +96,15 @@ export default class ProductDetail extends wepy.page {
         onSwiperChange(e) {
             this.previewIndex = e.detail.current;
         },
+        addorbuy(){
+            this.$broadcast('showSkuPopup', null);
+        },
         addcart(){
-            // if(!this.skudata.sid){
-            //     this.showPorductSku('addcart');
-            //     return;
-            // }
-            this.showPorductSku('addcart');
-            // store.dispatch(addShopCart(this.skuparams)).then(res => {
-            //     wepy.navigateTo({
-            //         url: '/pages/product/shopcart'
-            //     });
-            // });
+            this.$broadcast('showSkuPopup', 'addcart');
         },
         buynow(){
-            // if(!this.skudata.sid){
-            //     this.showPorductSku('buynow');
-            //     return;
-            // }
-            this.showPorductSku('buynow');
-            // store.dispatch(setShopBuyList(this.skuparams)).then(res => {
-            //     wepy.navigateTo({
-            //         url: '/pages/order/confirm'
-            //     });
-            // });
+            this.$broadcast('showSkuPopup', 'buynow');
         }
-    }
-
-    showPorductSku(type){
-        this.$broadcast('showSkuPopup', type);
     }
 
     async getProductDetail(){
@@ -225,7 +206,7 @@ export default class ProductDetail extends wepy.page {
                 <view class="title">{{product.title}}</view>
                 <view class="price">{{skudata.skuprice || product.price}}</view>
             </view>
-            <view class="box stock" @tap="showPorductSku()">
+            <view class="box stock" @tap="addorbuy()">
                 <text class="label">已选</text>
                 <text class="text" wx:if="{{product.skuList}}">{{skudata.sid ? skudata.skuAttrText +'，'+ skudata.skucount +'件' : skudata.skuAttrText}}</text>
                 <text class="text" wx:else>{{skudata.skucount}}件</text>

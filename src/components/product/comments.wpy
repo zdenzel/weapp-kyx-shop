@@ -34,7 +34,7 @@ export default class ProductComment extends wepy.component {
             <view class="cp-comment-header">
                 <view class="cp-comment-user" cross="center">
                     <image class="avatar" src="{{comment.avatarUrl}}" mode="scaleToFill"></image>
-                    <text class="name">{{comment.nickName}}</text>
+                    <wxc-elip class="name">{{comment.nickName}}</wxc-elip>
                     <score class="score" :score="comment.score"></score>
                 </view>
                 <text class="cp-comment-time">{{comment.date}}</text>
@@ -69,8 +69,9 @@ export default class ProductComment extends wepy.component {
         border-radius: 50%;
     }
     .name{
+        max-width: 200rpx;
         margin-left: @margin;
-        font-size: @font-size-large;
+        // font-size: @font-size-large;
     }
     .score{
         margin-left: @margin;

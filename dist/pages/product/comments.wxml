@@ -32,7 +32,7 @@
             <view class="cp-comment-header">
                 <view class="cp-comment-user" cross="center">
                     <image class="avatar" src="{{$comments$comment.avatarUrl}}" mode="scaleToFill"/>
-                    <text class="name">{{$comments$comment.nickName}}</text>
+                    <wxc-elip class="name">{{$comments$comment.nickName}}</wxc-elip>
                     
     <view class="cp-score score" style="{{$comments$score$color}}">
         <text class="cp-score-bar">

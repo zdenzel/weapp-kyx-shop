@@ -144,7 +144,9 @@ export default class AddressList extends wepy.page {
                 } else{
                     this.consigneeList = _.cloneDeep(result.datalist);
                 }
-            }catch(e){}
+            }catch(e){
+                this.consigneeList = null;
+            }
             this.totalPage = result.totalPage;
             this.currentPage = currentPage;
         }).catch(e=>{})

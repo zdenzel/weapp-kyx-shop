@@ -33,7 +33,8 @@
             <view class="cp-oi-item is-complete">
                 <wxc-flex class="cp-oii-head" main="between">
                     <text class="cp-oii-code">订单编号：{{$orderitems$order.code}}</text>
-                    <text class="cp-oii-status">{{filter.status2str($orderitems$order.status,'order')}}</text>
+                    <text class="cp-oii-status" wx:if="{{$orderitems$order.status==4}}">{{$orderitems$order.isCommented?'已完成':'待评价'}}</text>
+                    <text class="cp-oii-status" wx:else>{{filter.status2str($orderitems$order.status,'order')}}</text>
                 </wxc-flex>
                 <navigator class="cp-oii-main" url="/pages/order/detail?id={{$orderitems$order.id}}">
                     <wxc-flex class="cp-oii-product" wx:for="{{$orderitems$order.productList}}" wx:for-item="product" wx:key="product.id">

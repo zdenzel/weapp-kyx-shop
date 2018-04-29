@@ -21,7 +21,7 @@
                 <view class="title">{{product.title}}</view>
                 <view class="price">{{skudata.skuprice || product.price}}</view>
             </view>
-            <view class="box stock" bindtap="showPorductSku" data-wpyshowporductsku-a="">
+            <view class="box stock" bindtap="addorbuy" data-wpyaddorbuy-a="">
                 <text class="label">已选</text>
                 <text class="text" wx:if="{{product.skuList}}">{{skudata.sid ? skudata.skuAttrText +'，'+ skudata.skucount +'件' : skudata.skuAttrText}}</text>
                 <text class="text" wx:else>{{skudata.skucount}}件</text>
@@ -86,7 +86,7 @@
             <view class="cp-comment-header">
                 <view class="cp-comment-user" cross="center">
                     <image class="avatar" src="{{$comments$comment.avatarUrl}}" mode="scaleToFill"/>
-                    <text class="name">{{$comments$comment.nickName}}</text>
+                    <wxc-elip class="name">{{$comments$comment.nickName}}</wxc-elip>
                     
     <view class="cp-score score" style="{{$comments$score$color}}">
         <text class="cp-score-bar">
@@ -203,9 +203,14 @@
                     </view>
                 </view>
             </scroll-view>
-            <view class="cp-sku-tool">
+            <view class="cp-sku-tool" wx:if="{{$sku$type}}">
                 <!-- <button type="warn" size="large" catchtap="onReset">重置</button> -->
-                <button type="base" size="large" catchtap="$sku$onSubmit">确定</button>
+                <button type="base" size="large" catchtap="$sku$onSubmit" data-wpyonsubmit-a="">确定</button>
+            </view>
+            <view class="cp-sku-tool" wx:else>
+                <!-- <button type="warn" size="large" catchtap="onReset">重置</button> -->
+                <button type="primary" size="large" catchtap="$sku$onAddcart" data-wpyonaddcart-a="">加入购物车</button>
+                <button type="base" size="large" catchtap="$sku$onBuynow" data-wpyonbuynow-a="">立即购买</button>
             </view>
         </view>
     </wxc-popup>

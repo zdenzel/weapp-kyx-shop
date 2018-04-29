@@ -217,7 +217,7 @@ export default class OrderDetail extends wepy.page {
             </wxc-flex>
         </view>
         <view class="order-detail-property">
-            <view wx:if="{{order.status==4}}"><text>订单状态：</text>{{filter.status2str(order.status,'order')}}（{{order.isCommented?'已评价':'未评价'}}）</view>
+            <view wx:if="{{order.status==4}}"><text>订单状态：</text>{{order.isCommented?'已完成':'待评价'}}</view>
             <view wx:else><text>订单状态：</text>{{filter.status2str(order.status,'order')}}</view>
             <view><text>订单编号：</text>{{order.code}}</view>
             <view><text>成交时间：</text>{{order.createTime}}</view>
