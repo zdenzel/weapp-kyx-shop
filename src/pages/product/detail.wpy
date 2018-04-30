@@ -76,7 +76,9 @@ export default class ProductDetail extends wepy.page {
         previewIndex: 0,
         product: null,
         content: null,
-        comments: null,
+        commentScore: 0,
+        commentCount: 0,
+        commentList: null,
         skudata: {
             pid: null,
             sid: null,
@@ -141,7 +143,9 @@ export default class ProductDetail extends wepy.page {
         }
 
         await utils.request(api.product.comments, { data }).then(({result}) => {
-            this.comments = result;
+            this.commentCount = result.totalCount;
+            this.commentScore = result.totalScore;
+            this.commentList = result.datalist;
             this.$apply();
         }).catch(e=>{ });
     }
@@ -233,23 +237,19 @@ export default class ProductDetail extends wepy.page {
                     <text class="text">{{product.attribute.spec}}</text>
                 </view>
             </view>
-            <view class="box comments" wx:if="{{comments}}">
-                <view class="head">商品评价({{comments.totalCount}})</view>
+            <view class="box comments">
+                <view class="head">商品评价({{commentCount}})</view>
                 <view class="lead">
                     <view>
-                        <text class="score-text">好评度：{{comments.totalScore/5*100}}%</text>
-                        <repeat>
-                            <score class="score-chart" :score="comments.totalScore"></score>
-                        </repeat>
+                        <text class="score-text">好评度：{{filter.calcscore(commentScore)}}%</text>
+                        <score class="score-chart" :score.sync="commentScore"></score>
                     </view>
                     <view class="links">
                         <navigator url="/pages/product/comments?id={{activeId}}">查看全部</navigator>
                     </view>
                 </view>
-                <view class="body" wx:if="{{comments && comments.totalCount}}">
-                    <repeat>
-                        <comments :datalist="comments.datalist"></comments>
-                    </repeat>
+                <view class="body" wx:if="{{commentCount}}">
+                    <comments :datalist.sync="commentList"></comments>
                 </view>
                 <nocomments text="还没有评价" wx:else></nocomments>
             </view>

@@ -22,5 +22,10 @@ module.exports = {
             }
         }
         return text
+    },
+    calcscore: function(score, total){
+        total = total || 5;
+        var num = score / total * 100 || '0';
+        return Math.round(num*100)/100;
     }
 };

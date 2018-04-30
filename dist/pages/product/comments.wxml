@@ -1,9 +1,9 @@
+<wxs src="../../wxs/filter.wxs" module="filter"/>
 
     <view class="box comments"  wx:if="{{proloaded}}">
-        <view class="head">商品评价({{comments.totalCount}})</view>
+        <view class="head">商品评价({{totalCount}})</view>
         <view class="lead">
-            <text class="score-text">好评度：{{comments.totalScore/5*100}}%</text>
-            <block>
+            <text class="score-text">好评度：{{filter.calcscore(totalScore)}}%</text>
                 
     <view class="cp-score score-chart" style="{{$score$color}}">
         <text class="cp-score-bar">
@@ -13,7 +13,7 @@
             <text class="icon icon-star-fill"/>
             <text class="icon icon-star-fill"/>
         </text>
-        <text class="cp-score-bar active" style="{{$score$activeColor}}width:{{comments.totalScore/$score$total*100}}%;">
+        <text class="cp-score-bar active" style="{{$score$activeColor}}width:{{$score$score/$score$total*100}}%;">
             <text class="icon icon-star-fill"/>
             <text class="icon icon-star-fill"/>
             <text class="icon icon-star-fill"/>
@@ -22,12 +22,10 @@
         </text>
     </view>
 
-            </block>
         </view>
-        <view class="body" wx:if="{{comments && comments.totalCount}}">
-            <block>
-                
-    <block wx:for="{{comments.datalist}}" wx:for-index="$comments$index" wx:for-item="$comments$comment" wx:key="$comments$key">
+        <view class="body" wx:if="{{totalCount}}">
+            
+    <block wx:for="{{$comments$datalist}}" wx:for-index="$comments$index" wx:for-item="$comments$comment" wx:key="$comments$key">
         <view class="cp-comment-item">
             <view class="cp-comment-header">
                 <view class="cp-comment-user" cross="center">
@@ -58,7 +56,6 @@
         </view>
     </block>
 
-            </block>
             
     <view class="cp-loadmore" wx:if="{{isloading}}">
         <view class="cp-loadmore-main" style="padding:{{$loadmore$padding}} 0;">

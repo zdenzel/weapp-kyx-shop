@@ -5,6 +5,8 @@ import wepy from 'wepy'
 import utils from '@/utils'
 import api from '@/utils/api'
 
+import filter from '../../wxs/filter.wxs'
+
 import previewImage from '@/mixins/previewImage'
 
 import nulldata from '@/components/nulldata'
@@ -45,13 +47,19 @@ export default class ProductDetail extends wepy.page {
 
     mixins = [previewImage]
 
+    wxs = {
+        filter
+    }
+
     data = {
         proloaded: false,
         isloading: false,
         limit: 10,
         totalPage: 1,
+        totalCount: 0,
+        totalScore: 0,
         currentPage: 1,
-        comments: null
+        commentList: null
     }
 
     async getInitialData(isLoadmore) {
@@ -70,8 +78,19 @@ export default class ProductDetail extends wepy.page {
         }
         
         await utils.request(api.product.comments, { data }).then(({result}) => {
-            this.comments = result;
+            try{
+                if(!result.datalist.length){ return; }
+                if (isLoadmore) {
+                    this.commentList = _.concat(this.productList, result.datalist);
+                } else {
+                    this.commentList = result.datalist;
+                }
+            }catch(e){
+                this.commentList = null;
+            }
             this.totalPage = result.totalPage;
+            this.totalScore = result.totalScore;
+            this.totalCount = result.totalCount;
             this.currentPage = currentPage;
         }).catch(e=>{});
 
@@ -107,17 +126,13 @@ export default class ProductDetail extends wepy.page {
 
 <template>
     <view class="box comments" wx:if="{{proloaded}}">
-        <view class="head">商品评价({{comments.totalCount}})</view>
+        <view class="head">商品评价({{totalCount}})</view>
         <view class="lead">
-            <text class="score-text">好评度：{{comments.totalScore/5*100}}%</text>
-            <repeat>
-                <score class="score-chart" :score="comments.totalScore"></score>
-            </repeat>
+            <text class="score-text">好评度：{{filter.calcscore(totalScore)}}%</text>
+                <score class="score-chart" :score.sync="totalScore"></score>
         </view>
-        <view class="body" wx:if="{{comments && comments.totalCount}}">
-            <repeat>
-                <comments :datalist="comments.datalist"></comments>
-            </repeat>
+        <view class="body" wx:if="{{totalCount}}">
+            <comments :datalist.sync="commentList"></comments>
             <loadmore wx:if="{{isloading}}"></loadmore>
         </view>
         <nulldata text="还没有评价" wx:else></nulldata>
