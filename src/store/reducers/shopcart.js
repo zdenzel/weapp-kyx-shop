@@ -2,7 +2,7 @@
  * @Author: zdenzel
  * @Date:   2018-03-14 23:23:42
  * @Last Modified by:   denzel
- * @Last Modified time: 2018-04-28 00:53:19
+ * @Last Modified time: 2018-05-03 01:30:50
  */
 
 import _ from 'lodash'
@@ -72,6 +72,27 @@ const reducers = handleActions({
         wepy.setStorageSync(SHOP_CART_LIST, shopCartData)
 
         return { ...state, shopCartData, shopCartList, isSelectedAll, totalAmount, shopCartCount }
+    },
+    [types.SYNC_SHOP_CART](state, { type, payload }) {
+        console.log('SYNC_SHOP_CART', payload)
+        // let shopCartData = state.shopCartData.concat()
+        // try {
+        //     shopCartData = shopCartData.map(item => {
+        //         if (item.uid == payload.uid && item.id == payload.id && item.sid == payload.sid) {
+        //             item = payload
+        //         }
+        //         return item
+        //     })
+        // } catch (e) {}
+
+        // let shopCartList = shopCartData.filter(item => item.uid == payload.uid)
+        // let isSelectedAll = getSelectStatus(shopCartList)
+        // let totalAmount = getTotalAmount(shopCartList)
+        // let shopCartCount = shopCartList.length
+
+        // wepy.setStorageSync(SHOP_CART_LIST, shopCartData)
+
+        // return { ...state, shopCartData, shopCartList, isSelectedAll, totalAmount, shopCartCount }
     },
     [types.DEL_SHOP_CART](state, { type, payload }) {
         let shopCartData = state.shopCartData.concat()

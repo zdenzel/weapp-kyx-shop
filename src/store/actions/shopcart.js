@@ -1,8 +1,8 @@
 /*
  * @Author: zdenzel
  * @Date:   2018-03-14 23:38:28
- * @Last Modified by:   zdenzel
- * @Last Modified time: 2018-03-18 13:47:26
+ * @Last Modified by:   denzel
+ * @Last Modified time: 2018-05-03 01:30:23
  */
 
 import wepy from 'wepy'
@@ -10,8 +10,9 @@ import { createAction } from 'redux-actions'
 import types from '../types/shopcart'
 
 
-export const getShopCart = createAction(types.GET_SHOP_CART, (payload) => {
-    return new Promise((resolve, reject) => {
+export const getShopCart = createAction(types.GET_SHOP_CART, (payload, a, b) => {
+    return new Promise( async (resolve, reject) => {
+        await syncShopCart()
         resolve(payload)
     })
 })
@@ -19,6 +20,14 @@ export const getShopCart = createAction(types.GET_SHOP_CART, (payload) => {
 export const addShopCart = createAction(types.ADD_SHOP_CART, (payload) => {
     return new Promise((resolve, reject) => {
         resolve(payload)
+    })
+})
+
+export const syncShopCart = createAction(types.SYNC_SHOP_CART, (payload) => {
+    return new Promise(async (resolve, reject) => {
+        await request(api.shopcart.infos, { data: payload }).then(({ result }) => {
+            resolve(result)
+        }).catch(e => { })
     })
 })
 

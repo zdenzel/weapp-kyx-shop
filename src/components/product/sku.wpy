@@ -41,7 +41,7 @@ export default class ProductFilter extends wepy.component {
         skuimage: null,
         skuprice: '0.00',
         skucount: 1,
-        skuAttrText: '请选择',
+        skuAttrText: null,
     }
 
     computed = {
@@ -213,7 +213,9 @@ export default class ProductFilter extends wepy.component {
             })
             this.skuAttrText = skuAttrText.join('，');
         }catch(e){
-            this.skuAttrText = '请选择';
+            if(this.sid){
+                this.skuAttrText = '请选择';
+            }
         }
         this.skudata = _.assign({}, this.skudata, {
             pid: this.pid,

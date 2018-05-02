@@ -90,7 +90,7 @@ export default class ProductDetail extends wepy.page {
             skuprice: '0.00',
             skucount: 1,
             skutitle: null,
-            skuAttrText: '请选择'
+            skuAttrText: null
         }
     }
 

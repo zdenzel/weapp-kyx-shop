@@ -36,6 +36,10 @@ export default {
         custom: baseUrl + 'topics/custom',
     },
 
+    shopcart: {
+        infos: baseUrl + 'cart/infos',
+    },
+
     order: {
         list: baseUrl + 'order/list',
         info: baseUrl + 'order/info',

@@ -25,7 +25,7 @@
                 <wxc-flex class="cp-op-main" dir="top" main="between">
                     <view class="cp-op-info">
                         <text class="cp-op-row cp-op-title">{{$products$product.title}}</text>
-                        <text class="cp-op-row cp-op-text">{{$products$product.skuAttrText}}</text>
+                        <text class="cp-op-row cp-op-text">{{$products$product.skuAttrText || ''}}</text>
                     </view>
                     <wxc-flex class="cp-op-count" main="between" cross="center">
                         <text class="price">{{$products$product.price}}</text>

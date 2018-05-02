@@ -134,11 +134,17 @@ async function request(url, option) {
             url: opts.url,
             data: opts.data,
             method: opts.method,
+            // dataType: 'json',
             header: Object.assign({}, {
                 'Content-Type': 'application/json',
                 'token': wepy.getStorageSync('token')
-            }, opts.header)
+            }, opts.header),
+            success(res){
+                console.log('success', res)
+            }
         }).then(async (res) => {
+
+            console.log('res', res)
 
             if (res.status) {
                 return resolve(res)
