@@ -13,7 +13,7 @@ const winWidth = wepy.getSystemInfoSync().windowWidth
 const winRatio = winWidth / devWidth
 
 import { getStore, connect } from 'wepy-redux'
-import { addShopCart, setShopBuyList } from '@/store/actions'
+import { addShopCartList, setShopBuyList } from '@/store/actions'
 const store = getStore()
 
 export default class ProductFilter extends wepy.component {
@@ -42,7 +42,7 @@ export default class ProductFilter extends wepy.component {
         skuimage: null,
         skuprice: '0.00',
         skucount: 1,
-        skuAttrText: null,
+        skuAttrText: '',
     }
 
     computed = {
@@ -139,6 +139,7 @@ export default class ProductFilter extends wepy.component {
     }
 
     handleSubmit(){
+        console.log(this.skudata)
         const data = {
             id: this.skudata.pid,
             sid: this.skudata.sid,
@@ -149,6 +150,7 @@ export default class ProductFilter extends wepy.component {
             price: this.skudata.skuprice,
             count: this.skudata.skucount,
             stock: this.skudata.skustock,
+            isFreeShipping: this.skudata.isFreeShipping,
             skuAttrText: this.skudata.skuAttrText,
         }
 

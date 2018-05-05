@@ -22,7 +22,7 @@ const winWidth = wepy.getSystemInfoSync().windowWidth
 const winRatio = winWidth / devWidth
 
 import { getStore, connect } from 'wepy-redux'
-import { addShopCart, setShopBuyList } from '@/store/actions'
+import { addShopCartList, setShopBuyList } from '@/store/actions'
 const store = getStore()
 @connect({
     shopCartCount: state => state.shopcart.shopCartCount,
@@ -125,6 +125,7 @@ export default class ProductDetail extends wepy.page {
                 skutitle: result.title,
                 skuprice: result.price,
                 skustock: result.stockCount,
+                isFreeShipping: result.isFreeShipping,
                 skuimage: result.previewList[0]
             });
             this.skudata = _.assign({}, skudata, {

@@ -15,7 +15,7 @@ const winWidth = wepy.getSystemInfoSync().windowWidth
 const winRatio = winWidth / devWidth
 
 import { getStore, connect } from 'wepy-redux'
-import { addShopCart, setShopBuyList } from '@/store/actions'
+import { addShopCartList, setShopBuyList } from '@/store/actions'
 const store = getStore()
 
 export default class CustomTopics extends wepy.page {
