@@ -2,7 +2,7 @@
  * @Author: zdenzel
  * @Date:   2018-03-14 23:23:42
  * @Last Modified by:   denzel
- * @Last Modified time: 2018-05-03 01:30:50
+ * @Last Modified time: 2018-05-05 16:04:53
  */
 
 import _ from 'lodash'
@@ -10,13 +10,11 @@ import wepy from 'wepy'
 import { handleActions } from 'redux-actions'
 import types from '../types/shopcart'
 
-const SHOP_BUY_LIST = 'SHOP_BUY_LIST'
-const SHOP_CART_LIST = 'SHOP_CART_LIST'
-
 const initState = {
     shopCartData: [],
     shopCartList: [],
     shopBuyList: [],
+    shopBuyConsignee: null,
     shopBuyType: 1,
     isSelectedAll: false,
     totalAmount: 0,
@@ -44,81 +42,64 @@ const getTotalAmount = (state) => {
 
 //list
 const reducers = handleActions({
-    [types.GET_SHOP_CART](state, { type, payload }) {
-        let shopCartData = Array.from(new Set(wepy.getStorageSync(SHOP_CART_LIST) || []))
-        let shopCartList = Array.from(new Set(shopCartData.filter(item => item.uid == payload.uid)))
+    [types.GET_SHOP_CART_LIST](state, { type, payload }) {
+        // let shopCartData = Array.from(new Set(wepy.getStorageSync(types.SHOP_CART_LIST) || []))
+        let shopCartData = Array.from(new Set(payload || []))
+        let shopCartList = Array.from(new Set(shopCartData.filter(item => item.uid == wepy.$instance.globalData.uid)))
         let isSelectedAll = getSelectStatus(shopCartList)
         let totalAmount = getTotalAmount(shopCartList)
         let shopCartCount = shopCartList.length
 
+        wepy.setStorageSync(types.SHOP_CART_LIST, shopCartData)
+
         return { ...state, shopCartData, shopCartList, isSelectedAll, totalAmount, shopCartCount }
     },
-    [types.SET_SHOP_CART](state, { type, payload }) {
+    [types.SET_SHOP_CART_LIST](state, { type, payload }) {
         let shopCartData = state.shopCartData.concat()
+        let itemdata = Object.assign({}, payload || {})
         try {
             shopCartData = shopCartData.map(item => {
-                if (item.uid == payload.uid && item.id == payload.id && item.sid == payload.sid) {
-                    item = payload
+                if (item.uid == wepy.$instance.globalData.uid && item.id == payload.id && item.sid == payload.sid) {
+                    item = Object.assign({}, itemdata, {isSelected:!!itemdata.count})
                 }
                 return item
             })
         } catch (e) {}
 
-        let shopCartList = shopCartData.filter(item => item.uid == payload.uid)
+        let shopCartList = shopCartData.filter(item => item.uid == wepy.$instance.globalData.uid)
         let isSelectedAll = getSelectStatus(shopCartList)
         let totalAmount = getTotalAmount(shopCartList)
         let shopCartCount = shopCartList.length
 
-        wepy.setStorageSync(SHOP_CART_LIST, shopCartData)
+        wepy.setStorageSync(types.SHOP_CART_LIST, shopCartData)
 
         return { ...state, shopCartData, shopCartList, isSelectedAll, totalAmount, shopCartCount }
     },
-    [types.SYNC_SHOP_CART](state, { type, payload }) {
-        console.log('SYNC_SHOP_CART', payload)
-        // let shopCartData = state.shopCartData.concat()
-        // try {
-        //     shopCartData = shopCartData.map(item => {
-        //         if (item.uid == payload.uid && item.id == payload.id && item.sid == payload.sid) {
-        //             item = payload
-        //         }
-        //         return item
-        //     })
-        // } catch (e) {}
-
-        // let shopCartList = shopCartData.filter(item => item.uid == payload.uid)
-        // let isSelectedAll = getSelectStatus(shopCartList)
-        // let totalAmount = getTotalAmount(shopCartList)
-        // let shopCartCount = shopCartList.length
-
-        // wepy.setStorageSync(SHOP_CART_LIST, shopCartData)
-
-        // return { ...state, shopCartData, shopCartList, isSelectedAll, totalAmount, shopCartCount }
-    },
-    [types.DEL_SHOP_CART](state, { type, payload }) {
+    [types.DEL_SHOP_CART_LIST](state, { type, payload }) {
         let shopCartData = state.shopCartData.concat()
 
         try {
-            let index = shopCartData.findIndex(item => item.id == payload.id && item.uid == payload.uid && item.sid == payload.sid)
+            let index = shopCartData.findIndex(item => item.id == payload.id && item.uid == wepy.$instance.globalData.uid && item.sid == payload.sid)
             shopCartData.splice(index, 1)
         } catch (e) {}
 
-        let shopCartList = shopCartData.filter(item => item.uid == payload.uid)
+        let shopCartList = shopCartData.filter(item => item.uid == wepy.$instance.globalData.uid)
         let isSelectedAll = getSelectStatus(shopCartList)
         let totalAmount = getTotalAmount(shopCartList)
         let shopCartCount = shopCartList.length
 
-        wepy.setStorageSync(SHOP_CART_LIST, shopCartData)
+        wepy.setStorageSync(types.SHOP_CART_LIST, shopCartData)
 
         return { ...state, shopCartData, shopCartList, isSelectedAll, totalAmount, shopCartCount }
     },
-    [types.ADD_SHOP_CART](state, { type, payload }) {
+    [types.ADD_SHOP_CART_LIST](state, { type, payload }) {
         let shopCartData = state.shopCartData.concat()
         try {
             if(payload.constructor == Object){
-                let exist = shopCartData.find(item => item.id == payload.id && item.uid == payload.uid && item.sid == payload.sid)
+                let exist = shopCartData.find(item => item.id == payload.id && item.uid == wepy.$instance.globalData.uid && item.sid == payload.sid)
                 if (exist) {
                     shopCartData = shopCartData.map(item => {
-                        if(item.id == payload.id && item.uid == payload.uid && item.sid == payload.sid){
+                        if(item.id == payload.id && item.uid == wepy.$instance.globalData.uid && item.sid == payload.sid){
                             item.isSelected = true
                             let count = item.count + payload.count
                             item.count = item.stock > count ? count : item.stock;
@@ -131,56 +112,56 @@ const reducers = handleActions({
             }
         } catch (e) {}
 
-        let shopCartList = shopCartData.filter(item => item.uid == payload.uid)
+        let shopCartList = shopCartData.filter(item => item.uid == wepy.$instance.globalData.uid)
         let isSelectedAll = getSelectStatus(shopCartList)
         let totalAmount = getTotalAmount(shopCartList)
         let shopCartCount = shopCartList.length
 
-        wepy.setStorageSync(SHOP_CART_LIST, shopCartData)
+        wepy.setStorageSync(types.SHOP_CART_LIST, shopCartData)
 
         return { ...state, shopCartData, shopCartList, isSelectedAll, totalAmount, shopCartCount }
     },
-    [types.CHECK_ONE_SHOP_CART](state, { type, payload }) {
+    [types.CHECK_SHOP_CART_ONE](state, { type, payload }) {
         let shopCartData = state.shopCartData.concat()
 
         try {
             shopCartData = shopCartData.map(item => {
-                if (item.uid == payload.uid && item.id == payload.id && item.sid == payload.sid) {
+                if (item.uid == wepy.$instance.globalData.uid && item.id == payload.id && item.sid == payload.sid) {
                     item.isSelected = !item.isSelected
                 }
                 return item
             })
         } catch (e) {}
 
-        let shopCartList = shopCartData.filter(item => item.uid == payload.uid)
+        let shopCartList = shopCartData.filter(item => item.uid == wepy.$instance.globalData.uid)
         let isSelectedAll = getSelectStatus(shopCartList)
         let totalAmount = getTotalAmount(shopCartList)
 
-        wepy.setStorageSync(SHOP_CART_LIST, shopCartData)
+        wepy.setStorageSync(types.SHOP_CART_LIST, shopCartData)
 
         return { ...state, shopCartData, shopCartList, isSelectedAll, totalAmount }
     },
-    [types.CHECK_ALL_SHOP_CART](state, { type, payload }) {
+    [types.CHECK_SHOP_CART_ALL](state, { type, payload }) {
         let shopCartData = state.shopCartData.concat()
         let isSelectedAll = !state.isSelectedAll
 
         try {
             shopCartData = shopCartData.map(item => {
-                if (item.uid == payload.uid) {
+                if (item.stock && item.uid == wepy.$instance.globalData.uid) {
                     item.isSelected = isSelectedAll
                 }
                 return item
             })
         } catch (e) {}
 
-        let shopCartList = shopCartData.filter(item => item.uid == payload.uid)
+        let shopCartList = shopCartData.filter(item => item.uid == wepy.$instance.globalData.uid)
         let totalAmount = getTotalAmount(shopCartList)
 
-        wepy.setStorageSync(SHOP_CART_LIST, shopCartData)
+        wepy.setStorageSync(types.SHOP_CART_LIST, shopCartData)
 
         return { ...state, shopCartData, shopCartList, isSelectedAll, totalAmount }
     },
-    [types.SET_BUY_LIST](state, { type, payload }) {
+    [types.SET_SHOP_BUY_LIST](state, { type, payload }) {
         let shopBuyList = state.shopBuyList.concat()
         let shopBuyType = state.shopBuyType;
         if(payload){
@@ -194,7 +175,7 @@ const reducers = handleActions({
                 })
                 shopBuyType = (shopBuyList[0].type == 3) ? 2 : 1;
             }
-            wepy.setStorageSync(SHOP_BUY_LIST, shopBuyList)
+            wepy.setStorageSync(types.SHOP_BUY_LIST, shopBuyList)
             return { ...state, shopBuyList, shopBuyList }
         }
         
@@ -205,40 +186,37 @@ const reducers = handleActions({
             shopBuyType = (shopBuyList[0].type == 3) ? 2 : 1;
         } catch (e) {}
 
-        wepy.setStorageSync(SHOP_BUY_LIST, shopBuyList)
+        wepy.setStorageSync(types.SHOP_BUY_LIST, shopBuyList)
 
         return { ...state, shopBuyList, shopBuyType }
     },
-    [types.GET_BUY_LIST](state, { type, payload }) {
-        let shopBuyList = wepy.getStorageSync(SHOP_BUY_LIST) || state.shopBuyList.concat()
+    [types.GET_SHOP_BUY_LIST](state, { type, payload }) {
+        let shopBuyList = wepy.getStorageSync(types.SHOP_BUY_LIST) || state.shopBuyList.concat()
         let totalAmount = getTotalAmount(shopBuyList)
         let shopBuyType = (shopBuyList[0].type == 3) ? 2 : 1;
         return { ...state, totalAmount, shopBuyList, shopBuyType }
     },
-    [types.REMOVE_BUY_LIST](state, { type, payload }) {
-        let shopCartData = state.shopCartData.concat()
+    [types.DEL_SHOP_BUY_LIST](state, { type, payload }) {
         let shopBuyList = []
-        let uid = null
+        let shopBuyType = 1
+        wepy.setStorageSync(types.SHOP_BUY_LIST, shopBuyList)
 
-        try {
-            state.shopBuyList.forEach(buy => {
-                let index = shopCartData.findIndex(cart => cart.id == buy.id && cart.uid == buy.uid && cart.sid == buy.sid)
-                console.log(index)
-                if(index > -1){
-                    uid = shopCartData[index].uid
-                    shopCartData.splice(index, 1)
-                }
-            })
-        } catch (e) {}
+        return { ...state, shopBuyList, shopBuyType }
+    },
+    [types.SET_SHOP_BUY_CONSIGNEE](state, { type, payload }) {
+        let shopBuyConsignee = Object.assign({}, payload)
 
-        let shopCartList = shopCartData.filter(item => item.uid == uid)
-        let isSelectedAll = getSelectStatus(shopCartList)
-        let totalAmount = getTotalAmount(shopCartList)
-        let shopCartCount = shopCartList.length
-        wepy.setStorageSync(SHOP_CART_LIST, shopCartData)
-        wepy.setStorageSync(SHOP_BUY_LIST, shopBuyList)
+        return { ...state, shopBuyConsignee }
+    },
+    [types.GET_SHOP_BUY_CONSIGNEE](state, { type, payload }) {
+        let shopBuyConsignee = Object.assign({}, payload)
 
-        return { ...state, shopCartData, shopCartList, shopBuyList, isSelectedAll, totalAmount, shopCartCount }
+        return { ...state, shopBuyConsignee }
+    },
+    [types.DEL_SHOP_BUY_CONSIGNEE](state, { type, payload }) {
+        let shopBuyConsignee = null
+
+        return { ...state, shopBuyConsignee }
     },
 
 }, initState);

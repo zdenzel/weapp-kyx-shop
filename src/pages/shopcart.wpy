@@ -1,14 +1,29 @@
+
 <script>
 import wepy from 'wepy'
+
+import filter from '../wxs/filter.wxs'
+import minuiMixin from '@/mixins/minui'
 
 import utils from '@/utils'
 import api from '@/utils/api'
 
-import shopcart from '@/components/shopcart'
+import nulldata from '@/components/nulldata'
+import loadmore from '@/components/loadmore'
 
 const devWidth = 750
 const winWidth = wepy.getSystemInfoSync().windowWidth
 const winRatio = winWidth / devWidth
+
+import { getStore, connect } from 'wepy-redux'
+import { getShopCart, setShopCart, addShopCart, delShopCart, checkShopCartOne, checkShopCartAll, setShopBuyList } from '@/store/actions'
+const store = getStore()
+
+@connect({
+    shopCartList: state => state.shopcart.shopCartList,
+    isSelectedAll: state => state.shopcart.isSelectedAll,
+    totalAmount: state => state.shopcart.totalAmount,
+})
 
 export default class PageShopCart extends wepy.page {
     config = {
@@ -34,15 +49,227 @@ export default class PageShopCart extends wepy.page {
     }
 
     components = {
-        shopcart
+        nulldata,
+        loadmore
+    }
+
+    mixins = [minuiMixin]
+
+    wxs = {
+        filter
+    }
+
+    data = {
+        uid: null
+    }
+
+    computed = {
+        optimize() {
+            let width = Math.ceil(180*winRatio);
+            return width + 'x' + width;
+        }
+    }
+
+    methods = {
+        onCheckAll(){
+            const param = { uid: this.uid}
+            store.dispatch(checkShopCartAll(param));
+        },
+        onCheckOne(param){
+            if(!param.stock){
+                utils.showToast('商品没有库存');
+                return;
+            }
+            if(!param.count){
+                utils.showToast('商品数量为空');
+                return;
+            }
+            store.dispatch(checkShopCartOne(param));
+        },
+        onChangeCounter(e){
+            const { value } = e.currentTarget.dataset;
+            const { number } = e.detail;
+
+            const param = Object.assign({}, value, {
+                count: number
+            })
+
+            store.dispatch(setShopCart(param));
+        },
+        onDelCart(param){
+            wx.showModal({
+                title: '温馨提示',
+                content: '请确认要删除该商品吗？',
+                success: (res) => {
+                    if(res.confirm){
+                        //执行删除
+                        store.dispatch(delShopCart(param));
+                        this.$apply();
+                    }
+                }
+            });
+        },
+        formSubmit(e){
+            console.log('去结算');
+            const { formId } = e.detail;
+            const param = { formId: formId};
+
+            let iscan = this.shopCartList.some(n => n.isSelected == true)
+            if(!iscan){
+                utils.showToast('未选中商品');
+                return;
+            }
+
+            store.dispatch(setShopBuyList()).then(res => {
+                wepy.navigateTo({
+                    url: '/pages/order/confirm'
+                });
+            });
+        }
+    }
+
+    async onShow(){
+        await store.dispatch(getShopCart());
     }
     
 }
 
 </script>
 <template>
-    <shopcart></shopcart>
+<block wx:if="{{shopCartList.length}}">
+    <form class="shopcart" report-submit="true" bindsubmit="formSubmit">
+        <view class="shopcart-contain">
+            <repeat for="{{shopCartList}}" item="product" key="product.id">
+                <wxc-flex class="shopcart-product {{!shopCartList.stock?'is-disabled':''}}">
+                    <view class="shopcart-product-check" @tap.stop="onCheckOne({{product}})">
+                        <text class="icon icon-radio{{ product.isSelected ? '-cur': '' }}"></text>
+                    </view>
+                    <navigator class="shopcart-product-cover" url="/pages/product/detail?id={{product.id}}">
+                        <image src="{{filter.thumbnail(product.cover,optimize)}}" mode="scaleToFill"></image>
+                    </navigator>
+                    <wxc-flex class="shopcart-product-main" main="between" dir="top">
+                        <wxc-flex class="shopcart-product-contain" dir="top">
+                            <view class="shopcart-product-title">{{product.title}}</view>
+                            <view class="shopcart-product-text" wx:if="{{product.skuAttrText}}">{{product.skuAttrText || ''}}</view>
+                            <view class="shopcart-product-text" wx:if="{{product.notice}}">{{product.notice || ''}}</view>
+                        </wxc-flex>
+                        <wxc-flex class="shopcart-product-count" main="between" cross="center">
+                            <text class="price">{{product.price}}</text>
+                            <wxc-counter class="counter" number="{{product.count || 0}}" max="{{product.stock || 0}}" min="0" bind:changenumber="onChangeCounter" data-value="{{product}}"></wxc-counter>
+                        </wxc-flex>
+                        <text class="icon icon-close" @tap.stop="onDelCart({{product}})"></text>
+                    </wxc-flex>
+                </wxc-flex>
+            </repeat>
+        </view>
+        <wxc-flex class="shopcart-toolbar">
+            <wxc-flex class="contain" cross="center" main="between">
+                <view class="check">
+                    <label @tap.stop="onCheckAll()">
+                        <text class="icon icon-radio{{ isSelectedAll ? '-cur': '' }}"></text>
+                        <text>全选</text>
+                    </label>
+                </view>
+                <view class="amount">
+                    合计：<text class="price">{{totalAmount}}</text>
+                </view>
+            </wxc-flex>
+            <button class="submit" type="base" size="bigger" form-type="submit">结算</button>
+        </wxc-flex>
+    </form>
+</block>
+<nulldata wx:else></nulldata>
 </template>
+
 <style lang="less">
 @import 'src/common/styles/config.less';
+
+.shopcart-toolbar{
+    display: block;
+    width: 100%;
+    height: 120rpx;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    margin: 0;
+    padding: 0;
+    z-index: 100;
+
+    background-color: @color-maincolor;
+    border-top: 2rpx solid @color-border;
+    box-sizing: border-box;
+    .price{
+        font-size: @font-size-bigger;
+        color: @color-success;
+    }
+    .submit{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        border-radius: 0;
+        &:after, &:before{
+            border-radius: 0;
+        }
+    }
+    .contain{
+        flex-grow: 1;
+        padding: @margin;
+    }
+    .amount{
+        font-size: @font-size-large;
+    }
+}
+
+.shopcart-product-check{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100rpx;
+    .icon{ margin: 0;}
+}
+.shopcart-product-cover{
+    display: block;
+    width: 180rpx;
+    height: 180rpx;
+    background-color: @color-forecolor;
+    border: 2rpx solid @color-border;
+    border-radius: @radius;
+}
+.shopcart-product-main{
+    flex: 1;
+    display: block;
+    margin: 0 @margin;
+    position: relative;
+}
+// .shopcart-product-title{
+//     font-size: @font-size-large;
+// }
+.shopcart-product-text{
+    color: @color-gray;
+}
+.shopcart-product{
+    display: block;
+    position: relative;
+    padding: @margin 0;
+
+    margin-top: @margin;
+    background-color: @color-maincolor;
+    .icon-close{
+        position: absolute;
+        right: 0;
+        top: 0;
+        font-size: @font-size-biggest;
+        color: @color-gray;
+    }
+}
+.shopcart-contain{
+    padding-bottom: 140rpx;
+    position: relative;
+}
+.shopcart{
+    .icon-radio, .icon-radio-cur{
+        font-size: 48rpx;
+    }
+}
 </style>

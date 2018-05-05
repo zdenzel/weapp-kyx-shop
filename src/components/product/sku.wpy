@@ -32,6 +32,7 @@ export default class ProductFilter extends wepy.component {
 
     data = {
         preloaded: false,
+        mytype: null,
         type: null,
         pid: null,
         sid: null,
@@ -111,11 +112,11 @@ export default class ProductFilter extends wepy.component {
             this.$emit('hideSkuPopup');
         },
         onAddcart(){
-            this.type = 'addcart';
+            this.mytype = 'addcart';
             this.handleSubmit();
         },
         onBuynow(){
-            this.type = 'buynow';
+            this.mytype = 'buynow';
             this.handleSubmit();
         },
         onSubmit() {
@@ -163,14 +164,14 @@ export default class ProductFilter extends wepy.component {
             utils.showToast('请选择数量');
             return;
         }
-        if(this.type == 'addcart'){
+        if(this.type == 'addcart' || this.mytype == 'addcart'){
             store.dispatch(addShopCart(data)).then(res => {
                 wepy.navigateTo({
                     url: '/pages/product/shopcart'
                 });
             });
         }
-        if(this.type == 'buynow'){
+        if(this.type == 'buynow' || this.mytype == 'buynow'){
             store.dispatch(setShopBuyList(data)).then(res => {
                 wepy.navigateTo({
                     url: '/pages/order/confirm'

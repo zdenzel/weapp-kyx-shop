@@ -42,7 +42,7 @@
                         <wxc-flex class="cp-oiip-main" dir="top" main="between">
                             <view class="cp-oiip-info">
                                 <text class="cp-oiip-row cp-oiip-title">{{product.title}}</text>
-                                <text class="cp-oiip-row cp-oiip-text">{{product.skuAttrText || ''}}</text>
+                                <text class="cp-oiip-row cp-oiip-text" wx:if="{{product.skuAttrText}}">{{product.skuAttrText || ''}}</text>
                             </view>
                             <wxc-flex class="cp-oiip-count" main="between" cross="center">
                                 <text class="price">{{product.price}}</text>

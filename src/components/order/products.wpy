@@ -40,7 +40,8 @@ export default class OrderProducts extends wepy.component {
                 <wxc-flex class="cp-op-main" dir="top" main="between">
                     <view class="cp-op-info">
                         <text class="cp-op-row cp-op-title">{{product.title}}</text>
-                        <text class="cp-op-row cp-op-text">{{product.skuAttrText || ''}}</text>
+                        <text class="cp-op-row cp-op-text" wx:if="{{product.skuAttrText}}">{{product.skuAttrText || ''}}</text>
+                        <text class="cp-op-row cp-op-text" wx:if="{{product.notice}}">{{product.notice || ''}}</text>
                     </view>
                     <wxc-flex class="cp-op-count" main="between" cross="center">
                         <text class="price">{{product.price}}</text>

@@ -25,7 +25,8 @@
                 <wxc-flex class="cp-op-main" dir="top" main="between">
                     <view class="cp-op-info">
                         <text class="cp-op-row cp-op-title">{{$products$product.title}}</text>
-                        <text class="cp-op-row cp-op-text">{{$products$product.skuAttrText || ''}}</text>
+                        <text class="cp-op-row cp-op-text"  wx:if="{{$products$product.skuAttrText}}">{{$products$product.skuAttrText || ''}}</text>
+                        <text class="cp-op-row cp-op-text"  wx:if="{{$products$product.notice}}">{{$products$product.notice || ''}}</text>
                     </view>
                     <wxc-flex class="cp-op-count" main="between" cross="center">
                         <text class="price">{{$products$product.price}}</text>
@@ -42,7 +43,7 @@
                 <text>运费</text>
                 <text class="price">{{order.freightAmount}}</text>
             </wxc-flex>
-            <wxc-flex class="amount" main="between" cross="center" wx:if="{{order.payStatus==1}}">
+            <wxc-flex class="amount" main="between" cross="center"  wx:if="{{order.payStatus==1}}">
                 <text>实付款（含运费）</text>
                 <text class="price">{{order.totalAmount}}</text>
             </wxc-flex>

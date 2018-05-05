@@ -7,14 +7,14 @@ import 'wepy-async-function'
 import utils from '@/utils'
 import api from '@/utils/api'
 
-const device = wx.getSystemInfoSync()
-const deviceRadio = device.windowWidth / 750
-
 import { setStore } from 'wepy-redux'
 import configStore from '@/store'
 import { getShopCart } from '@/store/actions'
 const store = configStore()
 setStore(store)
+
+const device = wx.getSystemInfoSync()
+const deviceRadio = device.windowWidth / 750
 
 export default class extends wepy.app {
     config = {
@@ -87,7 +87,9 @@ export default class extends wepy.app {
         deviceRadio: deviceRadio,
         shareInfo: {},
         userInfo: null,
-        token: null
+        token: null,
+        uid: null,
+        store
     }
 
     constructor() {
@@ -137,21 +139,9 @@ export default class extends wepy.app {
 
     async onLaunch() {
         console.log(wepy)
-        let params = { uid: this.globalData.uid };
         await utils.login()
         await utils.getShareInfo()
-        await store.dispatch(getShopCart(params))
-
-
-        console.log('asdfadfasdfasdf', store.getState().shopcart.shopCartCount)
-        if(this.shopCartCount){
-            let data = this.shopCartData.map(item =>{
-                return {
-                    id: item.id, sid: item.sid, type: item.type
-                }
-            })
-            await store.dispatch(syncShopCart(data))
-        }
+        await store.dispatch(getShopCart())
     }
 
 }
