@@ -45,7 +45,8 @@ export default class PageShopCart extends wepy.page {
             'wxc-dialog': '/packages/@minui/wxc-dialog/dist/index',
             'wxc-popup': '/packages/@minui/wxc-popup/dist/index',
             'wxc-toast': '/packages/@minui/wxc-toast/dist/index'
-        }
+        },
+        enablePullDownRefresh: true
     }
 
     components = {
@@ -130,6 +131,13 @@ export default class PageShopCart extends wepy.page {
 
     async onShow(){
         await store.dispatch(getShopCart());
+    }
+
+    async onPullDownRefresh() {
+        //下拉刷新数据
+        console.log('下拉刷新数据');
+        await store.dispatch(getShopCart());
+        wepy.stopPullDownRefresh();
     }
     
 }
