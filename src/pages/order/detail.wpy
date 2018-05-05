@@ -31,7 +31,8 @@ export default class OrderDetail extends wepy.page {
             'wxc-dialog': '/packages/@minui/wxc-dialog/dist/index',
             'wxc-popup': '/packages/@minui/wxc-popup/dist/index',
             'wxc-toast': '/packages/@minui/wxc-toast/dist/index'
-        }
+        },
+        enablePullDownRefresh: true
     }
 
     components = {
@@ -89,22 +90,22 @@ export default class OrderDetail extends wepy.page {
 
             wepy.showLoading();
             await utils.request(api.payment, { data }).then(({ result })=>{
-                wepy.requestPayment({
+                wx.requestPayment({
                     timeStamp: result.timeStamp,
                     nonceStr: result.nonceStr,
                     package: result.package,
                     signType: result.signType,
                     paySign: result.paySign,
-                    complete: res => {
+                    complete: (res)=> {
                         console.log('complete', res);
                     },
-                    success: res => {
+                    success: (res)=> {
                         console.log('success', res);
                         wepy.navigateTo({
                             url: `/pages/order/result?id=${id}&status=success&price=${totalAmount}`
                         });
                     },
-                    fail: res => {
+                    fail: (res)=> {
                         console.log('fail', res)
                     }
                 });
@@ -175,12 +176,16 @@ export default class OrderDetail extends wepy.page {
 
     async onLoad(option) {
         this.activeId = option.id;
-    }
-
-    async onShow() {
         await this.getInitialData();
         this.preloaded = true;
         this.$apply();
+    }
+
+    async onPullDownRefresh() {
+        //下拉刷新数据
+        console.log('下拉刷新数据');
+        await this.getInitialData();
+        wepy.stopPullDownRefresh();
     }
 }
 

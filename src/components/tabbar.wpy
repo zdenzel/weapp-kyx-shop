@@ -197,6 +197,8 @@ export default class Tabbar extends wepy.component {
         padding: 0 @margin/2;
         text-overflow: ellipsis;
         white-space: nowrap;
+    }
+    .label{
         &:after{
             display: none;
             content: '';
@@ -208,9 +210,6 @@ export default class Tabbar extends wepy.component {
             height: 5rpx;
             background-color: @color-base;
         }
-    }
-    &.active{
-        text:after{ display: inherit;}
     }
     .badge{
         min-width: 20rpx;
@@ -226,6 +225,9 @@ export default class Tabbar extends wepy.component {
         font-size: @font-size-mini;
         color: @color-invert;
         border-radius: 20rpx;
+    }
+    &.active{
+        text:after{ display: inherit;}
     }
 }
 </style>

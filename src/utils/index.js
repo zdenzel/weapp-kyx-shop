@@ -2,6 +2,45 @@ import wepy from 'wepy'
 // import jwtDecode from 'jwt-decode'
 import api from '@/utils/api.js'
 
+if (!Object.assign) {
+    // 定义assign方法
+    Object.defineProperty(Object, 'assign', {
+        enumerable: false,
+        configurable: true,
+        writable: true,
+        value: function(target) { // assign方法的第一个参数
+            'use strict';
+            // 第一个参数为空，则抛错
+            if (target === undefined || target === null) {
+                throw new TypeError('Cannot convert first argument to object');
+            }
+
+            var to = Object(target);
+            // 遍历剩余所有参数
+            for (var i = 1; i < arguments.length; i++) {
+                var nextSource = arguments[i];
+                // 参数为空，则跳过，继续下一个
+                if (nextSource === undefined || nextSource === null) {
+                    continue;
+                }
+                nextSource = Object(nextSource);
+
+                // 获取改参数的所有key值，并遍历
+                var keysArray = Object.keys(nextSource);
+                for (var nextIndex = 0, len = keysArray.length; nextIndex < len; nextIndex++) {
+                    var nextKey = keysArray[nextIndex];
+                    var desc = Object.getOwnPropertyDescriptor(nextSource, nextKey);
+                    // 如果不为空且可枚举，则直接浅拷贝赋值
+                    if (desc !== undefined && desc.enumerable) {
+                        to[nextKey] = nextSource[nextKey];
+                    }
+                }
+            }
+            return to;
+        }
+    });
+}
+
 const formatTime = date => {
     const year = date.getFullYear()
     const month = date.getMonth() + 1
@@ -129,7 +168,7 @@ async function request(url, option) {
         method: 'GET'
     }, option)
 
-    return new Promise(async (resolve, reject) => {
+    return new Promise(async(resolve, reject) => {
         wepy.request({
             url: opts.url,
             data: opts.data,
@@ -139,10 +178,10 @@ async function request(url, option) {
                 'Content-Type': 'application/json',
                 'token': wepy.getStorageSync('token')
             }, opts.header),
-            success(res){
+            success(res) {
                 console.log('success', res)
             }
-        }).then(async (res) => {
+        }).then(async(res) => {
 
             console.log('res', res)
 
@@ -196,22 +235,23 @@ async function checkLogin() {
 
 async function getuid() {
     let res = await checkLogin()
-    let uid = null, token = null
-    if(res){
+    let uid = null,
+        token = null
+    if (res) {
         uid = wepy.getStorageSync('uid');
         token = wepy.getStorageSync('token');
         wepy.$instance.globalData.uid = uid;
         wepy.$instance.globalData.token = token;
-        return { uid, token}
-    } else{
+        return { uid, token }
+    } else {
         return await login()
     }
 }
 
-async function getShareInfo(){
+async function getShareInfo() {
     await request(api.share.default).then(({ result }) => {
         wepy.$instance.globalData.shareInfo = result || {};
-    }).catch(e => { })
+    }).catch(e => {})
 }
 
 /**
@@ -220,14 +260,15 @@ async function getShareInfo(){
 async function login() {
 
     let res = await checkLogin()
-    let uid = wepy.getStorageSync('uid') || null, token = wepy.getStorageSync('token') || null
+    let uid = wepy.getStorageSync('uid') || null,
+        token = wepy.getStorageSync('token') || null
     let { code } = await wepy.login()
     let { userInfo } = await getUserInfo()
 
-    await request(api.user.login, { data: { code, userInfo}, method: 'POST' }).then(({ result }) => {
+    await request(api.user.login, { data: { code, userInfo }, method: 'POST' }).then(({ result }) => {
         uid = result.uid;
         token = result.token;
-    }).catch(e => { })
+    }).catch(e => {})
 
     wepy.setStorageSync('uid', uid);
     wepy.setStorageSync('token', token);
@@ -276,11 +317,19 @@ function redirect(url) {
 
 function showToast(title, type) {
     let image = '/images/toast-warn.png'
-    switch(type){
-        case 'success': image = '/images/toast-success.png'; break;
-        case 'error': image = '/images/toast-error.png'; break;
-        case 'info': image = '/images/toast-info.png'; break;
-        case 'warn': image = '/images/toast-warn.png'; break;
+    switch (type) {
+        case 'success':
+            image = '/images/toast-success.png';
+            break;
+        case 'error':
+            image = '/images/toast-error.png';
+            break;
+        case 'info':
+            image = '/images/toast-info.png';
+            break;
+        case 'warn':
+            image = '/images/toast-warn.png';
+            break;
     }
     wepy.showToast({
         title,
