@@ -75,26 +75,27 @@ export default class OrderItems extends wepy.component {
             })
         },
         async tapOrderPayment(order){
-            let data = { id: order.id };
+            let { id, totalAmount } = order;
+            let data = { id };
 
             wepy.showLoading();
             await utils.request(api.payment, { data }).then(({ result })=>{
-                wepy.requestPayment({
+                wx.requestPayment({
                     timeStamp: result.timeStamp,
                     nonceStr: result.nonceStr,
                     package: result.package,
                     signType: result.signType,
                     paySign: result.paySign,
-                    complete: res => {
+                    complete: (res)=> {
                         console.log('complete', res);
                     },
-                    success: res => {
+                    success: (res)=> {
                         console.log('success', res);
                         wepy.navigateTo({
-                            url: `/pages/order/result?id=${order.id}&status=success&price=${order.totalAmount}`
+                            url: `/pages/order/result?id=${id}&status=success&price=${totalAmount}`
                         });
                     },
-                    fail: res => {
+                    fail: (res)=> {
                         console.log('fail', res)
                     }
                 });
