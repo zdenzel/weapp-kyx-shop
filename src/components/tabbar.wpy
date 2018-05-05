@@ -207,7 +207,7 @@ export default class Tabbar extends wepy.component {
             left: 0;
 
             width: 100%;
-            height: 5rpx;
+            height: 8rpx;
             background-color: @color-base;
         }
     }
@@ -225,6 +225,7 @@ export default class Tabbar extends wepy.component {
         font-size: @font-size-mini;
         color: @color-invert;
         border-radius: 20rpx;
+        &:after{ display: none;}
     }
     &.active{
         text:after{ display: inherit;}

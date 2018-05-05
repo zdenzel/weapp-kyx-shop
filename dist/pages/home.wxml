@@ -4,7 +4,7 @@
     
     <scroll-view class="tabbar" bindscroll="$tabbar$onScroll" scroll-left="{{$tabbar$offsetLeft}}" scroll-x="true"  wx:if="{{catalogList}}">
         <view class="tabbar-contain {{$tabbar$isFlex?'is-flex':''}}" style="{{$tabbar$mainStyle}}">
-            <view class="tabbar-button active"><text>首页</text></view>
+            <view class="tabbar-button active"><text class="label">首页</text></view>
             <block wx:if="{{$tabbar$route}}">
                 <block wx:for="{{$tabbar$datalist}}" wx:for-index="$tabbar$index" wx:for-item="$tabbar$item" wx:key="$tabbar$key">
                     <navigator class="tabbar-button {{$tabbar$alive!='false'&&$tabbar$defaultKey==($tabbar$item[$tabbar$key])?'active':''}}" url="{{$tabbar$item.route || $tabbar$route+'?'+ $tabbar$key +'='+ $tabbar$item[$tabbar$key]}}" id="tabbar-{{$tabbar$item[$tabbar$key]}}" data-index="{{$tabbar$index}}" style="{{$tabbar$itemStyle}}">
@@ -22,7 +22,7 @@
                 </block>
             </block>
             
-            <navigator class="tabbar-button" url="/pages/topics/free"><text>免费试喝</text></navigator><navigator class="tabbar-button" url="/pages/topics/custom"><text>个性定制</text></navigator>
+            <navigator class="tabbar-button" url="/pages/topics/free"><text class="label">免费试喝</text></navigator><navigator class="tabbar-button" url="/pages/topics/custom"><text class="label">个性定制</text></navigator>
         </view>
     </scroll-view>
 

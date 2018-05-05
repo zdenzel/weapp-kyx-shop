@@ -142,9 +142,9 @@ export default class HomePage extends wepy.page {
 <template>
 <block wx:if="{{preloaded}}">
     <tabbar :datalist.sync="catalogList" defaultKey="home" route="/pages/product/list" @on-change.user="onTabChange" wx:if="{{catalogList}}">
-        <view class="tabbar-button active" slot="before"><text>首页</text></view>
-        <navigator class="tabbar-button" url="/pages/topics/free" slot="after"><text>免费试喝</text></navigator>
-        <navigator class="tabbar-button" url="/pages/topics/custom" slot="after"><text>个性定制</text></navigator>
+        <view class="tabbar-button active" slot="before"><text class="label">首页</text></view>
+        <navigator class="tabbar-button" url="/pages/topics/free" slot="after"><text class="label">免费试喝</text></navigator>
+        <navigator class="tabbar-button" url="/pages/topics/custom" slot="after"><text class="label">个性定制</text></navigator>
     </tabbar>
     <view class="swiper" wx:if="{{slideList}}">
         <swiper class="swiper" bindchange="onSlideChange" autoplay="{{true}}" interval="{{4500}}" duration="{{500}}">

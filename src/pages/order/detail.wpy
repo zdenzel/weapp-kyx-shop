@@ -237,22 +237,22 @@ export default class OrderDetail extends wepy.page {
         <view class="order-detail-toolbar">
             <block wx:if="{{order.status==1}}">
                 <view class="btn">
-                    <button type="warn" @tap="tapOrderCancel()">取消订单</button>
+                    <button type="warn" size="large" @tap="tapOrderCancel()">取消订单</button>
                 </view>
                 <view class="btn" wx:if="{{order.payStatus==0}}">
-                    <button type="base" @tap="tapOrderPayment()">马上支付</button>
+                    <button type="base" size="large" @tap="tapOrderPayment()">马上支付</button>
                 </view>
             </block>
             <block wx:if="{{order.status==2}}">
             </block>
             <block wx:if="{{order.status==3}}">
                 <view class="btn">
-                    <button type="base" @tap="tapOrderConfirm()">确认收货</button>
+                    <button type="base" size="large" @tap="tapOrderConfirm()">确认收货</button>
                 </view>
             </block>
             <block wx:if="{{order.status==4}}">
                 <view class="btn" wx:if="{{!order.isCommented}}">
-                    <button type="base" @tap="tapOrderComment()">发表评价</button>
+                    <button type="base" size="large" @tap="tapOrderComment()">发表评价</button>
                 </view>
             </block>
         </view>

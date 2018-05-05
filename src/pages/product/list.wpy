@@ -242,9 +242,9 @@ export default class ProductList extends wepy.page {
 <template>
 <block wx:if="{{preloaded}}">
     <tabbar class="catalog" :datalist.sync="catalogList" :defaultKey.sync="activeId" @on-change.user="onTabChange" wx:if="{{preloaded}}">
-        <navigator class="tabbar-button" url="/pages/home" open-type="switchTab" slot="before"><text>首页</text></navigator>
-        <navigator class="tabbar-button" url="/pages/topics/free" slot="after"><text>免费试喝</text></navigator>
-        <navigator class="tabbar-button" url="/pages/topics/custom" slot="after"><text>个性定制</text></navigator>
+        <navigator class="tabbar-button" url="/pages/home" open-type="switchTab" slot="before"><text class="label">首页</text></navigator>
+        <navigator class="tabbar-button" url="/pages/topics/free" slot="after"><text class="label">免费试喝</text></navigator>
+        <navigator class="tabbar-button" url="/pages/topics/custom" slot="after"><text class="label">个性定制</text></navigator>
     </tabbar>
     <wxc-flex class="filters" main="between" cross="center">
         <wxc-flex>
