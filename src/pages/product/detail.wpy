@@ -90,7 +90,7 @@ export default class ProductDetail extends wepy.page {
             skuprice: '0.00',
             skucount: 1,
             skutitle: null,
-            skuAttrText: null
+            skuAttrText: ''
         }
     }
 
@@ -213,7 +213,7 @@ export default class ProductDetail extends wepy.page {
             </view>
             <view class="box stock" @tap="addorbuy()">
                 <text class="label">已选</text>
-                <text class="text" wx:if="{{product.skuList}}">{{skudata.sid ? skudata.skuAttrText +'，'+ skudata.skucount +'件' : skudata.skuAttrText}}</text>
+                <text class="text" wx:if="{{product.skuList}}">{{skudata.sid ? skudata.skuAttrText +'，'+ skudata.skucount +'件' : skudata.skucount +'件'}}</text>
                 <text class="text" wx:else>{{skudata.skucount}}件</text>
             </view>
             <view class="box attrs">
