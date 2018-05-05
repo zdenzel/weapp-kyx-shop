@@ -165,7 +165,7 @@ export default class ProductFilter extends wepy.component {
             return;
         }
         if(this.type == 'addcart' || this.mytype == 'addcart'){
-            store.dispatch(addShopCart(data)).then(res => {
+            store.dispatch(addShopCartList(data)).then(res => {
                 wepy.navigateTo({
                     url: '/pages/product/shopcart'
                 });

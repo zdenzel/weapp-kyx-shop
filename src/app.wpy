@@ -9,7 +9,7 @@ import api from '@/utils/api'
 
 import { setStore } from 'wepy-redux'
 import configStore from '@/store'
-import { getShopCart } from '@/store/actions'
+import { getShopCartList } from '@/store/actions'
 const store = configStore()
 setStore(store)
 
@@ -141,7 +141,7 @@ export default class extends wepy.app {
         console.log(wepy)
         await utils.login()
         await utils.getShareInfo()
-        await store.dispatch(getShopCart())
+        await store.dispatch(getShopCartList())
     }
 
 }

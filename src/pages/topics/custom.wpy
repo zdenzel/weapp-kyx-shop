@@ -247,7 +247,7 @@ export default class CustomTopics extends wepy.page {
                 custom: custom
             };
 
-            await store.dispatch(addShopCart(products)).then(res => {
+            await store.dispatch(addShopCartList(products)).then(res => {
                 wepy.navigateTo({
                     url: '/pages/product/shopcart'
                 });

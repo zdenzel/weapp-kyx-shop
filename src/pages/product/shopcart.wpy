@@ -16,7 +16,7 @@ const winWidth = wepy.getSystemInfoSync().windowWidth
 const winRatio = winWidth / devWidth
 
 import { getStore, connect } from 'wepy-redux'
-import { getShopCart, setShopCart, addShopCart, delShopCart, checkShopCartOne, checkShopCartAll, setShopBuyList } from '@/store/actions'
+import { getShopCartList, setShopCartList, addShopCartList, delShopCartList, checkShopCartOne, checkShopCartAll, setShopBuyList } from '@/store/actions'
 const store = getStore()
 
 @connect({
@@ -95,7 +95,7 @@ export default class PageShopCart extends wepy.page {
                 count: number
             })
 
-            store.dispatch(setShopCart(param));
+            store.dispatch(setShopCartList(param));
         },
         onDelCart(param){
             wx.showModal({
@@ -104,7 +104,7 @@ export default class PageShopCart extends wepy.page {
                 success: (res) => {
                     if(res.confirm){
                         //执行删除
-                        store.dispatch(delShopCart(param));
+                        store.dispatch(delShopCartList(param));
                         this.$apply();
                     }
                 }
@@ -130,13 +130,13 @@ export default class PageShopCart extends wepy.page {
     }
 
     async onShow(){
-        await store.dispatch(getShopCart());
+        await store.dispatch(getShopCartList());
     }
 
     async onPullDownRefresh() {
         //下拉刷新数据
         console.log('下拉刷新数据');
-        await store.dispatch(getShopCart());
+        await store.dispatch(getShopCartList());
         wepy.stopPullDownRefresh();
     }
     

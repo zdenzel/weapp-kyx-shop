@@ -2,7 +2,7 @@
  * @Author: zdenzel
  * @Date:   2018-03-14 23:38:28
  * @Last Modified by:   denzel
- * @Last Modified time: 2018-05-05 16:41:05
+ * @Last Modified time: 2018-05-05 17:01:58
  */
 
 import wepy from 'wepy'
@@ -11,7 +11,7 @@ import types from '../types/shopcart'
 import utils from '@/utils'
 import api from '@/utils/api'
 
-export const getShopCart = createAction(types.GET_SHOP_CART_LIST, payload => new Promise(resolve => {
+export const getShopCartList = createAction(types.GET_SHOP_CART_LIST, payload => new Promise(resolve => {
     let shopCartData = Array.from(new Set(wepy.getStorageSync(types.SHOP_CART_LIST) || []))
     let userCartData = Array.from(new Set(shopCartData.filter(n => n.uid == wepy.$instance.globalData.uid)))
     let data = {
@@ -42,15 +42,15 @@ export const getShopCart = createAction(types.GET_SHOP_CART_LIST, payload => new
     }).catch(e => { })
 }))
 
-export const addShopCart = createAction(types.ADD_SHOP_CART_LIST, payload => new Promise(resolve => {
+export const addShopCartList = createAction(types.ADD_SHOP_CART_LIST, payload => new Promise(resolve => {
     resolve(payload)
 }))
 
-export const delShopCart = createAction(types.DEL_SHOP_CART_LIST, payload => new Promise(resolve => {
+export const delShopCartList = createAction(types.DEL_SHOP_CART_LIST, payload => new Promise(resolve => {
     resolve(payload)
 }))
 
-export const setShopCart = createAction(types.SET_SHOP_CART_LIST, payload => new Promise(resolve => {
+export const setShopCartList = createAction(types.SET_SHOP_CART_LIST, payload => new Promise(resolve => {
     resolve(payload)
 }))
 

@@ -105,7 +105,9 @@ export default class OrderDetail extends wepy.page {
             await utils.request(api.order.create, { data, method: 'POST' }).then( async ({result})=>{
 
                 await this.delShopBuyStorage();
-                await this.delShopCartList(data.products);
+                if(data.products){
+                    await this.delShopCartList(data.products);
+                }
                 wepy.redirectTo({
                     url: `/pages/order/detail?id=${result}`
                 });
