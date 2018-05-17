@@ -84,12 +84,10 @@ export default class HTMLParser extends wepy.component {
 
 <style lang="less">
 @import "src/plugins/wxParse/wxParse.wxss";
-
 .wxParse-img {
     margin: 0 auto;
-    width: 100%;
-    min-height: ~"200rpx";
     display: block;
+    max-width: 100%;
     background-color: transparent;
 }
 </style>

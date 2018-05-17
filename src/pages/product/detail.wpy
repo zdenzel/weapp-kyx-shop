@@ -180,7 +180,7 @@ export default class ProductDetail extends wepy.page {
         return {
             path: `/pages/product/detail?id=${this.product.id}&isShare=true`,
             title: `${this.product.title} - ${wepy.$instance.globalData.shareInfo.title}`,
-            imageUrl: this.product.previewList[0].image || wepy.$instance.globalData.shareInfo.imageUrl,
+            imageUrl: this.product.previewList[0] || wepy.$instance.globalData.shareInfo.imageUrl,
             success: res => { },
             fail: res => { }
         }
