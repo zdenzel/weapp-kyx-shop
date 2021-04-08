@@ -35,7 +35,7 @@
     <wxc-popup class="J_Filter" locked="false" animation-mode="right" align="right">
         <view class="cp-filter" catchtap="$filter$tap">
             <scroll-view class="cp-filter-scroll" scroll-y>
-                <view class="cp-filter-main">
+                <view class="cp-filter-main"  wx:if="{{$filter$datalist && $filter$datalist.length}}">
                     <block wx:for="{{$filter$datalist}}" wx:for-index="$filter$index" wx:for-item="$filter$item" wx:key="$filter$key">
                         <radio-group class="cp-filter-group" bindchange="$filter$onRadioChange" data-key="{{$filter$item.key}}">
                             <view class="cp-filter-title">{{$filter$item.name}}</view>

@@ -229,7 +229,7 @@ export default class ProductList extends wepy.page {
         this.isloading = false;
         this.$apply();
     }
-    
+
     async onPullDownRefresh() {
         //下拉刷新数据
         console.log('下拉刷新数据');
@@ -246,26 +246,28 @@ export default class ProductList extends wepy.page {
         <navigator class="tabbar-button" url="/pages/topics/free" slot="after"><text class="label">免费试喝</text></navigator>
         <navigator class="tabbar-button" url="/pages/topics/custom" slot="after"><text class="label">个性定制</text></navigator>
     </tabbar>
-    <wxc-flex class="filters" main="between" cross="center">
-        <wxc-flex>
-            <view class="btn {{sortValue == 'isPopular' ? 'active' : ''}}" @tap="tapSort('popular')">
-                <text>人气</text>
-            </view>
-            <view class="btn {{(sortValue == 'isPriceDown' || sortValue == 'isPriceUp') ? 'active' : ''}}" @tap="tapSort('price')">
-                <text>价格</text>
-                <text class="icon icon-sort-{{sortValue == 'isPriceDown' ? 'down' : 'up'}}" wx:if="{{(sortValue == 'isPriceDown' || sortValue == 'isPriceUp')}}"></text>
-            </view>
+    <view class="filters">
+        <wxc-flex class="filters-flex" main="between" cross="center">
+            <wxc-flex>
+                <view class="btn {{sortValue == 'isPopular' ? 'active' : ''}}" @tap="tapSort('popular')">
+                    <text>人气</text>
+                </view>
+                <view class="btn {{(sortValue == 'isPriceDown' || sortValue == 'isPriceUp') ? 'active' : ''}}" @tap="tapSort('price')">
+                    <text>价格</text>
+                    <text class="icon icon-sort-{{sortValue == 'isPriceDown' ? 'down' : 'up'}}" wx:if="{{(sortValue == 'isPriceDown' || sortValue == 'isPriceUp')}}"></text>
+                </view>
+            </wxc-flex>
+            <wxc-flex>
+                <!-- <view class="btn" @tap="tapGridList()">
+                    <text class="icon icon-{{isGridList ? 'grid' : 'list'}}"></text>
+                </view> -->
+                <view class="btn {{filterValue ? 'active' : ''}}" @tap="showFilter()">
+                    <text>筛选</text>
+                    <text class="icon icon-filter"></text>
+                </view>
+            </wxc-flex>
         </wxc-flex>
-        <wxc-flex>
-            <!-- <view class="btn" @tap="tapGridList()">
-                <text class="icon icon-{{isGridList ? 'grid' : 'list'}}"></text>
-            </view> -->
-            <view class="btn {{filterValue ? 'active' : ''}}" @tap="showFilter()">
-                <text>筛选</text>
-                <text class="icon icon-filter"></text>
-            </view>
-        </wxc-flex>
-    </wxc-flex>
+    </view>
     <filter :datalist.sync="filterList" :checked.sync="filterValue" @on-submit.user="submitFilter"></filter>
     <view class="products">
         <block wx:if="{{productList}}">
@@ -285,13 +287,11 @@ export default class ProductList extends wepy.page {
 
 .filters{
     display: block;
-    height: 60rpx;
-    padding: @margin;
-    position: -webkit-sticky;
-    position: sticky;
-    top: 100rpx;
+    height: 0px;
+    padding: 100rpx @margin 0;
+    position: relative;
+    top: 0;
     z-index: 2;
-    background-color: @color-maincolor;
     .btn {
         display: flex;
         align-items: center;
@@ -316,6 +316,15 @@ export default class ProductList extends wepy.page {
             vertical-align: middle;
         } // font-size: @font-size-large;
     }
+}
+.filters-flex {
+    width: 100%;
+    height: 60rpx;
+    padding: @margin 0;
+    position: fixed;
+    left: 0;
+    top: 100rpx;
+    background-color: @color-maincolor;
 }
 
 .products {

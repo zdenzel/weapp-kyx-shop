@@ -57,7 +57,7 @@ export default class MyCenter extends wepy.page {
         this.$apply();
 
     }
-    
+
     async onPullDownRefresh() {
         //下拉刷新数据
         console.log('下拉刷新数据');
@@ -90,7 +90,7 @@ export default class MyCenter extends wepy.page {
             </view>
         </wxc-cc>
     </view>
-    <tabbar class="tabbar" badge="count" :datalist.sync="orderTypes" alive="false" isFlex route="/pages/order/list"></tabbar>
+    <tabbar class="tabbar" badge="count" :datalist.sync="orderTypes" alive="false" fixed="false" flex="true" route="/pages/order/list"></tabbar>
     <wxc-flex class="menu" main="around">
         <navigator class="normal" url="/pages/shopcart" open-type="switchTab">
             <text class="icon icon-shopcart"></text>
@@ -131,6 +131,9 @@ export default class MyCenter extends wepy.page {
 }
 .tabbar{
     background: @color-maincolor;
+    .tabbar-scroll{
+        background: @color-maincolor;
+    }
 }
 .menu{
     display: block;

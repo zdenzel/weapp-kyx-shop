@@ -23,8 +23,8 @@
             </view>
             <view class="box stock" bindtap="addorbuy" data-wpyaddorbuy-a="">
                 <text class="label">已选</text>
-                <text class="text" wx:if="{{product.skuList}}">{{skudata.sid ? skudata.skuAttrText +'，'+ skudata.skucount +'件' : skudata.skucount +'件'}}</text>
-                <text class="text" wx:else>{{skudata.skucount}}件</text>
+                <text class="text" wx:if="{{product.skuList}}">{{skudata.sid ? skudata.skuAttrText +'，'+ 'x' + skudata.skucount : 'x' + skudata.skucount}}</text>
+                <text class="text" wx:else>x{{skudata.skucount}}</text>
             </view>
             <view class="box attrs">
                 <view class="item" wx:if="{{product.attribute.year}}">

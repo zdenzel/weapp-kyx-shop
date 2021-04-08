@@ -177,7 +177,7 @@ export default class ProductFilter extends wepy.component {
     <wxc-popup class="J_Filter" locked="false" animation-mode="right" align="right">
         <view class="cp-filter" @tap.stop="tap">
             <scroll-view class="cp-filter-scroll" scroll-y>
-                <view class="cp-filter-main">
+                <view class="cp-filter-main" wx:if="{{datalist && datalist.length}}">
                     <repeat for="{{datalist}}" item="item">
                         <radio-group class="cp-filter-group" bindchange="onRadioChange" data-key="{{item.key}}">
                             <view class="cp-filter-title">{{item.name}}</view>

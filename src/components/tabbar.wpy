@@ -35,9 +35,13 @@ export default class Tabbar extends wepy.component {
             type: String,
             default: ''
         },
-        isFlex: {
+        flex: {
             type: String,
-            default: '',
+            default: ''
+        },
+        fixed: {
+            type: String,
+            default: ''
         },
         justify: {
             type: String,
@@ -65,7 +69,7 @@ export default class Tabbar extends wepy.component {
     computed = {
         mainStyle() {
             let style = '';
-            if(this.isFlex){
+            if(this.flex){
                 style += `flex-wrap: ${this.wrap}`;
                 style += `;align-items: ${this.cross}`;
                 style += `;justify-content: ${this.justify}`;
@@ -109,41 +113,54 @@ export default class Tabbar extends wepy.component {
 }
 </script>
 <template>
-    <scroll-view class="tabbar" bindscroll="onScroll" scroll-left="{{offsetLeft}}" scroll-x="true" wx:if="{{datalist}}">
-        <view class="tabbar-contain {{isFlex?'is-flex':''}}" style="{{mainStyle}}">
-            <slot name="before"></slot>
-            <block wx:if="{{route}}">
-                <repeat for="{{datalist}}">
-                    <navigator class="tabbar-button {{alive!='false'&&defaultKey==(item[key])?'active':''}}" url="{{item.route || route+'?'+ key +'='+ item[key]}}" id="tabbar-{{item[key]}}" data-index="{{index}}" style="{{itemStyle}}">
-                        <text class="label">{{item[label]}}</text>
-                        <text class="badge" wx:if="{{item[badge]}}">{{item[badge]}}</text>
-                    </navigator>
-                </repeat>
-            </block>
-            <block wx:else>
-                <repeat for="{{datalist}}">
-                    <view class="tabbar-button {{alive!='false'&&defaultKey==(item[key])?'active':''}}" style="{{itemStyle}}" @tap="onClick" id="tabbar-{{item[key]}}" data-key="{{item[key]}}" data-index="{{index}}" data-index="{{index}}">
-                        <text class="label">{{item[label]}}</text>
-                        <text class="badge" wx:if="{{item[badge]}}">{{item[badge]}}</text>
-                    </view>
-                </repeat>
-            </block>
-            <slot name="content"></slot>
-            <slot name="after"></slot>
-        </view>
-    </scroll-view>
+    <view class="tabbar {{fixed!='false'?'is-fixed':''}}">
+        <scroll-view class="tabbar-scroll" bindscroll="onScroll" scroll-left="{{offsetLeft}}" scroll-x="true" wx:if="{{datalist}}">
+            <view class="tabbar-contain {{flex?'is-flex':''}}" style="{{mainStyle}}">
+                <slot name="before"></slot>
+                <block wx:if="{{route}}">
+                    <repeat for="{{datalist}}">
+                        <navigator class="tabbar-button {{alive!='false'&&defaultKey==(item[key])?'active':''}}" url="{{item.route || route+'?'+ key +'='+ item[key]}}" id="tabbar-{{item[key]}}" data-index="{{index}}" style="{{itemStyle}}">
+                            <text class="label">{{item[label]}}</text>
+                            <text class="badge" wx:if="{{item[badge]}}">{{item[badge]}}</text>
+                        </navigator>
+                    </repeat>
+                </block>
+                <block wx:else>
+                    <repeat for="{{datalist}}">
+                        <view class="tabbar-button {{alive!='false'&&defaultKey==(item[key])?'active':''}}" style="{{itemStyle}}" @tap="onClick" id="tabbar-{{item[key]}}" data-key="{{item[key]}}" data-index="{{index}}" data-index="{{index}}">
+                            <text class="label">{{item[label]}}</text>
+                            <text class="badge" wx:if="{{item[badge]}}">{{item[badge]}}</text>
+                        </view>
+                    </repeat>
+                </block>
+                <slot name="content"></slot>
+                <slot name="after"></slot>
+            </view>
+        </scroll-view>
+    </view>
 </template>
 <style lang="less">
 @import 'src/common/styles/config.less';
 
-.tabbar{
+.tabbar {
     display: block;
     width: 100%;
     height: 100rpx;
-    position: -webkit-sticky;
-    position: sticky;
-    left: 0;
-    top: 0;
+    position: relative;
+    z-index: 100;
+    &.is-fixed {
+        height: 0px;
+        padding-top: 100rpx;
+        .tabbar-scroll {
+            position: fixed;
+            left: 0;
+            top: 0;
+        }
+    }
+}
+.tabbar-scroll {
+    width: 100%;
+    height: 100rpx;
     z-index: 100;
     white-space: nowrap;
     background-image: url('@{assets-url}/images/bg.jpg');

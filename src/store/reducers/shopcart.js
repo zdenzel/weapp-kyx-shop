@@ -2,7 +2,7 @@
  * @Author: zdenzel
  * @Date:   2018-03-14 23:23:42
  * @Last Modified by:   denzel
- * @Last Modified time: 2018-05-05 16:04:53
+ * @Last Modified time: 2018-06-03 17:29:57
  */
 
 import _ from 'lodash'
@@ -95,7 +95,7 @@ const reducers = handleActions({
     [types.ADD_SHOP_CART_LIST](state, { type, payload }) {
         let shopCartData = state.shopCartData.concat()
         try {
-            if(payload.constructor == Object){
+            if(payload && payload.constructor == Object){
                 let exist = shopCartData.find(item => item.id == payload.id && item.uid == wepy.$instance.globalData.uid && item.sid == payload.sid)
                 if (exist) {
                     shopCartData = shopCartData.map(item => {
@@ -209,7 +209,7 @@ const reducers = handleActions({
         return { ...state, shopBuyConsignee }
     },
     [types.GET_SHOP_BUY_CONSIGNEE](state, { type, payload }) {
-        let shopBuyConsignee = Object.assign({}, payload)
+        let shopBuyConsignee = payload ? Object.assign({}, payload) : null
 
         return { ...state, shopBuyConsignee }
     },

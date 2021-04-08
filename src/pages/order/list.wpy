@@ -162,5 +162,8 @@ export default class OrderLists extends wepy.page {
 @import 'src/common/styles/config.less';
 .statusbar{
     background: @color-maincolor;
+    .tabbar-scroll{
+        background: @color-maincolor;
+    }
 }
 </style>

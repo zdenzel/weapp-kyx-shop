@@ -1,28 +1,30 @@
 
 
-    <scroll-view class="tabbar statusbar" bindscroll="$tabbar$onScroll" scroll-left="{{$tabbar$offsetLeft}}" scroll-x="true"  wx:if="{{$tabbar$datalist}}">
-        <view class="tabbar-contain {{$tabbar$isFlex?'is-flex':''}}" style="{{$tabbar$mainStyle}}">
-            
-            <block wx:if="{{$tabbar$route}}">
-                <block wx:for="{{$tabbar$datalist}}" wx:for-index="$tabbar$index" wx:for-item="$tabbar$item" wx:key="$tabbar$key">
-                    <navigator class="tabbar-button {{$tabbar$alive!='false'&&$tabbar$defaultKey==($tabbar$item[$tabbar$key])?'active':''}}" url="{{$tabbar$item.route || $tabbar$route+'?'+ $tabbar$key +'='+ $tabbar$item[$tabbar$key]}}" id="tabbar-{{$tabbar$item[$tabbar$key]}}" data-index="{{$tabbar$index}}" style="{{$tabbar$itemStyle}}">
-                        <text class="label">{{$tabbar$item[$tabbar$label]}}</text>
-                        <text class="badge" wx:if="{{$tabbar$item[$tabbar$badge]}}">{{$tabbar$item[$tabbar$badge]}}</text>
-                    </navigator>
+    <view class="tabbar {{$tabbar$fixed!='false'?'is-fixed':''}} statusbar">
+        <scroll-view class="tabbar-scroll" bindscroll="$tabbar$onScroll" scroll-left="{{$tabbar$offsetLeft}}" scroll-x="true"  wx:if="{{$tabbar$datalist}}">
+            <view class="tabbar-contain {{$tabbar$flex?'is-flex':''}}" style="{{$tabbar$mainStyle}}">
+                
+                <block wx:if="{{$tabbar$route}}">
+                    <block wx:for="{{$tabbar$datalist}}" wx:for-index="$tabbar$index" wx:for-item="$tabbar$item" wx:key="$tabbar$key">
+                        <navigator class="tabbar-button {{$tabbar$alive!='false'&&$tabbar$defaultKey==($tabbar$item[$tabbar$key])?'active':''}}" url="{{$tabbar$item.route || $tabbar$route+'?'+ $tabbar$key +'='+ $tabbar$item[$tabbar$key]}}" id="tabbar-{{$tabbar$item[$tabbar$key]}}" data-index="{{$tabbar$index}}" style="{{$tabbar$itemStyle}}">
+                            <text class="label">{{$tabbar$item[$tabbar$label]}}</text>
+                            <text class="badge" wx:if="{{$tabbar$item[$tabbar$badge]}}">{{$tabbar$item[$tabbar$badge]}}</text>
+                        </navigator>
+                    </block>
                 </block>
-            </block>
-            <block wx:else>
-                <block wx:for="{{$tabbar$datalist}}" wx:for-index="$tabbar$index" wx:for-item="$tabbar$item" wx:key="$tabbar$key">
-                    <view class="tabbar-button {{$tabbar$alive!='false'&&$tabbar$defaultKey==($tabbar$item[$tabbar$key])?'active':''}}" style="{{$tabbar$itemStyle}}" bindtap="$tabbar$onClick" id="tabbar-{{$tabbar$item[$tabbar$key]}}" data-key="{{$tabbar$item[$tabbar$key]}}" data-index="{{$tabbar$index}}">
-                        <text class="label">{{$tabbar$item[$tabbar$label]}}</text>
-                        <text class="badge" wx:if="{{$tabbar$item[$tabbar$badge]}}">{{$tabbar$item[$tabbar$badge]}}</text>
-                    </view>
+                <block wx:else>
+                    <block wx:for="{{$tabbar$datalist}}" wx:for-index="$tabbar$index" wx:for-item="$tabbar$item" wx:key="$tabbar$key">
+                        <view class="tabbar-button {{$tabbar$alive!='false'&&$tabbar$defaultKey==($tabbar$item[$tabbar$key])?'active':''}}" style="{{$tabbar$itemStyle}}" bindtap="$tabbar$onClick" id="tabbar-{{$tabbar$item[$tabbar$key]}}" data-key="{{$tabbar$item[$tabbar$key]}}" data-index="{{$tabbar$index}}">
+                            <text class="label">{{$tabbar$item[$tabbar$label]}}</text>
+                            <text class="badge" wx:if="{{$tabbar$item[$tabbar$badge]}}">{{$tabbar$item[$tabbar$badge]}}</text>
+                        </view>
+                    </block>
                 </block>
-            </block>
-            
-            
-        </view>
-    </scroll-view>
+                
+                
+            </view>
+        </scroll-view>
+    </view>
 
 <view class="contain"  wx:if="{{preloaded}}">
     <block wx:if="{{orderList}}">

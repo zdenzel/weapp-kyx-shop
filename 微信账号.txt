@@ -1,0 +1,27 @@
+﻿小程序
+
+keyixingcy@163.com，
+xing1926
+
+:支付商户号：
+1501090411
+:
+
+登陆账号：1501090411@1501090411
+
+
+
+对应的小程序：可以兴商城（）
+:
+
+小程序APPID ：wxb4c68f02e08e245e
+'appId' => 'wxb4c68f02e08e245e',
+  'appSecret' => '20ef4c3a4037a0b3e5ab00c5cbf6e4e8',
+
+微信支付
+
+mchId：1501090411
+
+mchKey：3efa4122ceaY1d21UTc9YDGFDSG05671
+
+微信操作密码：keyixing@1926

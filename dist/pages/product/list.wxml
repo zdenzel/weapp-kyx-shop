@@ -1,55 +1,59 @@
 
 <block  wx:if="{{preloaded}}">
     
-    <scroll-view class="tabbar catalog" bindscroll="$tabbar$onScroll" scroll-left="{{$tabbar$offsetLeft}}" scroll-x="true"  wx:if="{{preloaded}}">
-        <view class="tabbar-contain {{$tabbar$isFlex?'is-flex':''}}" style="{{$tabbar$mainStyle}}">
-            <navigator class="tabbar-button" url="/pages/home" open-type="switchTab"><text class="label">首页</text></navigator>
-            <block wx:if="{{$tabbar$route}}">
-                <block wx:for="{{$tabbar$datalist}}" wx:for-index="$tabbar$index" wx:for-item="$tabbar$item" wx:key="$tabbar$key">
-                    <navigator class="tabbar-button {{$tabbar$alive!='false'&&$tabbar$defaultKey==($tabbar$item[$tabbar$key])?'active':''}}" url="{{$tabbar$item.route || $tabbar$route+'?'+ $tabbar$key +'='+ $tabbar$item[$tabbar$key]}}" id="tabbar-{{$tabbar$item[$tabbar$key]}}" data-index="{{$tabbar$index}}" style="{{$tabbar$itemStyle}}">
-                        <text class="label">{{$tabbar$item[$tabbar$label]}}</text>
-                        <text class="badge" wx:if="{{$tabbar$item[$tabbar$badge]}}">{{$tabbar$item[$tabbar$badge]}}</text>
-                    </navigator>
+    <view class="tabbar {{$tabbar$fixed!='false'?'is-fixed':''}} catalog" wx:if="{{preloaded}}">
+        <scroll-view class="tabbar-scroll" bindscroll="$tabbar$onScroll" scroll-left="{{$tabbar$offsetLeft}}" scroll-x="true"  wx:if="{{$tabbar$datalist}}">
+            <view class="tabbar-contain {{$tabbar$flex?'is-flex':''}}" style="{{$tabbar$mainStyle}}">
+                <navigator class="tabbar-button" url="/pages/home" open-type="switchTab"><text class="label">首页</text></navigator>
+                <block wx:if="{{$tabbar$route}}">
+                    <block wx:for="{{$tabbar$datalist}}" wx:for-index="$tabbar$index" wx:for-item="$tabbar$item" wx:key="$tabbar$key">
+                        <navigator class="tabbar-button {{$tabbar$alive!='false'&&$tabbar$defaultKey==($tabbar$item[$tabbar$key])?'active':''}}" url="{{$tabbar$item.route || $tabbar$route+'?'+ $tabbar$key +'='+ $tabbar$item[$tabbar$key]}}" id="tabbar-{{$tabbar$item[$tabbar$key]}}" data-index="{{$tabbar$index}}" style="{{$tabbar$itemStyle}}">
+                            <text class="label">{{$tabbar$item[$tabbar$label]}}</text>
+                            <text class="badge" wx:if="{{$tabbar$item[$tabbar$badge]}}">{{$tabbar$item[$tabbar$badge]}}</text>
+                        </navigator>
+                    </block>
                 </block>
-            </block>
-            <block wx:else>
-                <block wx:for="{{$tabbar$datalist}}" wx:for-index="$tabbar$index" wx:for-item="$tabbar$item" wx:key="$tabbar$key">
-                    <view class="tabbar-button {{$tabbar$alive!='false'&&$tabbar$defaultKey==($tabbar$item[$tabbar$key])?'active':''}}" style="{{$tabbar$itemStyle}}" bindtap="$tabbar$onClick" id="tabbar-{{$tabbar$item[$tabbar$key]}}" data-key="{{$tabbar$item[$tabbar$key]}}" data-index="{{$tabbar$index}}">
-                        <text class="label">{{$tabbar$item[$tabbar$label]}}</text>
-                        <text class="badge" wx:if="{{$tabbar$item[$tabbar$badge]}}">{{$tabbar$item[$tabbar$badge]}}</text>
-                    </view>
+                <block wx:else>
+                    <block wx:for="{{$tabbar$datalist}}" wx:for-index="$tabbar$index" wx:for-item="$tabbar$item" wx:key="$tabbar$key">
+                        <view class="tabbar-button {{$tabbar$alive!='false'&&$tabbar$defaultKey==($tabbar$item[$tabbar$key])?'active':''}}" style="{{$tabbar$itemStyle}}" bindtap="$tabbar$onClick" id="tabbar-{{$tabbar$item[$tabbar$key]}}" data-key="{{$tabbar$item[$tabbar$key]}}" data-index="{{$tabbar$index}}">
+                            <text class="label">{{$tabbar$item[$tabbar$label]}}</text>
+                            <text class="badge" wx:if="{{$tabbar$item[$tabbar$badge]}}">{{$tabbar$item[$tabbar$badge]}}</text>
+                        </view>
+                    </block>
                 </block>
-            </block>
-            
-            <navigator class="tabbar-button" url="/pages/topics/free"><text class="label">免费试喝</text></navigator><navigator class="tabbar-button" url="/pages/topics/custom"><text class="label">个性定制</text></navigator>
-        </view>
-    </scroll-view>
+                
+                <navigator class="tabbar-button" url="/pages/topics/free"><text class="label">免费试喝</text></navigator><navigator class="tabbar-button" url="/pages/topics/custom"><text class="label">个性定制</text></navigator>
+            </view>
+        </scroll-view>
+    </view>
 
-    <wxc-flex class="filters" main="between" cross="center">
-        <wxc-flex>
-            <view class="btn {{sortValue == 'isPopular' ? 'active' : ''}}" bindtap="tapSort" data-wpytapsort-a="popular">
-                <text>人气</text>
-            </view>
-            <view class="btn {{(sortValue == 'isPriceDown' || sortValue == 'isPriceUp') ? 'active' : ''}}" bindtap="tapSort" data-wpytapsort-a="price">
-                <text>价格</text>
-                <text class="icon icon-sort-{{sortValue == 'isPriceDown' ? 'down' : 'up'}}" wx:if="{{(sortValue == 'isPriceDown' || sortValue == 'isPriceUp')}}"/>
-            </view>
+    <view class="filters">
+        <wxc-flex class="filters-flex" main="between" cross="center">
+            <wxc-flex>
+                <view class="btn {{sortValue == 'isPopular' ? 'active' : ''}}" bindtap="tapSort" data-wpytapsort-a="popular">
+                    <text>人气</text>
+                </view>
+                <view class="btn {{(sortValue == 'isPriceDown' || sortValue == 'isPriceUp') ? 'active' : ''}}" bindtap="tapSort" data-wpytapsort-a="price">
+                    <text>价格</text>
+                    <text class="icon icon-sort-{{sortValue == 'isPriceDown' ? 'down' : 'up'}}" wx:if="{{(sortValue == 'isPriceDown' || sortValue == 'isPriceUp')}}"/>
+                </view>
+            </wxc-flex>
+            <wxc-flex>
+                <!-- <view class="btn" bindtap="tapGridList()">
+                    <text class="icon icon-{{isGridList ? 'grid' : 'list'}}"></text>
+                </view> -->
+                <view class="btn {{filterValue ? 'active' : ''}}" bindtap="showFilter" data-wpyshowfilter-a="">
+                    <text>筛选</text>
+                    <text class="icon icon-filter"/>
+                </view>
+            </wxc-flex>
         </wxc-flex>
-        <wxc-flex>
-            <!-- <view class="btn" bindtap="tapGridList()">
-                <text class="icon icon-{{isGridList ? 'grid' : 'list'}}"></text>
-            </view> -->
-            <view class="btn {{filterValue ? 'active' : ''}}" bindtap="showFilter" data-wpyshowfilter-a="">
-                <text>筛选</text>
-                <text class="icon icon-filter"/>
-            </view>
-        </wxc-flex>
-    </wxc-flex>
+    </view>
     
     <wxc-popup class="J_Filter" locked="false" animation-mode="right" align="right">
         <view class="cp-filter" catchtap="$filter$tap">
             <scroll-view class="cp-filter-scroll" scroll-y>
-                <view class="cp-filter-main">
+                <view class="cp-filter-main"  wx:if="{{$filter$datalist && $filter$datalist.length}}">
                     <block wx:for="{{$filter$datalist}}" wx:for-index="$filter$index" wx:for-item="$filter$item" wx:key="$filter$key">
                         <radio-group class="cp-filter-group" bindchange="$filter$onRadioChange" data-key="{{$filter$item.key}}">
                             <view class="cp-filter-title">{{$filter$item.name}}</view>
