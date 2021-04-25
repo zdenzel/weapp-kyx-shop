@@ -1,3 +1,0 @@
-
-    <web-view src="{{url}}"  wx:if="{{url}}"/>
-    <view class="dzui-nodata"  wx:else>请求链接地址不存在</view>

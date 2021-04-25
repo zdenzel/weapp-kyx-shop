@@ -1,7 +1,0 @@
-@import "./../../components/product/filter.wxss";
-@import "./../../components/product/grid.wxss";
-@import "./../../components/product/item.wxss";
-@import "./../../components/loadmore.wxss";
-@import "./../../components/nulldata.wxss";
-@import "./../../components/tabbar.wxss";
-.filters{display:block;height:60rpx;padding:20rpx;position:-webkit-sticky;position:sticky;top:100rpx;z-index:2;background-color:#e9e0cc}.filters .btn{display:flex;align-items:center;justify-content:center;height:60rpx;padding:0 20rpx;margin-left:20rpx;background-color:transparent;border-radius:6rpx}.filters .btn:first-child{margin-left:0}.filters .btn.active{background-color:#452713;color:#e9e0cc}.filters .btn .icon{margin-left:5rpx}.filters .btn text{display:inline-block;vertical-align:middle}.products{position:relative}
